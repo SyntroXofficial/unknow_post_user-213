@@ -11,74 +11,85 @@ function Search() {
   const TMDB_TOKEN = 'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI3MmJhMTBjNDI5OTE0MTU3MzgwOGQyNzEwNGVkMThmYSIsInN1YiI6IjY0ZjVhNTUwMTIxOTdlMDBmZWE5MzdmMSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.84b7vWpVEilAbly4RpS01E9tyirHdhSXjcpfmTczI3Q';
 
   useEffect(() => {
-    const fetchResults = async () => {
+    const searchContent = async () => {
+      if (!query) return;
+      
       setLoading(true);
       try {
-        const response = await axios.get(
-          `https://api.themoviedb.org/3/search/multi?query=${encodeURIComponent(query)}`,
-          {
-            headers: {
-              'Authorization': `Bearer ${TMDB_TOKEN}`
-            }
-          }
-        );
-        setResults(response.data.results.filter(item => item.media_type !== 'person'));
+        const response = await axios.get('https://api.themoviedb.org/3/search/multi', {
+          params: {
+            query,
+            include_adult: false,
+            language: 'en-US',
+            page: 1
+          },
+          headers: { 'Authorization': `Bearer ${TMDB_TOKEN}` }
+        });
+
+        setResults(response.data.results.filter(item => 
+          item.media_type !== 'person' && item.poster_path
+        ));
       } catch (error) {
-        console.error('Error fetching search results:', error);
+        console.error('Error searching content:', error);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
-    if (query) {
-      fetchResults();
-    }
+    searchContent();
   }, [query]);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-[#141414] pt-[88px] flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-[#141414] pt-[88px] px-16">
-      <h1 className="text-4xl font-bold text-white mb-8 animate-fade-in">
+    <div className="min-h-screen bg-[#0a0a0a] pt-32 px-16">
+      <h1 className="text-4xl font-bold text-white mb-8">
         Search Results for "{query}"
       </h1>
-      
-      <div className="grid grid-cols-5 gap-6">
-        {results.map((item) => (
-          <Link 
-            key={item.id}
-            to={`/${item.media_type}/${item.id}`}
-            className="transform transition-all duration-300 hover:scale-105 hover:z-10 animate-fade-up"
-          >
-            <div className="relative group rounded-lg overflow-hidden">
-              <img
-                src={`https://image.tmdb.org/t/p/w500${item.poster_path}`}
-                alt={item.title || item.name}
-                className="w-full rounded-lg shadow-lg"
-                onError={(e) => {
-                  e.target.src = 'https://via.placeholder.com/500x750?text=No+Image';
-                }}
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/90 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col justify-end p-4">
-                <h3 className="text-white font-semibold">{item.title || item.name}</h3>
-                <div className="flex items-center mt-2">
-                  <FaStar className="text-yellow-500 w-4 h-4 mr-1" />
-                  <span className="text-white">{item.vote_average?.toFixed(1)}</span>
+
+      {loading ? (
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+        </div>
+      ) : results.length === 0 ? (
+        <div className="text-center text-gray-400 py-16">
+          <p className="text-2xl font-semibold">No results found</p>
+          <p className="mt-2">Try adjusting your search terms</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-6 gap-6">
+          {results.map((item) => (
+            <Link 
+              key={item.id}
+              to={`/${item.media_type}/${item.id}`}
+              className="transform transition-all duration-300 hover:scale-105"
+            >
+              <div className="relative group">
+                <img
+                  src={`https://image.tmdb.org/t/p/w500${item.poster_path}`}
+                  alt={item.title || item.name}
+                  className="w-full rounded-md shadow-lg"
+                />
+                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-md">
+                  <div className="absolute bottom-0 left-0 right-0 p-4">
+                    <p className="text-white font-bold text-lg">
+                      {item.title || item.name}
+                    </p>
+                    <div className="flex items-center space-x-2 mt-2">
+                      <div className="flex items-center">
+                        <FaStar className="text-yellow-500 w-4 h-4 mr-1" />
+                        <span className="text-white">
+                          {item.vote_average?.toFixed(1)}
+                        </span>
+                      </div>
+                      <span className="text-white/70">•</span>
+                      <span className="text-white/70">
+                        {(item.release_date || item.first_air_date)?.split('-')[0]}
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </Link>
-        ))}
-      </div>
-      
-      {results.length === 0 && (
-        <div className="text-center text-gray-400 mt-12 animate-fade-in">
-          No results found for "{query}"
+            </Link>
+          ))}
         </div>
       )}
     </div>
