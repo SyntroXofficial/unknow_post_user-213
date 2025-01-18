@@ -11,7 +11,10 @@ function Home() {
   const [topAnime, setTopAnime] = useState([]);
   const [actionMovies, setActionMovies] = useState([]);
   const [dramaShows, setDramaShows] = useState([]);
-  const [featured, setFeatured] = useState(null);
+  const [currentFeatured, setCurrentFeatured] = useState(null);
+  const [nextFeatured, setNextFeatured] = useState(null);
+  const [displayedContent, setDisplayedContent] = useState(null);
+  const [isTransitioning, setIsTransitioning] = useState(false);
   const TMDB_TOKEN = 'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI3MmJhMTBjNDI5OTE0MTU3MzgwOGQyNzEwNGVkMThmYSIsInN1YiI6IjY0ZjVhNTUwMTIxOTdlMDBmZWE5MzdmMSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.84b7vWpVEilAbly4RpS01E9tyirHdhSXjcpfmTczI3Q';
 
   useEffect(() => {
@@ -76,7 +79,9 @@ function Home() {
         setTopAnime(animeRes.data.results);
         setActionMovies(actionRes.data.results);
         setDramaShows(dramaRes.data.results);
-        setFeatured(trendingRes.data.results[0]);
+        setCurrentFeatured(trendingRes.data.results[0]);
+        setNextFeatured(trendingRes.data.results[1]);
+        setDisplayedContent(trendingRes.data.results[0]);
       } catch (error) {
         console.error('Error fetching content:', error);
       }
@@ -84,6 +89,27 @@ function Home() {
 
     fetchContent();
   }, []);
+
+  useEffect(() => {
+    if (!trending.length) return;
+
+    const interval = setInterval(() => {
+      setIsTransitioning(true);
+      
+      // Update displayed content immediately when transition starts
+      setDisplayedContent(nextFeatured);
+      
+      // After a short delay, update the background images
+      setTimeout(() => {
+        setCurrentFeatured(nextFeatured);
+        const nextIndex = (trending.findIndex(item => item.id === nextFeatured.id) + 1) % trending.length;
+        setNextFeatured(trending[nextIndex]);
+        setIsTransitioning(false);
+      }, 600);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [trending, nextFeatured]);
 
   const ContentRow = ({ title, items }) => (
     <section className="animate-fade-up">
@@ -126,52 +152,78 @@ function Home() {
   return (
     <div className="min-h-screen bg-[#0a0a0a]">
       {/* Featured Content Hero Section */}
-      {featured && (
-        <div className="relative h-[100vh] w-full">
-          <div className="absolute inset-0">
+      {currentFeatured && (
+        <div className="relative h-[100vh] w-full overflow-hidden">
+          {/* Current Featured Layer */}
+          <div 
+            className={`absolute inset-0 transition-opacity duration-600 ease-in-out ${
+              isTransitioning ? 'opacity-0' : 'opacity-100'
+            }`}
+          >
             <img
-              src={`https://image.tmdb.org/t/p/original${featured.backdrop_path}`}
-              alt={featured.title || featured.name}
+              src={`https://image.tmdb.org/t/p/original${currentFeatured.backdrop_path}`}
+              alt={currentFeatured.title || currentFeatured.name}
               className="w-full h-full object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] to-transparent" />
           </div>
+
+          {/* Next Featured Layer */}
+          <div 
+            className={`absolute inset-0 transition-opacity duration-600 ease-in-out ${
+              isTransitioning ? 'opacity-100' : 'opacity-0'
+            }`}
+          >
+            {nextFeatured && (
+              <>
+                <img
+                  src={`https://image.tmdb.org/t/p/original${nextFeatured.backdrop_path}`}
+                  alt={nextFeatured.title || nextFeatured.name}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] to-transparent" />
+              </>
+            )}
+          </div>
           
-          <div className="absolute bottom-32 left-0 px-24 space-y-4 w-[50%] z-10">
-            <div className="flex items-center space-x-6">
-              <div className="flex items-center space-x-4">
-                <div className="bg-purple-500 text-white px-4 py-1 rounded-full font-bold tracking-wider">
-                  TRENDING
-                </div>
-                <div className="flex items-center bg-purple-500/20 backdrop-blur-sm px-4 py-1 rounded-full">
-                  <FaStar className="text-yellow-500 w-4 h-4" />
-                  <span className="text-white ml-2 font-semibold">
-                    {Math.round(featured.vote_average * 10)}% Match
-                  </span>
-                </div>
-                <div className="bg-purple-500/20 backdrop-blur-sm text-white px-4 py-1 rounded-full font-bold tracking-wider">
-                  #{featured.media_type === 'movie' ? 'MOVIES' : 'TV SHOWS'}
+          {/* Content Layer - Using displayedContent for immediate updates */}
+          {displayedContent && (
+            <div className="absolute bottom-32 left-0 px-24 space-y-4 w-[50%] z-10">
+              <div className="flex items-center space-x-6">
+                <div className="flex items-center space-x-4">
+                  <div className="bg-purple-500 text-white px-4 py-1 rounded-full font-bold tracking-wider">
+                    TRENDING
+                  </div>
+                  <div className="flex items-center bg-purple-500/20 backdrop-blur-sm px-4 py-1 rounded-full">
+                    <FaStar className="text-yellow-500 w-4 h-4" />
+                    <span className="text-white ml-2 font-semibold">
+                      {Math.round(displayedContent.vote_average * 10)}% Match
+                    </span>
+                  </div>
+                  <div className="bg-purple-500/20 backdrop-blur-sm text-white px-4 py-1 rounded-full font-bold tracking-wider">
+                    #{displayedContent.media_type === 'movie' ? 'MOVIES' : 'TV SHOWS'}
+                  </div>
                 </div>
               </div>
+              <h1 className="text-7xl font-black text-white tracking-tight leading-none drop-shadow-lg">
+                {displayedContent.title || displayedContent.name}
+              </h1>
+              <p className="text-xl text-white line-clamp-3 font-medium drop-shadow-lg max-w-4xl">
+                {displayedContent.overview}
+              </p>
+              <div className="flex space-x-4 mt-8">
+                <Link 
+                  to={`/${displayedContent.media_type}/${displayedContent.id}`}
+                  className="flex items-center px-8 py-3 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-all duration-300 transform hover:scale-105 font-bold text-xl"
+                >
+                  <FaPlay className="mr-2 w-6 h-6" /> Watch Now
+                </Link>
+                <button className="flex items-center px-8 py-3 bg-gray-500/40 text-white rounded-lg hover:bg-gray-500/60 transition-all duration-300 transform hover:scale-105 font-bold text-xl backdrop-blur-sm">
+                  <FaInfoCircle className="mr-2 w-6 h-6" /> Info
+                </button>
+              </div>
             </div>
-            <h1 className="text-7xl font-black text-white tracking-tight leading-none drop-shadow-lg">
-              {featured.title || featured.name}
-            </h1>
-            <p className="text-xl text-white line-clamp-3 font-medium drop-shadow-lg max-w-4xl">
-              {featured.overview}
-            </p>
-            <div className="flex space-x-4 mt-8">
-              <Link 
-                to={`/${featured.media_type}/${featured.id}`}
-                className="flex items-center px-8 py-3 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-all duration-300 transform hover:scale-105 font-bold text-xl"
-              >
-                <FaPlay className="mr-2 w-6 h-6" /> Watch Now
-              </Link>
-              <button className="flex items-center px-8 py-3 bg-gray-500/40 text-white rounded-lg hover:bg-gray-500/60 transition-all duration-300 transform hover:scale-105 font-bold text-xl backdrop-blur-sm">
-                <FaInfoCircle className="mr-2 w-6 h-6" /> Info
-              </button>
-            </div>
-          </div>
+          )}
         </div>
       )}
 
