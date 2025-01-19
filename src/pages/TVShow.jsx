@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
-import { FaPlay, FaStar, FaCalendar, FaClock, FaGlobe } from 'react-icons/fa';
+import { FaStar, FaCalendar, FaClock, FaGlobe, FaServer } from 'react-icons/fa';
 
 function TVShow() {
   const { id } = useParams();
@@ -57,8 +57,21 @@ function TVShow() {
     }
   }, [season, id]);
 
-  const handlePlay = () => {
-    const streamingUrl = `https://multiembed.mov/directstream.php?video_id=${id}&tmdb=1&s=${season}&e=${episode}`;
+  const handlePlay = (provider) => {
+    let streamingUrl;
+    switch (provider) {
+      case 'viper':
+        streamingUrl = `https://multiembed.mov/directstream.php?video_id=${id}&tmdb=1&s=${season}&e=${episode}`;
+        break;
+      case 'superembed':
+        streamingUrl = `https://multiembed.mov/directstream.php?video_id=${id}&tmdb=1&s=${season}&e=${episode}&server=2`;
+        break;
+      case 'vidplay':
+        streamingUrl = `https://vidplay.site/e/tmdb/tv?id=${id}&s=${season}&e=${episode}`;
+        break;
+      default:
+        streamingUrl = `https://multiembed.mov/directstream.php?video_id=${id}&tmdb=1&s=${season}&e=${episode}`;
+    }
     window.open(streamingUrl, '_blank');
   };
 
@@ -129,10 +142,22 @@ function TVShow() {
 
           <div className="flex space-x-4 pt-4">
             <button
-              onClick={handlePlay}
+              onClick={() => handlePlay('viper')}
               className="flex items-center px-8 py-3 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-all duration-300 transform hover:scale-105 font-semibold text-xl"
             >
-              <FaPlay className="mr-2" /> Play
+              <FaServer className="mr-2" /> Server 1
+            </button>
+            <button
+              onClick={() => handlePlay('superembed')}
+              className="flex items-center px-8 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-all duration-300 transform hover:scale-105 font-semibold text-xl"
+            >
+              <FaServer className="mr-2" /> Server 2
+            </button>
+            <button
+              onClick={() => handlePlay('vidplay')}
+              className="flex items-center px-8 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all duration-300 transform hover:scale-105 font-semibold text-xl"
+            >
+              <FaServer className="mr-2" /> Server 3
             </button>
           </div>
         </div>
