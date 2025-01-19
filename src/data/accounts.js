@@ -25,7 +25,7 @@ export const accounts = [
     },
     type: 'Gaming',
     link: 'https://mega.nz/folder/example2',
-    imageUrl: 'https://platform.polygon.com/wp-content/uploads/sites/2/chorus/uploads/chorus_asset/file/8609775/ubisoft_new_2017_logo_2400.jpg?quality=90&strip=all&crop=0,12.977474878674,100,74.045050242652'
+    imageUrl: 'https://i.vimeocdn.com/video/996241381-68e3d43ab562fd208337dfeece8b9a9c04ec837c83fb0298b7e29120cd91c08f-d?f=webp'
   },
   {
     id: 'ea',
@@ -39,7 +39,7 @@ export const accounts = [
     },
     type: 'Gaming',
     link: 'https://mega.nz/folder/example3',
-    imageUrl: 'https://answers.ea.com/t5/image/serverpage/image-id/25952iE419E510A7582A2D?v=v2'
+    imageUrl: 'https://www.redhotcyber.com/wp-content/uploads/2024/07/image-21.jpg'
   },
   {
     id: 'battlenet',
@@ -53,7 +53,7 @@ export const accounts = [
     },
     type: 'Gaming',
     link: 'https://mega.nz/folder/example4',
-    imageUrl: 'https://static.invenglobal.com/upload/image/2018/11/02/i1541183391530612.jpeg'
+    imageUrl: 'https://bnetcmsus-a.akamaihd.net/cms/blog_header/75/754EP17W250N1608340465372.jpg'
   },
   {
     id: 'geforce-now',
@@ -67,7 +67,7 @@ export const accounts = [
     },
     type: 'Gaming',
     link: 'https://mega.nz/folder/example5',
-    imageUrl: 'https://www.pcworld.com/wp-content/uploads/2023/10/geforce-now-header-image.jpg?quality=50&strip=all'
+    imageUrl: 'https://blogs.nvidia.com/wp-content/uploads/2020/02/geforce-now-1280x680.jpg'
   },
   {
     id: 'playstation-plus',
@@ -81,7 +81,7 @@ export const accounts = [
     },
     type: 'Gaming',
     link: 'https://mega.nz/folder/example6',
-    imageUrl: 'https://images2.alphacoders.com/123/1231003.jpg'
+    imageUrl: 'https://img.freepik.com/premium-photo/blue-orange-playstation-logo-with-orange-flames-background_915071-7840.jpg'
   },
   {
     id: 'netflix',
@@ -151,7 +151,7 @@ export const accounts = [
     },
     type: 'Gaming',
     link: 'https://mega.nz/folder/example11',
-    imageUrl: 'https://wallpaper.forfun.com/fetch/34/34fcf4edbca5e75d4d31967a6b49373e.jpeg'
+    imageUrl: 'https://wallpapers.com/images/featured/valorant-logo-x0jet8s98hbbfi62.jpg'
   },
   {
     id: 'amazon-prime',
@@ -165,7 +165,7 @@ export const accounts = [
     },
     type: 'Streaming',
     link: 'https://mega.nz/folder/example12',
-    imageUrl: 'https://m.media-amazon.com/images/G/01/primevideo/seo/primevideo-seo-logo.png'
+    imageUrl: 'https://images.macrumors.com/t/R0aZG3Imf2q5RzJVsgrGcI-VGgg=/2500x/article-new/2024/02/Amazon-Prime-Video-Feature.jpg'
   },
   {
     id: 'duolingo',
@@ -207,7 +207,7 @@ export const accounts = [
     },
     type: 'Gaming',
     link: 'https://mega.nz/folder/example15',
-    imageUrl: 'https://www.stuff.tv/wp-content/uploads/sites/2/2023/04/Game-Pass.png'
+    imageUrl: 'https://images2.alphacoders.com/132/1325519.jpg'
   },
   {
     id: 'hbomax',
@@ -221,7 +221,7 @@ export const accounts = [
     },
     type: 'Streaming',
     link: 'https://mega.nz/folder/example16',
-    imageUrl: 'https://newmoney.ro/wp-content/uploads/2021/06/hbo-max.png'
+    imageUrl: 'https://wallpapers.com/images/hd/hbo-background-lgbdtr9oh7g93w02.jpg'
   },
   {
     id: 'vpn',
@@ -263,7 +263,7 @@ export const accounts = [
     },
     type: 'Streaming',
     link: 'https://mega.nz/folder/example19',
-    imageUrl: 'https://espnpressroom.com/caribbean/files/2024/06/Disney-Caribbean-scaled.jpg'
+    imageUrl: 'https://images6.alphacoders.com/134/1340430.jpeg'
   },
   {
     id: 'crunchyroll',
@@ -277,7 +277,7 @@ export const accounts = [
     },
     type: 'Streaming',
     link: 'https://mega.nz/folder/example20',
-    imageUrl: 'https://assets.aboutamazon.com/dims4/default/5ad65cc/2147483647/strip/true/crop/1920x960+0+60/resize/1200x600!/quality/90/?url=https%3A%2F%2Famazon-blogs-brightspot.s3.amazonaws.com%2Ff8%2F2a%2Fe21459814491b9aac0134bfffaf8%2Fcr-1920x1080.jpg'
+    imageUrl: 'https://moviecrazyplanet.com/wp-content/uploads/2024/08/Crunchyroll-005.jpg'
   },
   {
     id: 'proxy',
@@ -291,7 +291,7 @@ export const accounts = [
     },
     type: 'Security',
     link: 'https://mega.nz/folder/example21',
-    imageUrl: 'https://vietsocks.com/wp-content/uploads/2021/03/Proxy-dung-de-lam-gi.jpg'
+    imageUrl: 'https://datascientest.com/en/files/2024/05/proxy-server-datascientest.jpg'
   },
   {
     id: 'lol',
@@ -305,7 +305,7 @@ export const accounts = [
     },
     type: 'Gaming',
     link: 'https://mega.nz/folder/example22',
-    imageUrl: 'https://cmsassets.rgpub.io/sanity/images/dsfx7636/news_live/3705653167ef8f43acdc03fb2f0a469d5b3086fd-1920x1080.jpg'
+    imageUrl: 'https://w0.peakpx.com/wallpaper/675/1006/HD-wallpaper-league-of-legends-logo-games.jpg'
   },
   {
     id: 'outlook',

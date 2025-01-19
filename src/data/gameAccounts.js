@@ -25,7 +25,7 @@ export const mythicAccounts = [
     game: "Assassin's Creed Odyssey",
     username: 'suku_221',
     password: 'Suku853715',
-    imageUrl: 'https://cdn1.epicgames.com/clary/offer/GameName_Store_Landscape_2560x1440%20(1)-2560x1440-2456ec2b7ad7c1a093330e607965d985.jpg',
+    imageUrl: 'https://movienews.ro/wp-content/uploads/2018/10/assassins-creed-odyssey-logo.jpg',
     description: '• Full Game Access\n• All DLC Content\n• Season Pass\n• All Abilities\n• Special Items\n• Legendary Equipment',
     features: [
       { label: 'Region', value: 'Global' },
@@ -46,7 +46,7 @@ export const mythicAccounts = [
     game: 'Black Myth: Wukong',
     username: 'tomtran81',
     password: '80v5hzbt2',
-    imageUrl: 'https://wallpapercg.com/download/black-myth-wukong-3840x2160-25790.jpeg',
+    imageUrl: 'https://motionbgs.com/media/6470/black-myth-wukong.jpg',
     description: '• Full Game Access\n• All DLC Content\n• Special Edition Items\n• All Skills Unlocked\n• Exclusive Pre-order Bonuses\n• Digital Artbook',
     features: [
       { label: 'Region', value: 'Global' },
@@ -88,7 +88,7 @@ export const mythicAccounts = [
     game: 'Watch Dogs: Legion',
     username: 'NicoNtiaPhotoSica',
     password: 'WATCH@2029',
-    imageUrl: 'https://image.api.playstation.com/vulcan/ap/rnd/202009/2223/dJs37eVfzwgRbtRQxHUyyWu4.jpg',
+    imageUrl: 'https://images6.alphacoders.com/108/thumb-1920-1087062.jpg',
     description: '• Full Game Access\n• All DLC Content\n• Season Pass\n• Online Features\n• All Characters\n• Special Operations',
     features: [
       { label: 'Region', value: 'Global' },
@@ -109,7 +109,7 @@ export const mythicAccounts = [
     game: 'Mortal Kombat 1',
     username: 'amygomez9e',
     password: 'eCko4pjixz2000',
-    imageUrl: 'https://victordima.net/wp-content/uploads/2023/05/img_2644-scaled.jpg',
+    imageUrl: 'https://4kwallpapers.com/images/wallpapers/mortal-kombat-1-3840x2160-17968.jpg',
     description: '• Full Game Access\n• All Characters Unlocked\n• Premium Skins\n• Story Mode\n• Online Multiplayer\n• Fatalities Pack',
     features: [
       { label: 'Region', value: 'Global' },
@@ -154,7 +154,7 @@ export const legendaryAccounts = [
     game: 'God Of War Ragnarok',
     username: 'krishurt9p',
     password: 'sqVk3Ghpmk1988',
-    imageUrl: 'https://image.api.playstation.com/vulcan/ap/rnd/202207/1210/aqZdSwWyy9JcQ66BxHDKrky6.jpg',
+    imageUrl: 'https://image.api.playstation.com/vulcan/ap/rnd/202207/1117/4uH3OH4dQtHMe2gmdFuth02u.jpg',
     description: '• Full Game Access\n• All Weapons & Armor\n• All Realms Unlocked\n• Special Abilities\n• Bonus Content\n• New Game+ Mode',
     features: [
       { label: 'Region', value: 'Global' },
@@ -217,7 +217,7 @@ export const legendaryAccounts = [
     game: 'Starfield',
     username: 'hiyondw18',
     password: 'VBGHJ1234Ibwraj',
-    imageUrl: 'https://cdn.wallpapersafari.com/49/87/KRO6l0.jpg',
+    imageUrl: 'https://log-wp-media.s3.amazonaws.com/wp-content/uploads/2024/07/C76JswZduwNLSqNMfXvi5b.jpg',
     description: '• Full Game Access\n• All DLC Content\n• All Ships\n• All Weapons\n• Special Items\n• Bonus Content',
     features: [
       { label: 'Region', value: 'Global' },
@@ -238,7 +238,7 @@ export const legendaryAccounts = [
     game: "Baldur's Gate 3",
     username: 'dudash_ruslan',
     password: '8_JDEXLy',
-    imageUrl: 'https://images6.alphacoders.com/136/1366683.jpeg',
+    imageUrl: 'https://images5.alphacoders.com/132/1325553.jpg',
     description: '• Full Game Access\n• All Classes Unlocked\n• All Acts Available\n• Multiplayer Access\n• Character Creation\n• All Origin Characters',
     features: [
       { label: 'Region', value: 'Global' },
@@ -262,7 +262,7 @@ export const epicAccounts = [
     game: 'Gotham Knights',
     username: 'steamok3090498',
     password: 'Mjc2MDQ5NTA=',
-    imageUrl: 'https://images2.alphacoders.com/117/1178628.jpg',
+    imageUrl: 'https://preview.redd.it/gotham-knights-wallpaper-v0-fzj1khxl34v91.jpg?width=3840&format=pjpg&auto=webp&s=3af022f878804f9d7a5f3e7131c10f7f8f57f077',
     description: '• Full Game Access\n• All Characters Unlocked\n• All Costumes\n• Special Abilities\n• Story Mode\n• Co-op Features',
     features: [
       { label: 'Region', value: 'Global' },
