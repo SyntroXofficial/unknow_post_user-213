@@ -1,73 +1,144 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { FaSearch, FaDiscord, FaUser, FaCaretDown } from 'react-icons/fa';
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { FaDiscord, FaUser, FaHome, FaBars, FaChevronLeft, FaPlay, FaGamepad, FaTools, FaExclamationTriangle } from 'react-icons/fa';
 
-function Navbar() {
-  const navigate = useNavigate();
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [showSearch, setShowSearch] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 0);
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  const handleSearch = (e) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
-      setSearchQuery('');
-      setShowSearch(false);
-    }
-  };
-
+function Navbar({ isOpen, setIsOpen }) {
   return (
-    <nav className={`fixed w-full z-50 transition-all duration-300 ${isScrolled ? 'bg-[#0a0a0a]' : 'bg-gradient-to-b from-[#0a0a0a] to-transparent'}`}>
-      <div className="max-w-[2000px] mx-auto px-16">
-        <div className="flex items-center justify-between h-[68px]">
-          <Link to="/" className="text-purple-500 text-4xl font-bold">AZCORP</Link>
+    <>
+      {/* Minimal Sidebar */}
+      <div className={`fixed left-0 top-0 h-full w-16 bg-[#0a0a0a] border-r border-white/10 z-40 flex flex-col justify-between py-6 transition-opacity duration-300 ${
+        isOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'
+      }`}>
+        {/* Top Section */}
+        <div className="flex flex-col items-center space-y-8">
+          <button
+            onClick={() => setIsOpen(true)}
+            className="p-3 bg-[#0a0a0a] rounded-lg border border-purple-500/50 shadow-[0_0_15px_rgba(109,40,217,0.3)] hover:shadow-[0_0_20px_rgba(109,40,217,0.5)] transition-all duration-300"
+          >
+            <FaBars className="w-5 h-5 text-purple-500 hover:text-purple-400 transition-colors" />
+          </button>
+          
+          <Link to="/" className="p-3 text-purple-500 hover:text-purple-400 transition-colors">
+            <FaHome className="w-5 h-5" />
+          </Link>
 
-          <div className="flex items-center space-x-6">
-            <div className="relative">
-              <form onSubmit={handleSearch} className={`${showSearch ? 'w-64' : 'w-0'} transition-all duration-300 overflow-hidden`}>
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search..."
-                  className="w-full bg-[#0a0a0a] border border-purple-500/50 text-white px-4 py-2 rounded-full placeholder-gray-400 focus:outline-none focus:border-purple-500"
-                />
-              </form>
-              <button 
-                onClick={() => setShowSearch(!showSearch)} 
-                className="text-white hover:text-purple-500 transition absolute right-2 top-1/2 -translate-y-1/2"
-              >
-                <FaSearch className="w-5 h-5" />
-              </button>
-            </div>
-            <a 
-              href="https://discord.gg/cFdRcKwvgx" 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className="text-white hover:text-purple-500 transition"
-            >
-              <FaDiscord className="w-6 h-6" />
-            </a>
-            <button className="flex items-center space-x-2 group">
-              <div className="w-8 h-8 rounded-full bg-purple-500 flex items-center justify-center">
-                <FaUser className="w-5 h-5 text-white" />
-              </div>
-              <FaCaretDown className="text-white group-hover:rotate-180 transition-transform duration-200" />
-            </button>
-          </div>
+          <Link to="/premium" className="p-3 text-purple-500 hover:text-purple-400 transition-colors">
+            <FaUser className="w-5 h-5" />
+          </Link>
+
+          <Link to="/games" className="p-3 text-purple-500 hover:text-purple-400 transition-colors">
+            <FaGamepad className="w-5 h-5" />
+          </Link>
+
+          <Link to="/tools" className="p-3 text-purple-500 hover:text-purple-400 transition-colors">
+            <FaTools className="w-5 h-5" />
+          </Link>
+
+          <Link to="/streaming" className="p-3 text-purple-500 hover:text-purple-400 transition-colors">
+            <FaPlay className="w-5 h-5" />
+          </Link>
+
+          <Link to="/important" className="p-3 text-red-500 hover:text-red-400 transition-colors">
+            <FaExclamationTriangle className="w-5 h-5" />
+          </Link>
+        </div>
+
+        {/* Bottom Section */}
+        <div className="flex flex-col items-center space-y-8">
+          <a 
+            href="https://discord.gg/cFdRcKwvgx" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="p-3 text-purple-500 hover:text-purple-400 transition-colors"
+          >
+            <FaDiscord className="w-5 h-5" />
+          </a>
         </div>
       </div>
-    </nav>
+
+      {/* Main Sidebar */}
+      <nav className={`fixed left-0 top-0 h-full w-[240px] bg-[#0a0a0a] border-r border-white/10 z-40 transition-all duration-300 transform ${
+        isOpen ? 'translate-x-0' : '-translate-x-full'
+      }`}>
+        <div className="flex flex-col h-full">
+          {/* Logo with Toggle Button */}
+          <div className="relative mt-8 mx-2">
+            <Link to="/" className="flex items-center text-purple-500 text-3xl font-bold p-6 shadow-[0_0_8px_rgba(109,40,217,0.2)] border border-purple-500/50 rounded-lg">
+              <span className="ml-12">AZCORP</span>
+            </Link>
+            <button
+              onClick={() => setIsOpen(false)}
+              className="absolute left-2 top-1/2 -translate-y-1/2 p-3 bg-[#0a0a0a] rounded-lg border border-purple-500/50 shadow-[0_0_15px_rgba(109,40,217,0.3)] hover:shadow-[0_0_20px_rgba(109,40,217,0.5)] transition-all duration-300"
+            >
+              <FaChevronLeft className="w-5 h-5 text-purple-500 hover:text-purple-400 transition-colors" />
+            </button>
+          </div>
+
+          {/* Navigation Links */}
+          <div className="flex-1 px-2 mt-8">
+            <div className="space-y-2">
+              <Link 
+                to="/" 
+                className="flex items-center space-x-3 text-white/70 hover:text-white hover:bg-white/5 px-4 py-3 rounded-lg transition-all duration-200 shadow-[0_0_15px_rgba(109,40,217,0.3)] border border-purple-500/50"
+              >
+                <FaHome className="w-5 h-5" />
+                <span>Home</span>
+              </Link>
+              <Link 
+                to="/premium" 
+                className="flex items-center space-x-3 text-white/70 hover:text-white hover:bg-white/5 px-4 py-3 rounded-lg transition-all duration-200 shadow-[0_0_15px_rgba(109,40,217,0.3)] border border-purple-500/50"
+              >
+                <FaUser className="w-5 h-5" />
+                <span>Premium Accounts</span>
+              </Link>
+              <Link 
+                to="/games" 
+                className="flex items-center space-x-3 text-white/70 hover:text-white hover:bg-white/5 px-4 py-3 rounded-lg transition-all duration-200 shadow-[0_0_15px_rgba(109,40,217,0.3)] border border-purple-500/50"
+              >
+                <FaGamepad className="w-5 h-5" />
+                <span>Game Library</span>
+              </Link>
+              <Link 
+                to="/tools" 
+                className="flex items-center space-x-3 text-white/70 hover:text-white hover:bg-white/5 px-4 py-3 rounded-lg transition-all duration-200 shadow-[0_0_15px_rgba(109,40,217,0.3)] border border-purple-500/50"
+              >
+                <FaTools className="w-5 h-5" />
+                <span>Tools</span>
+              </Link>
+              <Link 
+                to="/streaming" 
+                className="flex items-center space-x-3 text-white/70 hover:text-white hover:bg-white/5 px-4 py-3 rounded-lg transition-all duration-200 shadow-[0_0_15px_rgba(109,40,217,0.3)] border border-purple-500/50"
+              >
+                <FaPlay className="w-5 h-5" />
+                <span>Streaming</span>
+              </Link>
+              <Link 
+                to="/important" 
+                className="flex items-center space-x-3 text-white/70 hover:text-white hover:bg-white/5 px-4 py-3 rounded-lg transition-all duration-200 shadow-[0_0_15px_rgba(255,0,0,0.3)] border border-red-500/50"
+              >
+                <FaExclamationTriangle className="w-5 h-5 text-red-500" />
+                <span className="text-red-500">Important</span>
+              </Link>
+            </div>
+          </div>
+
+          {/* Bottom Section */}
+          <div className="p-4 border-t border-white/10">
+            <div className="flex flex-col space-y-4">
+              <a 
+                href="https://discord.gg/cFdRcKwvgx" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="flex items-center space-x-3 text-white/70 hover:text-white hover:bg-white/5 px-4 py-3 rounded-lg transition-all duration-200 shadow-[0_0_15px_rgba(109,40,217,0.3)] border border-purple-500/50"
+              >
+                <FaDiscord className="w-5 h-5" />
+                <span>Join Discord</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </>
   );
 }
 

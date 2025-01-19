@@ -56,10 +56,10 @@ function Movie() {
   const director = credits.crew.find(person => person.job === "Director");
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] pt-[68px]">
+    <div className="min-h-screen bg-[#0a0a0a]">
       <div className="relative">
         {/* Background Image */}
-        <div className="relative h-[80vh] animate-fade-in">
+        <div className="relative h-[100vh] animate-fade-in">
           <img
             src={`https://image.tmdb.org/t/p/original${movie.backdrop_path}`}
             alt={movie.title}

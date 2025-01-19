@@ -82,10 +82,10 @@ function TVShow() {
   const creators = show.created_by || [];
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] pt-[68px]">
+    <div className="min-h-screen bg-[#0a0a0a]">
       <div className="relative">
         {/* Background Image */}
-        <div className="relative h-[80vh] animate-fade-in">
+        <div className="relative h-[100vh] animate-fade-in">
           <img
             src={`https://image.tmdb.org/t/p/original${show.backdrop_path}`}
             alt={show.name}
