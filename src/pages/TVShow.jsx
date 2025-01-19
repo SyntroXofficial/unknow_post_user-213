@@ -66,9 +66,6 @@ function TVShow() {
       case 'superembed':
         streamingUrl = `https://multiembed.mov/directstream.php?video_id=${id}&tmdb=1&s=${season}&e=${episode}&server=2`;
         break;
-      case 'vidplay':
-        streamingUrl = `https://vidplay.site/e/tmdb/tv?id=${id}&s=${season}&e=${episode}`;
-        break;
       default:
         streamingUrl = `https://multiembed.mov/directstream.php?video_id=${id}&tmdb=1&s=${season}&e=${episode}`;
     }
@@ -152,12 +149,6 @@ function TVShow() {
               className="flex items-center px-8 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-all duration-300 transform hover:scale-105 font-semibold text-xl"
             >
               <FaServer className="mr-2" /> Server 2
-            </button>
-            <button
-              onClick={() => handlePlay('vidplay')}
-              className="flex items-center px-8 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all duration-300 transform hover:scale-105 font-semibold text-xl"
-            >
-              <FaServer className="mr-2" /> Server 3
             </button>
           </div>
         </div>

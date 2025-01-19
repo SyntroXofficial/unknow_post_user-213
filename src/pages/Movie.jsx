@@ -40,9 +40,6 @@ function Movie() {
       case 'superembed':
         streamingUrl = `https://multiembed.mov/directstream.php?video_id=${id}&tmdb=1&server=2`;
         break;
-      case 'vidplay':
-        streamingUrl = `https://vidplay.site/e/tmdb/movie?id=${id}`;
-        break;
       default:
         streamingUrl = `https://multiembed.mov/directstream.php?video_id=${id}&tmdb=1`;
     }
@@ -101,12 +98,6 @@ function Movie() {
               className="flex items-center px-8 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-all duration-300 transform hover:scale-105 font-semibold text-xl"
             >
               <FaServer className="mr-2" /> Server 2
-            </button>
-            <button
-              onClick={() => handlePlay('vidplay')}
-              className="flex items-center px-8 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all duration-300 transform hover:scale-105 font-semibold text-xl"
-            >
-              <FaServer className="mr-2" /> Server 3
             </button>
           </div>
         </div>
