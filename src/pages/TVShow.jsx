@@ -60,14 +60,14 @@ function TVShow() {
   const handlePlay = (provider) => {
     let streamingUrl;
     switch (provider) {
-      case 'viper':
-        streamingUrl = `https://multiembed.mov/directstream.php?video_id=${id}&tmdb=1&s=${season}&e=${episode}`;
+      case 'server1':
+        streamingUrl = `https://multiembed.mov/?video_id=${id}&tmdb=1&s=${season}&e=${episode}`;
         break;
-      case 'superembed':
-        streamingUrl = `https://multiembed.mov/directstream.php?video_id=${id}&tmdb=1&s=${season}&e=${episode}&server=2`;
+      case 'server2':
+        streamingUrl = `https://multiembed.mov/directstream.php?video_id=${id}&tmdb=1&s=${season}&e=${episode}`;
         break;
       default:
-        streamingUrl = `https://multiembed.mov/directstream.php?video_id=${id}&tmdb=1&s=${season}&e=${episode}`;
+        streamingUrl = `https://multiembed.mov/?video_id=${id}&tmdb=1&s=${season}&e=${episode}`;
     }
     window.open(streamingUrl, '_blank');
   };
@@ -139,13 +139,13 @@ function TVShow() {
 
           <div className="flex space-x-4 pt-4">
             <button
-              onClick={() => handlePlay('viper')}
+              onClick={() => handlePlay('server1')}
               className="flex items-center px-8 py-3 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-all duration-300 transform hover:scale-105 font-semibold text-xl"
             >
               <FaServer className="mr-2" /> Server 1
             </button>
             <button
-              onClick={() => handlePlay('superembed')}
+              onClick={() => handlePlay('server2')}
               className="flex items-center px-8 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-all duration-300 transform hover:scale-105 font-semibold text-xl"
             >
               <FaServer className="mr-2" /> Server 2

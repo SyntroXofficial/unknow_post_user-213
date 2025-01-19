@@ -5,8 +5,16 @@ import { FaDiscord, FaUser, FaHome, FaBars, FaChevronLeft, FaPlay, FaGamepad, Fa
 function Navbar({ isOpen, setIsOpen }) {
   return (
     <>
+      {/* Mobile Menu Button - Only visible on small screens */}
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="fixed top-4 left-4 z-50 p-2 bg-purple-500 rounded-lg md:hidden"
+      >
+        <FaBars className="w-6 h-6 text-white" />
+      </button>
+
       {/* Minimal Sidebar */}
-      <div className={`fixed left-0 top-0 h-full w-16 bg-[#0a0a0a] border-r border-white/10 z-40 flex flex-col justify-between py-6 transition-opacity duration-300 ${
+      <div className={`fixed left-0 top-0 h-full w-16 bg-[#0a0a0a] border-r border-white/10 z-40 flex-col justify-between py-6 transition-all duration-300 hidden md:flex ${
         isOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'
       }`}>
         {/* Top Section */}
@@ -57,13 +65,13 @@ function Navbar({ isOpen, setIsOpen }) {
       </div>
 
       {/* Main Sidebar */}
-      <nav className={`fixed left-0 top-0 h-full w-[240px] bg-[#0a0a0a] border-r border-white/10 z-40 transition-all duration-300 transform ${
+      <nav className={`fixed left-0 top-0 h-full w-full md:w-[240px] bg-[#0a0a0a] border-r border-white/10 z-40 transition-all duration-300 transform ${
         isOpen ? 'translate-x-0' : '-translate-x-full'
       }`}>
         <div className="flex flex-col h-full">
           {/* Logo with Toggle Button */}
           <div className="relative mt-8 mx-2">
-            <Link to="/" className="flex items-center text-purple-500 text-3xl font-bold p-6 shadow-[0_0_8px_rgba(109,40,217,0.2)] border border-purple-500/50 rounded-lg">
+            <Link to="/" className="flex items-center text-purple-500 text-2xl md:text-3xl font-bold p-4 md:p-6 shadow-[0_0_8px_rgba(109,40,217,0.2)] border border-purple-500/50 rounded-lg">
               <span className="ml-12">AZCORP</span>
             </Link>
             <button
@@ -80,6 +88,7 @@ function Navbar({ isOpen, setIsOpen }) {
               <Link 
                 to="/" 
                 className="flex items-center space-x-3 text-white/70 hover:text-white hover:bg-white/5 px-4 py-3 rounded-lg transition-all duration-200 shadow-[0_0_15px_rgba(109,40,217,0.3)] border border-purple-500/50"
+                onClick={() => window.innerWidth < 768 && setIsOpen(false)}
               >
                 <FaHome className="w-5 h-5" />
                 <span>Home</span>
@@ -87,6 +96,7 @@ function Navbar({ isOpen, setIsOpen }) {
               <Link 
                 to="/premium" 
                 className="flex items-center space-x-3 text-white/70 hover:text-white hover:bg-white/5 px-4 py-3 rounded-lg transition-all duration-200 shadow-[0_0_15px_rgba(109,40,217,0.3)] border border-purple-500/50"
+                onClick={() => window.innerWidth < 768 && setIsOpen(false)}
               >
                 <FaUser className="w-5 h-5" />
                 <span>Premium Accounts</span>
@@ -94,6 +104,7 @@ function Navbar({ isOpen, setIsOpen }) {
               <Link 
                 to="/games" 
                 className="flex items-center space-x-3 text-white/70 hover:text-white hover:bg-white/5 px-4 py-3 rounded-lg transition-all duration-200 shadow-[0_0_15px_rgba(109,40,217,0.3)] border border-purple-500/50"
+                onClick={() => window.innerWidth < 768 && setIsOpen(false)}
               >
                 <FaGamepad className="w-5 h-5" />
                 <span>Game Library</span>
@@ -101,6 +112,7 @@ function Navbar({ isOpen, setIsOpen }) {
               <Link 
                 to="/tools" 
                 className="flex items-center space-x-3 text-white/70 hover:text-white hover:bg-white/5 px-4 py-3 rounded-lg transition-all duration-200 shadow-[0_0_15px_rgba(109,40,217,0.3)] border border-purple-500/50"
+                onClick={() => window.innerWidth < 768 && setIsOpen(false)}
               >
                 <FaTools className="w-5 h-5" />
                 <span>Tools</span>
@@ -108,6 +120,7 @@ function Navbar({ isOpen, setIsOpen }) {
               <Link 
                 to="/streaming" 
                 className="flex items-center space-x-3 text-white/70 hover:text-white hover:bg-white/5 px-4 py-3 rounded-lg transition-all duration-200 shadow-[0_0_15px_rgba(109,40,217,0.3)] border border-purple-500/50"
+                onClick={() => window.innerWidth < 768 && setIsOpen(false)}
               >
                 <FaPlay className="w-5 h-5" />
                 <span>Streaming</span>
@@ -115,6 +128,7 @@ function Navbar({ isOpen, setIsOpen }) {
               <Link 
                 to="/important" 
                 className="flex items-center space-x-3 text-white/70 hover:text-white hover:bg-white/5 px-4 py-3 rounded-lg transition-all duration-200 shadow-[0_0_15px_rgba(255,0,0,0.3)] border border-red-500/50"
+                onClick={() => window.innerWidth < 768 && setIsOpen(false)}
               >
                 <FaExclamationTriangle className="w-5 h-5 text-red-500" />
                 <span className="text-red-500">Important</span>
