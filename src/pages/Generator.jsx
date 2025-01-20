@@ -65,10 +65,7 @@ function Generator() {
         timestamp: new Date(),
         serviceName: service.name,
         isCookie: service.isCookie,
-        megaUrl: service.megaUrl,
-        status: 'active',
-        validUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
-        lastChecked: new Date()
+        megaUrl: service.megaUrl
       };
       setGeneratedAccounts(prev => [accountData, ...prev].slice(0, 10));
       setLoading(false);
@@ -92,7 +89,7 @@ function Generator() {
   const downloadHistory = () => {
     const content = generatedAccounts
       .map(item => {
-        const accountInfo = `Service: ${item.serviceName}\nAccount: ${item.account}\nStatus: ${item.status}\nGenerated: ${item.timestamp.toLocaleString()}\nValid Until: ${item.validUntil.toLocaleString()}\nLast Checked: ${item.lastChecked.toLocaleString()}`;
+        const accountInfo = `Service: ${item.serviceName}\nAccount: ${item.account}\nGenerated: ${item.timestamp.toLocaleString()}`;
         if (item.isCookie) {
           return `${accountInfo}\nType: Cookie Account\nDownload URL: ${item.megaUrl}\n`;
         }
@@ -218,7 +215,32 @@ function Generator() {
       )}
 
       {/* Rest of the Generator content */}
-      <div className="relative z-10 px-12 pt-8 pb-16">
+      <div className="relative z-10 px-12 pt-8 pb-4 flex items-center space-x-4">
+        {/* Media Type Dropdown */}
+        <select
+          value={filterType}
+          onChange={(e) => setFilterType(e.target.value)}
+          className="bg-[#111] border border-purple-500/50 text-white px-4 py-2 rounded-lg focus:outline-none focus:border-purple-500 w-48"
+        >
+          <option value="all">All Types</option>
+          <option value="cookie">Cookie Accounts</option>
+          <option value="regular">Regular Accounts</option>
+        </select>
+
+        {/* Search Bar */}
+        <div className="relative flex-1">
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search services..."
+            className="w-full bg-[#111] border border-purple-500/50 text-white px-4 py-2 rounded-lg focus:outline-none focus:border-purple-500 pl-10"
+          />
+          <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+        </div>
+      </div>
+
+      <div className="relative z-10 px-12 pb-16">
         <div className="max-w-7xl mx-auto">
           {/* Header Section with Stats */}
           <div className="bg-gradient-to-r from-purple-500/20 to-transparent p-8 rounded-2xl mb-8 border border-purple-500/20">
@@ -303,55 +325,6 @@ function Generator() {
                   <p className="text-gray-300 text-sm">Report any issues immediately</p>
                 </div>
               </div>
-            </div>
-          </div>
-
-          {/* Search and Filter Section */}
-          <div className="flex flex-wrap gap-4 mb-8">
-            <div className="flex-1 min-w-[200px]">
-              <div className="relative">
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search services..."
-                  className="w-full bg-[#111] border border-purple-500/20 text-white px-4 py-3 rounded-xl focus:outline-none focus:border-purple-500/50 pl-10"
-                />
-                <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-              </div>
-            </div>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setFilterType('all')}
-                className={`px-4 py-2 rounded-xl border ${
-                  filterType === 'all'
-                    ? 'bg-purple-500 border-purple-500 text-white'
-                    : 'border-purple-500/20 text-gray-400 hover:border-purple-500/50'
-                }`}
-              >
-                All
-              </button>
-              <button
-                onClick={() => setFilterType('cookie')}
-                className={`px-4 py-2 rounded-xl border flex items-center ${
-                  filterType === 'cookie'
-                    ? 'bg-purple-500 border-purple-500 text-white'
-                    : 'border-purple-500/20 text-gray-400 hover:border-purple-500/50'
-                }`}
-              >
-                <FaCookie className="mr-2" />
-                Cookie Accounts
-              </button>
-              <button
-                onClick={() => setFilterType('regular')}
-                className={`px-4 py-2 rounded-xl border ${
-                  filterType === 'regular'
-                    ? 'bg-purple-500 border-purple-500 text-white'
-                    : 'border-purple-500/20 text-gray-400 hover:border-purple-500/50'
-                }`}
-              >
-                Regular Accounts
-              </button>
             </div>
           </div>
 
@@ -501,29 +474,9 @@ function Generator() {
                         <p className="text-white font-mono break-all mb-2">
                           {item.account}
                         </p>
-                        <div className="grid grid-cols-2 gap-2 text-sm mt-3">
-                          <div className="flex items-center text-gray-400">
-                            <FaClock className="mr-1 w-3 h-3" />
-                            <span>Generated: {item.timestamp.toLocaleString()}</span>
-                          </div>
-                          <div className="flex items-center text-gray-400">
-                            <FaCalendarAlt className="mr-1 w-3 h-3" />
-                            <span>Valid until: {item.validUntil.toLocaleDateString()}</span>
-                          </div>
-                        </div>
-                        <div className="flex items-center justify-between mt-2">
-                          <div className="flex items-center">
-                            <span className={`px-2 py-1 rounded-full text-xs ${
-                              item.status === 'active' 
-                                ? 'bg-green-500/20 text-green-400' 
-                                : 'bg-yellow-500/20 text-yellow-400'
-                            }`}>
-                              {item.status === 'active' ? 'Active' : 'Checking'}
-                            </span>
-                          </div>
-                          <span className="text-gray-500 text-xs">
-                            Last checked: {item.lastChecked.toLocaleString()}
-                          </span>
+                        <div className="flex items-center text-gray-400">
+                          <FaClock className="mr-1 w-3 h-3" />
+                          <span>Generated: {item.timestamp.toLocaleString()}</span>
                         </div>
                         {item.isCookie && (
                           <div className="mt-2 text-yellow-400 text-sm flex items-center">

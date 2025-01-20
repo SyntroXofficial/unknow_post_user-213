@@ -40,7 +40,7 @@ export const accountLists = {
   hbomax: {
     name: 'HBO Max',
     description: 'HBO Max accounts with full content access',
-    imageUrl: 'https://wallpapers.com/images/hd/hbo-background-lgbdtr9oh7g93w02.jpg',
+    imageUrl: 'https://t2.tudocdn.net/600023?w=1920',
     inStock: 75,
     isCookie: false,
     megaUrl: 'https://mega.nz/folder/example3',
@@ -53,7 +53,7 @@ export const accountLists = {
   crunchyroll: {
     name: 'Crunchyroll',
     description: 'Premium Crunchyroll accounts for anime streaming',
-    imageUrl: 'https://moviecrazyplanet.com/wp-content/uploads/2024/08/Crunchyroll-005.jpg',
+    imageUrl: 'https://assets.aboutamazon.com/f8/2a/e21459814491b9aac0134bfffaf8/cr-1920x1080.jpg',
     inStock: 900,
     isCookie: false,
     accounts: [
@@ -139,7 +139,7 @@ export const accountLists = {
     name: 'Outlook Premium',
     description: 'Premium Outlook email accounts with advanced features',
     imageUrl: 'https://www.windowslatest.com/wp-content/uploads/2024/11/Windows-11s-new-Outlook-to-get-None-color-category-design-update.jpg',
-    inStock: 900000,
+    inStock: 10000,
     isCookie: false,
     accounts: [
       'outlook_user1:pass123|Premium|Valid until: 2024-12-31',
