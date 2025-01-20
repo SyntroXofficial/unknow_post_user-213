@@ -66,6 +66,9 @@ function TVShow() {
       case 'server2':
         streamingUrl = `https://multiembed.mov/directstream.php?video_id=${id}&tmdb=1&s=${season}&e=${episode}`;
         break;
+      case 'server3':
+        streamingUrl = `https://embed.su/embed/tv/${id}/${season}/${episode}`;
+        break;
       default:
         streamingUrl = `https://multiembed.mov/?video_id=${id}&tmdb=1&s=${season}&e=${episode}`;
     }
@@ -149,6 +152,12 @@ function TVShow() {
               className="flex items-center px-8 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-all duration-300 transform hover:scale-105 font-semibold text-xl"
             >
               <FaServer className="mr-2" /> Server 2
+            </button>
+            <button
+              onClick={() => handlePlay('server3')}
+              className="flex items-center px-8 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-all duration-300 transform hover:scale-105 font-semibold text-xl"
+            >
+              <FaServer className="mr-2" /> Server 3
             </button>
           </div>
         </div>

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
   FaRandom, FaCopy, FaHistory, FaTrash, FaDownload, FaCheck, FaInfoCircle, 
-  FaCookie, FaFilter, FaSearch, FaChartBar, FaUserShield, FaQuestionCircle,
+  FaCookie, FaSearch, FaChartBar, FaUserShield, FaQuestionCircle,
   FaCheckCircle, FaTimesCircle, FaClock, FaCalendarAlt, FaShieldAlt, FaExclamationTriangle
 } from 'react-icons/fa';
 import { accountLists } from '../data/generatorAccounts';
@@ -13,8 +13,6 @@ function Generator() {
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filterType, setFilterType] = useState('all');
   const [currentFeaturedIndex, setCurrentFeaturedIndex] = useState(0);
   const [showTutorial, setShowTutorial] = useState(false);
   const [showStats, setShowStats] = useState(true);
@@ -107,14 +105,6 @@ function Generator() {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   };
-
-  const filteredServices = Object.entries(accountLists).filter(([key, service]) => {
-    const matchesSearch = service.name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesFilter = filterType === 'all' || 
-      (filterType === 'cookie' && service.isCookie) || 
-      (filterType === 'regular' && !service.isCookie);
-    return matchesSearch && matchesFilter;
-  });
 
   const Tutorial = () => (
     <div className="fixed inset-0 z-50 flex items-center justify-center px-4 bg-black/80 backdrop-blur-sm">
@@ -213,32 +203,6 @@ function Generator() {
           </div>
         </div>
       )}
-
-      {/* Rest of the Generator content */}
-      <div className="relative z-10 px-12 pt-8 pb-4 flex items-center space-x-4">
-        {/* Media Type Dropdown */}
-        <select
-          value={filterType}
-          onChange={(e) => setFilterType(e.target.value)}
-          className="bg-[#111] border border-purple-500/50 text-white px-4 py-2 rounded-lg focus:outline-none focus:border-purple-500 w-48"
-        >
-          <option value="all">All Types</option>
-          <option value="cookie">Cookie Accounts</option>
-          <option value="regular">Regular Accounts</option>
-        </select>
-
-        {/* Search Bar */}
-        <div className="relative flex-1">
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search services..."
-            className="w-full bg-[#111] border border-purple-500/50 text-white px-4 py-2 rounded-lg focus:outline-none focus:border-purple-500 pl-10"
-          />
-          <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-        </div>
-      </div>
 
       <div className="relative z-10 px-12 pb-16">
         <div className="max-w-7xl mx-auto">
@@ -496,7 +460,7 @@ function Generator() {
           <div className="mt-8">
             <h2 className="text-2xl font-bold text-white mb-6">Available Services</h2>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-              {filteredServices.map(([key, service]) => (
+              {Object.entries(accountLists).map(([key, service]) => (
                 <motion.div
                   key={key}
                   className={`cursor-pointer group ${
