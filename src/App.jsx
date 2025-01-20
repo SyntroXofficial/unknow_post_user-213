@@ -8,9 +8,9 @@ import Movie from './pages/Movie';
 import TVShow from './pages/TVShow';
 import Search from './pages/Search';
 import Games from './pages/Games';
-import Premium from './pages/Premium';
 import Tools from './pages/Tools';
 import Important from './pages/Important';
+import Generator from './pages/Generator';
 import PageTransition from './components/PageTransition';
 import TransitionLayout from './components/TransitionLayout';
 
@@ -26,11 +26,6 @@ function AnimatedRoutes({ isSidebarOpen }) {
               <Home />
             </PageTransition>
           } />
-          <Route path="/premium" element={
-            <PageTransition>
-              <Premium />
-            </PageTransition>
-          } />
           <Route path="/streaming" element={
             <PageTransition>
               <Streaming />
@@ -44,6 +39,11 @@ function AnimatedRoutes({ isSidebarOpen }) {
           <Route path="/tools" element={
             <PageTransition>
               <Tools />
+            </PageTransition>
+          } />
+          <Route path="/generator" element={
+            <PageTransition>
+              <Generator />
             </PageTransition>
           } />
           <Route path="/important" element={

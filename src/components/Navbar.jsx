@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FaDiscord, FaUser, FaHome, FaBars, FaChevronLeft, FaPlay, FaGamepad, FaTools, FaExclamationTriangle } from 'react-icons/fa';
+import { FaDiscord, FaHome, FaBars, FaChevronLeft, FaPlay, FaGamepad, FaTools, FaExclamationTriangle, FaRandom } from 'react-icons/fa';
 
 function Navbar({ isOpen, setIsOpen }) {
   return (
@@ -30,8 +30,12 @@ function Navbar({ isOpen, setIsOpen }) {
             <FaHome className="w-5 h-5" />
           </Link>
 
-          <Link to="/premium" className="p-3 text-purple-500 hover:text-purple-400 transition-colors">
-            <FaUser className="w-5 h-5" />
+          <Link to="/generator" className="p-3 text-purple-500 hover:text-purple-400 transition-colors">
+            <FaRandom className="w-5 h-5" />
+          </Link>
+
+          <Link to="/streaming" className="p-3 text-purple-500 hover:text-purple-400 transition-colors">
+            <FaPlay className="w-5 h-5" />
           </Link>
 
           <Link to="/games" className="p-3 text-purple-500 hover:text-purple-400 transition-colors">
@@ -40,10 +44,6 @@ function Navbar({ isOpen, setIsOpen }) {
 
           <Link to="/tools" className="p-3 text-purple-500 hover:text-purple-400 transition-colors">
             <FaTools className="w-5 h-5" />
-          </Link>
-
-          <Link to="/streaming" className="p-3 text-purple-500 hover:text-purple-400 transition-colors">
-            <FaPlay className="w-5 h-5" />
           </Link>
 
           <Link to="/important" className="p-3 text-red-500 hover:text-red-400 transition-colors">
@@ -94,12 +94,20 @@ function Navbar({ isOpen, setIsOpen }) {
                 <span>Home</span>
               </Link>
               <Link 
-                to="/premium" 
+                to="/generator" 
                 className="flex items-center space-x-3 text-white/70 hover:text-white hover:bg-white/5 px-4 py-3 rounded-lg transition-all duration-200 shadow-[0_0_15px_rgba(109,40,217,0.3)] border border-purple-500/50"
                 onClick={() => window.innerWidth < 768 && setIsOpen(false)}
               >
-                <FaUser className="w-5 h-5" />
-                <span>Premium Accounts</span>
+                <FaRandom className="w-5 h-5" />
+                <span>Generator</span>
+              </Link>
+              <Link 
+                to="/streaming" 
+                className="flex items-center space-x-3 text-white/70 hover:text-white hover:bg-white/5 px-4 py-3 rounded-lg transition-all duration-200 shadow-[0_0_15px_rgba(109,40,217,0.3)] border border-purple-500/50"
+                onClick={() => window.innerWidth < 768 && setIsOpen(false)}
+              >
+                <FaPlay className="w-5 h-5" />
+                <span>Streaming</span>
               </Link>
               <Link 
                 to="/games" 
@@ -116,14 +124,6 @@ function Navbar({ isOpen, setIsOpen }) {
               >
                 <FaTools className="w-5 h-5" />
                 <span>Tools</span>
-              </Link>
-              <Link 
-                to="/streaming" 
-                className="flex items-center space-x-3 text-white/70 hover:text-white hover:bg-white/5 px-4 py-3 rounded-lg transition-all duration-200 shadow-[0_0_15px_rgba(109,40,217,0.3)] border border-purple-500/50"
-                onClick={() => window.innerWidth < 768 && setIsOpen(false)}
-              >
-                <FaPlay className="w-5 h-5" />
-                <span>Streaming</span>
               </Link>
               <Link 
                 to="/important" 

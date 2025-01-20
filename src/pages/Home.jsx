@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FaUser, FaGamepad, FaPlay } from 'react-icons/fa';
+import { FaGamepad, FaPlay, FaRandom } from 'react-icons/fa';
 
 const container = {
   hidden: { opacity: 0 },
@@ -62,7 +62,7 @@ function Home() {
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.6, duration: 0.6 }}
           >
-            Access exclusive premium accounts, games, and streaming services all in one place, and much more!
+            Access exclusive games, streaming services, and generate premium accounts all in one place!
           </motion.p>
 
           <motion.div 
@@ -77,13 +77,13 @@ function Home() {
               whileTap={{ scale: 0.95 }}
               className="w-full md:w-[280px]"
             >
-              <Link to="/premium" className="group block p-6 md:p-8 bg-purple-500 rounded-2xl hover:bg-purple-600 transition-all duration-300 shadow-lg shadow-purple-500/30">
+              <Link to="/generator" className="group block p-6 md:p-8 bg-purple-500 rounded-2xl hover:bg-purple-600 transition-all duration-300 shadow-lg shadow-purple-500/30">
                 <div className="flex flex-col items-center text-center space-y-4">
                   <div className="p-4 bg-white/10 rounded-full">
-                    <FaUser className="w-8 h-8" />
+                    <FaRandom className="w-8 h-8" />
                   </div>
-                  <span className="text-xl font-semibold">Premium Accounts</span>
-                  <p className="text-white/90 text-sm">Access exclusive premium accounts with unique features</p>
+                  <span className="text-xl font-semibold">Account Generator</span>
+                  <p className="text-white/90 text-sm">Generate premium accounts instantly</p>
                 </div>
               </Link>
             </motion.div>
