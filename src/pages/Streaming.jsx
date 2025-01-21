@@ -317,56 +317,79 @@ function Streaming() {
       )}
 
       {/* Search and Filters Section */}
-      <div className="relative z-10 px-12 pt-8 pb-4 flex items-center space-x-4">
-        {/* Media Type Dropdown */}
-        <select
-          value={mediaType}
-          onChange={(e) => setMediaType(e.target.value)}
-          className="bg-[#111] border border-purple-500/50 text-white px-4 py-2 rounded-lg focus:outline-none focus:border-purple-500 w-32"
-        >
-          <option value="all">All</option>
-          <option value="movie">Movies</option>
-          <option value="tv">TV Shows</option>
-        </select>
+      <div className="relative z-10 px-12 pt-8 pb-4">
+        <div className="bg-[#111]/80 backdrop-blur-sm rounded-xl p-6 border border-purple-500/20 shadow-lg">
+          <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-center">
+            {/* Media Type Dropdown */}
+            <div className="relative">
+              <label className="block text-gray-400 text-sm mb-1">Media Type</label>
+              <select
+                value={mediaType}
+                onChange={(e) => setMediaType(e.target.value)}
+                className="w-full md:w-40 bg-black border border-purple-500/50 text-white px-4 py-2.5 rounded-lg focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 appearance-none cursor-pointer hover:border-purple-400 transition-colors"
+              >
+                <option value="all">All Content</option>
+                <option value="movie">Movies Only</option>
+                <option value="tv">TV Shows Only</option>
+              </select>
+              <div className="absolute right-3 top-[34px] pointer-events-none text-gray-400">
+                <svg className="w-4 h-4 fill-current" viewBox="0 0 20 20">
+                  <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
+                </svg>
+              </div>
+            </div>
 
-        {/* Genre Dropdown */}
-        <select
-          value={genre}
-          onChange={(e) => setGenre(e.target.value)}
-          className="bg-[#111] border border-purple-500/50 text-white px-4 py-2 rounded-lg focus:outline-none focus:border-purple-500 w-48"
-        >
-          {genres.map((g) => (
-            <option key={g.id} value={g.id}>
-              {g.name}
-            </option>
-          ))}
-        </select>
+            {/* Genre Dropdown */}
+            <div className="relative flex-1 md:max-w-xs">
+              <label className="block text-gray-400 text-sm mb-1">Genre</label>
+              <select
+                value={genre}
+                onChange={(e) => setGenre(e.target.value)}
+                className="w-full bg-black border border-purple-500/50 text-white px-4 py-2.5 rounded-lg focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 appearance-none cursor-pointer hover:border-purple-400 transition-colors"
+              >
+                {genres.map((g) => (
+                  <option key={g.id} value={g.id}>
+                    {g.name}
+                  </option>
+                ))}
+              </select>
+              <div className="absolute right-3 top-[34px] pointer-events-none text-gray-400">
+                <svg className="w-4 h-4 fill-current" viewBox="0 0 20 20">
+                  <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
+                </svg>
+              </div>
+            </div>
 
-        {/* Search Bar */}
-        <form 
-          onSubmit={(e) => {
-            e.preventDefault();
-            if (searchQuery.trim()) {
-              navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
-              setSearchQuery('');
-            }
-          }} 
-          className="relative max-w-md"
-        >
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search..."
-            className="w-full bg-[#111] border border-purple-500/50 text-white px-4 py-2 rounded-lg placeholder-gray-400 focus:outline-none focus:border-purple-500"
-          />
-          <button 
-            type="submit"
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-white hover:text-purple-500 transition"
-          >
-            <FaSearch className="w-4 h-4" />
-          </button>
-        </form>
+            {/* Search Bar */}
+            <div className="flex-1">
+              <label className="block text-gray-400 text-sm mb-1">Search</label>
+              <form 
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (searchQuery.trim()) {
+                    navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
+                    setSearchQuery('');
+                  }
+                }} 
+                className="relative"
+              >
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search movies, TV shows..."
+                  className="w-full bg-black border border-purple-500/50 text-white px-4 py-2.5 rounded-lg placeholder-gray-500 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 hover:border-purple-400 transition-colors pr-10"
+                />
+                <button 
+                  type="submit"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-purple-500 transition-colors focus:outline-none"
+                >
+                  <FaSearch className="w-4 h-4" />
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div className="relative z-10 px-12 pb-16 space-y-12 bg-black">
