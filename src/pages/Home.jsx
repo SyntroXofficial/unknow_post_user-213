@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FaGamepad, FaPlay, FaRandom, FaExclamationTriangle } from 'react-icons/fa';
+import { FaGamepad, FaPlay, FaRandom, FaExclamationTriangle, FaDiscord } from 'react-icons/fa';
 
 const container = {
   hidden: { opacity: 0 },
@@ -134,6 +134,24 @@ function Home() {
                 </div>
               </Link>
             </motion.div>
+          </motion.div>
+
+          {/* Discord Button */}
+          <motion.div
+            className="mt-8 flex justify-center"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.8, duration: 0.6 }}
+          >
+            <a
+              href="https://discord.gg/cFdRcKwvgx"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center space-x-3 px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-all duration-300 transform hover:scale-105 group shadow-lg shadow-blue-500/30"
+            >
+              <FaDiscord className="w-6 h-6 group-hover:rotate-12 transition-transform duration-300" />
+              <span className="text-lg font-semibold">Join Our Discord Server</span>
+            </a>
           </motion.div>
         </motion.div>
       </motion.div>
