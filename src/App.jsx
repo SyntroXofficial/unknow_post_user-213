@@ -9,8 +9,9 @@ import TVShow from './pages/TVShow';
 import Search from './pages/Search';
 import Games from './pages/Games';
 import GameDetails from './pages/GameDetails';
-import Important from './pages/Important';
 import Generator from './pages/Generator';
+import GeneratorDetails from './pages/GeneratorDetails';
+import Important from './pages/Important';
 import PageTransition from './components/PageTransition';
 import TransitionLayout from './components/TransitionLayout';
 
@@ -44,6 +45,11 @@ function AnimatedRoutes({ isSidebarOpen }) {
           <Route path="/generator" element={
             <PageTransition>
               <Generator />
+            </PageTransition>
+          } />
+          <Route path="/generator/:id" element={
+            <PageTransition>
+              <GeneratorDetails />
             </PageTransition>
           } />
           <Route path="/important" element={
