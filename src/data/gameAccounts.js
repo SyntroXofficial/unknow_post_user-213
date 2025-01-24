@@ -1,6 +1,48 @@
 // Game account arrays
 export const mythicAccounts = [
   {
+    game: 'Far Cry 6',
+    username: 'luisvnzla18@gmail.com',
+    password: 'Luis2021.',
+    imageUrl: 'https://cdn1.epicgames.com/b4565296c22549e4830c13bc7506642d/offer/TETRA_PREORDER_GOLD%20EDITION_EPIC_Store_Landscape_2560x1440-2560x1440-1ae86e9cf2a9e913e4f9d40164cebafd.jpg',
+    description: '• Full Game Access\n• Open-World Action in Yara\n• Play as Dani Rojas, a Guerrilla Fighter\n• Explore a Tropical Paradise\n• Customizable Weapons and Gear\n• Fight Against a Tyrannical Regime',
+    features: [
+      { label: 'Region', value: 'Global' },
+      { label: 'Platform', value: 'Ubisoft' },
+      { label: 'Rating', value: 'M (Mature)' },
+      { label: 'Genre', value: 'Action-Adventure' },
+      { label: 'Release', value: '2021' },
+      { label: 'Playtime', value: '40+ hours' }
+    ],
+    requirements: {
+      cpu: 'Intel Core i5-8400 or AMD Ryzen 5 2600',
+      gpu: 'NVIDIA GeForce GTX 970 or AMD Radeon RX 480',
+      ram: '8 GB',
+      storage: '60 GB SSD'
+    }
+  },
+  {
+    game: 'Assassin\'s Creed Valhalla',
+    username: 'luisvnzla18@gmail.com',
+    password: 'Luis2021.',
+    imageUrl: 'https://cdn1.epicgames.com/offer/400347196e674de89c23cc2a7f2121db/UK_ACV_METEOR_COMPLETE_EPIC_Store%20Landscape_2560x1440_2560x1440-773d87f4d983907d991ecc72c85fcd0c',
+    description: '• Full Game Access\n• Open-World RPG in Viking Age England\n• Play as Eivor, a Viking Raider\n• Build and Upgrade Your Settlement\n• Raid and Conquer New Lands\n• Deep Story and Customization',
+    features: [
+      { label: 'Region', value: 'Global' },
+      { label: 'Platform', value: 'Ubisoft' },
+      { label: 'Rating', value: 'M (Mature)' },
+      { label: 'Genre', value: 'Action RPG' },
+      { label: 'Release', value: '2020' },
+      { label: 'Playtime', value: '60+ hours' }
+    ],
+    requirements: {
+      cpu: 'Intel Core i5-8400 or AMD Ryzen 5 1600',
+      gpu: 'NVIDIA GeForce GTX 1060 or AMD Radeon RX 570',
+      ram: '8 GB',
+      storage: '50 GB SSD'
+    }
+  },
+  {
     game: 'Five Nights at Freddys Security Breach',
     username: 'SexyGamer52',
     password: 'PicukiuMeistras3',
