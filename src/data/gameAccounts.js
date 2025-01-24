@@ -1,6 +1,90 @@
 // Game account arrays
 export const mythicAccounts = [
   {
+    game: 'Horizon Forbidden West: Complete Edition',
+    username: 'vonterr',
+    password: '889162',
+    imageUrl: 'https://image.api.playstation.com/vulcan/ap/rnd/202309/2015/d227c4c23b75dea4a32c837cea0f50585d137c789577fa09.jpg',
+    description: '• Full Game Access\n• Includes Base Game and Burning Shores DLC\n• Open-World Action RPG\n• Stunning Visuals and Environments\n• Advanced Combat and Exploration\n• Rich Story and Character Development',
+    features: [
+      { label: 'Region', value: 'Global' },
+      { label: 'Platform', value: 'PlayStation/PC' },
+      { label: 'Rating', value: 'T (Teen)' },
+      { label: 'Genre', value: 'Action RPG' },
+      { label: 'Release', value: '2023 (Complete Edition)' },
+      { label: 'Playtime', value: '60+ hours' }
+    ],
+    requirements: {
+      cpu: 'Intel Core i5-8600 or AMD Ryzen 5 3600',
+      gpu: 'NVIDIA GeForce GTX 1660 Ti or AMD Radeon RX 580',
+      ram: '16 GB',
+      storage: '150 GB SSD'
+    }
+  },
+  {
+    game: 'Silent Hill 2 Remake',
+    username: 'pmxoxfkafa',
+    password: 'rsrqkjdhfy',
+    imageUrl: 'https://i.redd.it/some-wallpapers-you-may-like-with-the-new-silent-hill-2-logo-v0-5lzr4f9pudw91.png?width=3840&format=png&auto=webp&s=d0b7a7cb8a23e29c245e3c4f206dadfb16f7c15b',
+    description: '• Full Game Access\n• Remake of the Classic Survival Horror Game\n• Enhanced Graphics and Gameplay\n• Psychological Horror Experience\n• Reimagined Story and Atmosphere\n• Modernized Controls and Mechanics',
+    features: [
+      { label: 'Region', value: 'Global' },
+      { label: 'Platform', value: 'Steam' },
+      { label: 'Rating', value: 'M (Mature)' },
+      { label: 'Genre', value: 'Survival Horror' },
+      { label: 'Release', value: '2024' },
+      { label: 'Playtime', value: '15+ hours' }
+    ],
+    requirements: {
+      cpu: 'Intel Core i7-8700K or AMD Ryzen 5 3600X',
+      gpu: 'NVIDIA GeForce RTX 2060 or AMD Radeon RX 5700 XT',
+      ram: '16 GB',
+      storage: '50 GB SSD'
+    }
+  },
+  {
+    game: 'Elden Ring',
+    username: 'yisso2nd',
+    password: 'CLRraNhtfT8d',
+    imageUrl: 'https://image.api.playstation.com/vulcan/ap/rnd/202402/2214/fe6de6126062e4d38dd6c4cef9ba1966ee2440a43429dc98.jpg',
+    description: '• Full Game Access\n• Open-World Action RPG\n• Developed by FromSoftware\n• Challenging Combat\n• Rich Lore and Storytelling\n• Multiplayer Co-op and PvP',
+    features: [
+      { label: 'Region', value: 'Global' },
+      { label: 'Platform', value: 'Steam' },
+      { label: 'Rating', value: 'M (Mature)' },
+      { label: 'Genre', value: 'Action RPG' },
+      { label: 'Release', value: '2022' },
+      { label: 'Playtime', value: '100+ hours' }
+    ],
+    requirements: {
+      cpu: 'Intel Core i5-8400 or AMD Ryzen 3 3300X',
+      gpu: 'NVIDIA GeForce GTX 1060 or AMD Radeon RX 580',
+      ram: '12 GB',
+      storage: '60 GB SSD'
+    }
+  },
+  {
+    game: 'Ready or Not',
+    username: 'vqp44022',
+    password: 'quc47770',
+    imageUrl: 'https://images2.alphacoders.com/120/1202624.jpg',
+    description: '• Full Game Access\n• Tactical First-Person Shooter\n• Realistic SWAT Operations\n• Singleplayer and Multiplayer Modes\n• Advanced AI Behavior\n• Customizable Loadouts',
+    features: [
+      { label: 'Region', value: 'Global' },
+      { label: 'Platform', value: 'Steam' },
+      { label: 'Rating', value: 'M (Mature)' },
+      { label: 'Genre', value: 'Tactical FPS' },
+      { label: 'Release', value: '2023' },
+      { label: 'Playtime', value: '50+ hours' }
+    ],
+    requirements: {
+      cpu: 'Intel Core i5-4430 or AMD FX-6300',
+      gpu: 'NVIDIA GeForce GTX 960 or AMD Radeon R7 370',
+      ram: '8 GB',
+      storage: '50 GB SSD'
+    }
+  },
+  {
     game: 'Resident Evil 4 Remake',
     username: 'steamok2091664',
     password: 'steamok2091234',
@@ -19,6 +103,90 @@ export const mythicAccounts = [
       gpu: 'AMD RX 5700 or NVIDIA RTX 2060',
       ram: '16 GB',
       storage: '60 GB SSD'
+    }
+  },
+  {
+    game: 'Hitman: World of Assassination',
+    username: 'wbtq1088781',
+    password: 'steamok333',
+    imageUrl: 'https://mlpnk72yciwc.i.optimole.com/cqhiHLc.IIZS~2ef73/w:auto/h:auto/q:75/https://bleedingcool.com/wp-content/uploads/2023/01/Hitman-World-Of-Assasination-Art-1.jpg',
+    description: '• Full Game Access\n• All Locations and Missions\n• Stealth and Action Gameplay\n• Replayable Missions\n• Customizable Loadouts\n• Online Features',
+    features: [
+      { label: 'Region', value: 'Global' },
+      { label: 'Platform', value: 'Steam' },
+      { label: 'Rating', value: 'M (Mature)' },
+      { label: 'Genre', value: 'Stealth/Action' },
+      { label: 'Release', value: '2023' },
+      { label: 'Playtime', value: '100+ hours' }
+    ],
+    requirements: {
+      cpu: 'Intel Core i5-2500K or AMD Phenom II X4 940',
+      gpu: 'NVIDIA GeForce GTX 660 or AMD Radeon HD 7870',
+      ram: '8 GB',
+      storage: '60 GB SSD'
+    }
+  },
+  {
+    game: 'Ghost of Tsushima',
+    username: 'dawnbauman3f',
+    password: 'daWNCpkh7I1984',
+    imageUrl: 'https://image.api.playstation.com/vulcan/ap/rnd/202106/2322/ZSrFeb6XkqKiq2PZKWg20yfe.jpg',
+    description: '• Full Game Access\n• Open-World Samurai Adventure\n• Stunning Visuals\n• Dynamic Combat System\n• Exploration and Side Quests\n• Photo Mode',
+    features: [
+      { label: 'Region', value: 'Global' },
+      { label: 'Platform', value: 'PlayStation/PC' },
+      { label: 'Rating', value: 'M (Mature)' },
+      { label: 'Genre', value: 'Action-Adventure' },
+      { label: 'Release', value: '2020 (PlayStation), 2024 (PC)' },
+      { label: 'Playtime', value: '50+ hours' }
+    ],
+    requirements: {
+      cpu: 'Intel Core i5-8600 or AMD Ryzen 5 3600',
+      gpu: 'NVIDIA GeForce GTX 1060 or AMD Radeon RX 580',
+      ram: '16 GB',
+      storage: '75 GB SSD'
+    }
+  },
+  {
+    game: 'Forza Horizon 5',
+    username: '57841430',
+    password: '61488286',
+    imageUrl: 'https://www.alliedgamingpc.com.au/assets/images/news/51.jpg',
+    description: '• Full Game Access\n• Open-World Racing in Mexico\n• Hundreds of Cars\n• Dynamic Seasons and Weather\n• Customization and Tuning\n• Multiplayer Modes',
+    features: [
+      { label: 'Region', value: 'Global' },
+      { label: 'Platform', value: 'Xbox/PC' },
+      { label: 'Rating', value: 'E (Everyone)' },
+      { label: 'Genre', value: 'Racing' },
+      { label: 'Release', value: '2021' },
+      { label: 'Playtime', value: '100+ hours' }
+    ],
+    requirements: {
+      cpu: 'Intel Core i5-8400 or AMD Ryzen 5 1500X',
+      gpu: 'NVIDIA GeForce GTX 1070 or AMD Radeon RX 590',
+      ram: '16 GB',
+      storage: '110 GB SSD'
+    }
+  },
+  {
+    game: 'Hogwarts Legacy',
+    username: 'kaywilson5k',
+    password: 'SISKI333SAhGZ9iytoAV1rSMq4tOUetfDEH',
+    imageUrl: 'https://cdn1.epicgames.com/offer/e97659b501af4e3981d5430dad170911/EGS_HogwartsLegacyDigitalDeluxeEdition_AvalancheSoftware_Editions_S1_2560x1440-65f2cce001ab1893cca57f48aeb25196',
+    description: '• Full Game Access\n• Open-World RPG Set in the Wizarding World\n• Create Your Own Wizard\n• Attend Hogwarts and Learn Spells\n• Explore the Forbidden Forest and Beyond\n• Customize Your Character and Gear',
+    features: [
+      { label: 'Region', value: 'Global' },
+      { label: 'Platform', value: 'Steam' },
+      { label: 'Rating', value: 'T (Teen)' },
+      { label: 'Genre', value: 'Action RPG' },
+      { label: 'Release', value: '2023' },
+      { label: 'Playtime', value: '60+ hours' }
+    ],
+    requirements: {
+      cpu: 'Intel Core i5-8400 or AMD Ryzen 5 2600',
+      gpu: 'NVIDIA GeForce GTX 1080 Ti or AMD Radeon RX 5700 XT',
+      ram: '16 GB',
+      storage: '85 GB SSD'
     }
   },
   {
@@ -82,6 +250,27 @@ export const mythicAccounts = [
       gpu: 'AMD Radeon RX 6700 XT or NVIDIA RTX 3070',
       ram: '16 GB',
       storage: '150 GB SSD'
+    }
+  },
+  {
+    game: 'Dying Light: Definitive Edition',
+    username: 'qq1070414930',
+    password: 'mhEklDDkjP',
+    imageUrl: 'https://cdn1.epicgames.com/offer/2c42520d342a46d7a6e0cfa77b4715de/EGS_DyingLightDefinitiveEdition_Techland_Editions_S1_2560x1440-17c03be0bf68fc0f1b4a212fcdd469fd',
+    description: '• Full Game Access\n• All DLCs Included\n• Enhanced Graphics\n• Open-World Zombie Survival\n• Parkour Mechanics\n• Co-op Multiplayer',
+    features: [
+      { label: 'Region', value: 'Global' },
+      { label: 'Platform', value: 'Steam' },
+      { label: 'Rating', value: 'M (Mature)' },
+      { label: 'Genre', value: 'Action/Survival' },
+      { label: 'Release', value: '2015 (Definitive Edition: 2021)' },
+      { label: 'Playtime', value: '40+ hours' }
+    ],
+    requirements: {
+      cpu: 'Intel Core i5-2500 @3.3 GHz / AMD FX-8320 @3.5 GHz',
+      gpu: 'NVIDIA GeForce GTX 780 / AMD Radeon R9 290',
+      ram: '8 GB',
+      storage: '60 GB HDD'
     }
   },
   {

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import Navbar from './components/Navbar';
@@ -15,7 +15,7 @@ import Important from './pages/Important';
 import PageTransition from './components/PageTransition';
 import TransitionLayout from './components/TransitionLayout';
 
-function AnimatedRoutes({ isSidebarOpen }) {
+function AnimatedRoutes() {
   const location = useLocation();
 
   return (
@@ -79,15 +79,15 @@ function AnimatedRoutes({ isSidebarOpen }) {
 }
 
 function App() {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
 
   return (
     <Router>
-      <div className="min-h-screen bg-black flex">
-        <Navbar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
-        <main className={`flex-1 transition-all duration-300 ${isSidebarOpen ? 'md:ml-[280px]' : 'md:ml-16'}`}>
-          <AnimatedRoutes isSidebarOpen={isSidebarOpen} />
+      <div className={`min-h-screen bg-black transition-all duration-300 ${isSidebarOpen ? 'pl-16' : ''}`}>
+        <main className="relative">
+          <AnimatedRoutes />
         </main>
+        <Navbar isSidebarOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen} />
       </div>
     </Router>
   );
