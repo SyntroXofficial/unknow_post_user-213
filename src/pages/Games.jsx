@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   FaGamepad, FaInfoCircle, FaStar, FaDesktop, FaCalendar, FaClock,
   FaFilter, FaSort, FaSearch, FaWindows, FaPlaystation, FaXbox,
-  FaGlobe, FaUserClock, FaChevronDown
+  FaGlobe, FaUserClock, FaChevronDown, FaChevronLeft, FaChevronRight
 } from 'react-icons/fa';
 import { allGames } from '../data/gameAccounts';
 
@@ -41,6 +41,8 @@ function Games() {
   const [selectedPlatform, setSelectedPlatform] = useState('all');
   const [selectedRating, setSelectedRating] = useState('all');
   const [viewMode, setViewMode] = useState('grid');
+  const [currentPage, setCurrentPage] = useState(1);
+  const gamesPerPage = 10;
   
   useEffect(() => {
     if (allGames.length > 0) {
@@ -104,6 +106,16 @@ function Games() {
           return 0;
       }
     });
+
+  const indexOfLastGame = currentPage * gamesPerPage;
+  const indexOfFirstGame = indexOfLastGame - gamesPerPage;
+  const currentGames = filteredGames.slice(indexOfFirstGame, indexOfLastGame);
+  const totalPages = Math.ceil(filteredGames.length / gamesPerPage);
+
+  const paginate = (pageNumber) => {
+    setCurrentPage(pageNumber);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const renderGameCard = (game) => {
     const gameUrl = game.game.toLowerCase().replace(/[^a-z0-9]+/g, '-');
@@ -353,13 +365,58 @@ function Games() {
 
           {/* Games Grid */}
           <motion.div 
-            className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6"
+            className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-5 gap-6"
             variants={container}
             initial="hidden"
             animate="show"
           >
-            {filteredGames.map(renderGameCard)}
+            {currentGames.map(renderGameCard)}
           </motion.div>
+
+          {/* Pagination Controls */}
+          {filteredGames.length > 0 && (
+            <div className="mt-8 flex justify-center items-center space-x-4">
+              <button
+                onClick={() => paginate(currentPage - 1)}
+                disabled={currentPage === 1}
+                className={`p-2 rounded-lg transition-all ${
+                  currentPage === 1
+                    ? 'bg-white/5 text-gray-500 cursor-not-allowed'
+                    : 'bg-white/10 text-white hover:bg-white/20'
+                }`}
+              >
+                <FaChevronLeft className="w-5 h-5" />
+              </button>
+
+              <div className="flex items-center space-x-2">
+                {[...Array(totalPages)].map((_, index) => (
+                  <button
+                    key={index + 1}
+                    onClick={() => paginate(index + 1)}
+                    className={`w-10 h-10 rounded-lg transition-all ${
+                      currentPage === index + 1
+                        ? 'bg-white text-black'
+                        : 'bg-white/10 text-white hover:bg-white/20'
+                    }`}
+                  >
+                    {index + 1}
+                  </button>
+                ))}
+              </div>
+
+              <button
+                onClick={() => paginate(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className={`p-2 rounded-lg transition-all ${
+                  currentPage === totalPages
+                    ? 'bg-white/5 text-gray-500 cursor-not-allowed'
+                    : 'bg-white/10 text-white hover:bg-white/20'
+                }`}
+              >
+                <FaChevronRight className="w-5 h-5" />
+              </button>
+            </div>
+          )}
 
           {/* No Results Message */}
           {filteredGames.length === 0 && (

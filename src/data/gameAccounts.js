@@ -1,6 +1,132 @@
 // Game account arrays
 export const mythicAccounts = [
   {
+    game: 'Five Nights at Freddys Security Breach',
+    username: 'SexyGamer52',
+    password: 'PicukiuMeistras3',
+    imageUrl: 'https://cdn1.epicgames.com/spt-assets/5339564279024f0a97654210da2e26d7/five-nights-at-freddys-security-breach-offer-162ow.png',
+    description: '• Full Game Access\n• Survival Horror in a Mega Pizzaplex\n• Play as Gregory, a Young Boy Trapped Overnight\n• Hide from Animatronic Enemies\n• Explore and Solve Puzzles\n• Multiple Endings',
+    features: [
+      { label: 'Region', value: 'Global' },
+      { label: 'Platform', value: 'Steam' },
+      { label: 'Rating', value: 'M (Mature)' },
+      { label: 'Genre', value: 'Survival Horror' },
+      { label: 'Release', value: '2021' },
+      { label: 'Playtime', value: '10+ hours' }
+    ],
+    requirements: {
+      cpu: 'Intel Core i5-3570 or AMD Ryzen 3 1200',
+      gpu: 'NVIDIA GeForce GTX 1050 Ti or AMD Radeon RX 470',
+      ram: '8 GB',
+      storage: '80 GB HDD'
+    }
+  },
+  {
+    game: 'Need for Speed Heat',
+    username: '73947078',
+    password: 'Farhanab12@',
+    imageUrl: 'https://gaming-cdn.com/images/products/5362/orig/need-for-speed-heat-pc-game-ea-app-cover.jpg?v=1737537940',
+    description: '• Full Game Access\n• Open-World Racing in Palm City\n• Day and Night Gameplay Mechanics\n• Customizable Cars and Performance Upgrades\n• Police Chases and Races\n• Multiplayer Modes',
+    features: [
+      { label: 'Region', value: 'Global' },
+      { label: 'Platform', value: 'Steam' },
+      { label: 'Rating', value: 'T (Teen)' },
+      { label: 'Genre', value: 'Racing' },
+      { label: 'Release', value: '2019' },
+      { label: 'Playtime', value: '30+ hours' }
+    ],
+    requirements: {
+      cpu: 'Intel Core i5-3570 or AMD FX-6350',
+      gpu: 'NVIDIA GeForce GTX 760 or AMD Radeon R9 270X',
+      ram: '8 GB',
+      storage: '50 GB HDD'
+    }
+  },
+  {
+    game: 'Cyberpunk 2077 Ultimate Edition',
+    username: 'akwuja',
+    password: 'Hh60399tve',
+    imageUrl: 'https://cdn1.epicgames.com/offer/77f2b98e2cef40c8a7437518bf420e47/EGS_Cyberpunk2077UltimateEdition_CDPROJEKTRED_Editions_S1_2560x1440-b8bfbed19257188c717a26ee5bf79b41',
+    description: '• Full Game Access\n• Includes Base Game and Phantom Liberty Expansion\n• Open-World RPG in Night City\n• Deep Story and Character Customization\n• Next-Gen Graphics and Gameplay\n• Multiple Endings and Choices',
+    features: [
+      { label: 'Region', value: 'Global' },
+      { label: 'Platform', value: 'Steam' },
+      { label: 'Rating', value: 'M (Mature)' },
+      { label: 'Genre', value: 'Action RPG' },
+      { label: 'Release', value: '2023 (Ultimate Edition)' },
+      { label: 'Playtime', value: '100+ hours' }
+    ],
+    requirements: {
+      cpu: 'Intel Core i7-6700 or AMD Ryzen 5 3600',
+      gpu: 'NVIDIA GeForce GTX 1060 or AMD Radeon RX 580',
+      ram: '16 GB',
+      storage: '70 GB SSD'
+    }
+  },
+  {
+    game: 'Golf With Your Friends',
+    username: 'ksmekens20',
+    password: 'poophead204',
+    imageUrl: 'https://image.api.playstation.com/vulcan/ap/rnd/202311/1414/4a728adbf1d4bcd9c9d143679bef2234c97103026dbb5f7c.jpg',
+    description: '• Full Game Access\n• Multiplayer Mini-Golf\n• Fun and Challenging Courses\n• Customizable Balls and Game Rules\n• Online and Local Multiplayer\n• Cross-Platform Play',
+    features: [
+      { label: 'Region', value: 'Global' },
+      { label: 'Platform', value: 'Steam' },
+      { label: 'Rating', value: 'E (Everyone)' },
+      { label: 'Genre', value: 'Sports/Multiplayer' },
+      { label: 'Release', value: '2020' },
+      { label: 'Playtime', value: '10+ hours' }
+    ],
+    requirements: {
+      cpu: 'Intel Core i3-2100 or AMD FX-4300',
+      gpu: 'NVIDIA GeForce GTX 650 or AMD Radeon HD 7750',
+      ram: '4 GB',
+      storage: '5 GB HDD'
+    }
+  },
+  {
+    game: 'Teardown',
+    username: 'ifqjjspglkiq',
+    password: '9AXCbYLX3d',
+    imageUrl: 'https://saber.games/wp-content/uploads/2023/09/Teardown_Console_KeyArt_Logo.png',
+    description: '• Full Game Access\n• Physics-Based Destruction Sandbox\n• Heist and Mission-Based Gameplay\n• Voxel-Based Environments\n• Modding Support\n• Realistic Physics and Destruction',
+    features: [
+      { label: 'Region', value: 'Global' },
+      { label: 'Platform', value: 'Steam' },
+      { label: 'Rating', value: 'E (Everyone)' },
+      { label: 'Genre', value: 'Sandbox/Simulation' },
+      { label: 'Release', value: '2022' },
+      { label: 'Playtime', value: '20+ hours' }
+    ],
+    requirements: {
+      cpu: 'Intel Core i7-4770K or AMD Ryzen 5 1600',
+      gpu: 'NVIDIA GeForce GTX 1060 or AMD Radeon RX 580',
+      ram: '8 GB',
+      storage: '10 GB SSD'
+    }
+  },
+  {
+    game: 'Cuphead',
+    username: 'su0wn1hf',
+    password: 'UOipTT58vG5XZ1',
+    imageUrl: 'https://assets.nintendo.com/image/upload/c_fill,w_1200/q_auto:best/f_auto/dpr_2.0/ncom/software/switch/70010000016330/d94d2186ef03c930392253c83c84af0c73b7e57cd902a526b09b4155a25930fe',
+    description: '• Full Game Access\n• Run-and-Gun Platformer with Boss Battles\n• Hand-Drawn 1930s Cartoon Art Style\n• Challenging Gameplay\n• Local Co-op Mode\n• Original Jazz Soundtrack',
+    features: [
+      { label: 'Region', value: 'Global' },
+      { label: 'Platform', value: 'Steam' },
+      { label: 'Rating', value: 'E (Everyone)' },
+      { label: 'Genre', value: 'Run-and-Gun' },
+      { label: 'Release', value: '2017' },
+      { label: 'Playtime', value: '10+ hours' }
+    ],
+    requirements: {
+      cpu: 'Intel Core2 Duo E8400 or AMD Athlon 64 X2 6000+',
+      gpu: 'NVIDIA GeForce 9600 GT or AMD Radeon HD 3870',
+      ram: '4 GB',
+      storage: '20 GB HDD'
+    }
+  },
+  {
     game: 'Horizon Forbidden West: Complete Edition',
     username: 'vonterr',
     password: '889162',
