@@ -1,6 +1,90 @@
 // Game account arrays
 export const mythicAccounts = [
   {
+    game: 'Lords of the Fallen',
+    username: 'vjtae27237',
+    password: 'tojh49172Y',
+    imageUrl: 'https://cdn1.epicgames.com/spt-assets/56420acb023b4f9597401dc2c5ea9352/lords-of-the-fallen-117s9.png',
+    description: '• Full Game Access\n• Dark Fantasy Action RPG\n• Challenging Combat and Exploration\n• Dual-World Mechanics (Axiom and Umbral)\n• Customizable Character and Weapons\n• Rich Story and Atmospheric World',
+    features: [
+      { label: 'Region', value: 'Global' },
+      { label: 'Platform', value: 'Steam' },
+      { label: 'Rating', value: 'M (Mature)' },
+      { label: 'Genre', value: 'Action RPG' },
+      { label: 'Release', value: '2023' },
+      { label: 'Playtime', value: '30+ hours' }
+    ],
+    requirements: {
+      cpu: 'Intel Core i5-8400 or AMD Ryzen 5 2600',
+      gpu: 'NVIDIA GeForce GTX 1060 or AMD Radeon RX 580',
+      ram: '8 GB',
+      storage: '45 GB SSD'
+    }
+  },
+  {
+    game: 'Cult of the Lamb',
+    username: 'wbtq1087807',
+    password: 'steamok456456',
+    imageUrl: 'https://image.api.playstation.com/vulcan/ap/rnd/202305/0118/673d9659123ab90a2b26b175009b3e9d04afcbfc599ebbbf.jpg',
+    description: '• Full Game Access\n• Build and Manage Your Own Cult\n• Roguelike Dungeon Crawling\n• Unique Art Style and Dark Humor\n• Recruit Followers and Perform Rituals\n• Explore a Mysterious World',
+    features: [
+      { label: 'Region', value: 'Global' },
+      { label: 'Platform', value: 'Steam' },
+      { label: 'Rating', value: 'T (Teen)' },
+      { label: 'Genre', value: 'Roguelike/Simulation' },
+      { label: 'Release', value: '2022' },
+      { label: 'Playtime', value: '15+ hours' }
+    ],
+    requirements: {
+      cpu: 'Intel Core i5-3470 or AMD FX-8350',
+      gpu: 'NVIDIA GeForce GTX 670 or AMD Radeon HD 7870',
+      ram: '4 GB',
+      storage: '4 GB HDD'
+    }
+  },
+  {
+    game: 'Far Cry 5',
+    username: 'tristano2007@wp.pl',
+    password: 'Lubienutele07',
+    imageUrl: 'https://wallpapers.com/images/hd/far-cry-5-4k-rhmqptb97zxbdoz1.jpg',
+    description: '• Full Game Access\n• Open-World FPS in Hope County, Montana\n• Fight Against a Dangerous Cult\n• Explore a Vast and Dynamic World\n• Customizable Weapons and Vehicles\n• Single-Player and Co-op Modes',
+    features: [
+      { label: 'Region', value: 'Global' },
+      { label: 'Platform', value: 'Ubisoft' },
+      { label: 'Rating', value: 'M (Mature)' },
+      { label: 'Genre', value: 'Action-Adventure' },
+      { label: 'Release', value: '2018' },
+      { label: 'Playtime', value: '30+ hours' }
+    ],
+    requirements: {
+      cpu: 'Intel Core i5-2400 or AMD FX-6300',
+      gpu: 'NVIDIA GeForce GTX 670 or AMD R9 270',
+      ram: '8 GB',
+      storage: '40 GB HDD'
+    }
+  },
+  {
+    game: 'Assassin\'s Creed Origins',
+    username: 'patrickmoody28@btinternet.com',
+    password: 'Minecraftort28',
+    imageUrl: 'https://cdn1.epicgames.com/camellia/offer/ACH_UCS12003_EGST_BannerBundle_GE_US_Edition_Capsule_1920X1080-1920x1080-24fb5b57db3a6fbf381c2028ea3e5b5591aa6a4b.jpg',
+    description: '• Full Game Access\n• Open-World Action RPG in Ancient Egypt\n• Play as Bayek, a Medjay Protector\n• Explore a Vast and Beautiful World\n• Engage in Stealth and Combat\n• Rich Story and Historical Setting',
+    features: [
+      { label: 'Region', value: 'Global' },
+      { label: 'Platform', value: 'Ubisoft' },
+      { label: 'Rating', value: 'M (Mature)' },
+      { label: 'Genre', value: 'Action RPG' },
+      { label: 'Release', value: '2017' },
+      { label: 'Playtime', value: '50+ hours' }
+    ],
+    requirements: {
+      cpu: 'Intel Core i5-2400s or AMD FX-6350',
+      gpu: 'NVIDIA GeForce GTX 660 or AMD Radeon R9 270',
+      ram: '6 GB',
+      storage: '42 GB HDD'
+    }
+  },
+  {
     game: 'Atomic Heart',
     username: 'Maksimqb',
     password: 'Anpol2005.',
