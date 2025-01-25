@@ -70,36 +70,30 @@ function GameDetails() {
 
           {/* Account Credentials */}
           <div className="space-y-4 bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
-            <h3 className="text-xl font-bold text-white">Account Details</h3>
-            <div className="grid grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <div className="flex items-center space-x-2">
-                  <FaUser className="text-white/70" />
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-bold text-white">Account Details</h3>
+              </div>
+              <div className="grid grid-cols-2 gap-6">
+                <div className="space-y-2">
                   <p className="text-gray-400">Username</p>
+                  <div className="flex items-center space-x-2">
+                    <p className="text-white bg-black/30 px-4 py-2 rounded font-mono">
+                      {game.username}
+                    </p>
+                    <FaUser className="text-white/70" />
+                  </div>
                 </div>
-                <p className="text-white bg-black/30 px-4 py-2 rounded font-mono">
-                  {game.username}
-                </p>
-              </div>
-              <div className="space-y-2">
-                <div className="flex items-center space-x-2">
-                  <FaKey className="text-white/70" />
+                <div className="space-y-2">
                   <p className="text-gray-400">Password</p>
+                  <div className="flex items-center space-x-2">
+                    <p className="text-white bg-black/30 px-4 py-2 rounded font-mono">
+                      {game.password}
+                    </p>
+                    <FaKey className="text-white/70" />
+                  </div>
                 </div>
-                <p className="text-white bg-black/30 px-4 py-2 rounded font-mono">
-                  {game.password}
-                </p>
               </div>
-            </div>
-          </div>
-
-          {/* Game Features */}
-          <div className="flex items-center space-x-6 pt-4">
-            <div className="px-6 py-2 bg-white/10 backdrop-blur-sm text-white font-bold rounded-lg">
-              {game.features.find(f => f.label === 'Genre')?.value}
-            </div>
-            <div className="px-6 py-2 bg-white/10 backdrop-blur-sm text-white font-bold rounded-lg">
-              {game.features.find(f => f.label === 'Platform')?.value}
             </div>
           </div>
         </motion.div>
