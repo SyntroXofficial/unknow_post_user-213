@@ -49,53 +49,57 @@ function GameDetails() {
 
         {/* Game Info */}
         <motion.div 
-          className="absolute top-1/2 -translate-y-1/2 left-12 w-1/2 space-y-4"
+          className="absolute inset-0 flex items-end pb-32"
           initial={{ x: -50, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ delay: 0.3, duration: 0.8 }}
         >
-          <h1 className="text-4xl font-bold text-white">{game.game}</h1>
-          <div className="flex items-center space-x-4">
-            <span className="flex items-center">
-              <FaStar className="text-yellow-500 w-4 h-4 mr-1" />
-              <span className="text-white font-bold">{ratingMatch} Match</span>
-            </span>
-            <span className="text-white/70">{game.features.find(f => f.label === 'Release')?.value}</span>
-            <span className="px-2 py-1 border border-white/20 text-white/70 text-sm">
-              {game.features.find(f => f.label === 'Rating')?.value}
-            </span>
-            <span className="text-white/70">{game.features.find(f => f.label === 'Playtime')?.value}</span>
-          </div>
-          <p className="text-base text-white/90">{game.description}</p>
+            <div className="w-[500px] ml-16 space-y-6">
+              <h1 className="text-5xl font-bold text-white">{game.game}</h1>
 
-          {/* Account Credentials */}
-          <div className="space-y-3 bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-bold text-white">Account Details</h3>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <p className="text-gray-400 text-sm">Username</p>
-                  <div className="flex items-center space-x-2">
-                    <p className="text-white bg-black/30 px-3 py-1.5 rounded text-sm font-mono">
-                      {game.username}
-                    </p>
-                    <FaUser className="text-white/70 w-4 h-4" />
-                  </div>
+              <div className="flex items-center space-x-6">
+                <div className="flex items-center">
+                  <FaStar className="text-yellow-500 w-4 h-4 mr-2" />
+                  <span className="text-white font-bold">{ratingMatch} Match</span>
                 </div>
-                <div className="space-y-1">
-                  <p className="text-gray-400 text-sm">Password</p>
-                  <div className="flex items-center space-x-2">
-                    <p className="text-white bg-black/30 px-3 py-1.5 rounded text-sm font-mono">
-                      {game.password}
-                    </p>
-                    <FaKey className="text-white/70 w-4 h-4" />
+                <span className="text-white/70">{game.features.find(f => f.label === 'Release')?.value}</span>
+                <span className="px-2 py-1 border border-white/20 text-white/70 text-sm">
+                  {game.features.find(f => f.label === 'Rating')?.value}
+                </span>
+                <span className="text-white/70">{game.features.find(f => f.label === 'Playtime')?.value}</span>
+              </div>
+
+              <p className="text-lg text-white/90">{game.description}</p>
+
+              {/* Account Credentials */}
+              <div className="space-y-3 bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-bold text-white">Account Details</h3>
+                  </div>
+                  <div className="space-y-4">
+                    <div className="space-y-1">
+                      <p className="text-gray-400 text-sm">Username</p>
+                      <div className="flex items-center space-x-2">
+                        <p className="text-white bg-black/30 px-3 py-1.5 rounded text-sm font-mono">
+                          {game.username}
+                        </p>
+                        <FaUser className="text-white/70 w-4 h-4" />
+                      </div>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-gray-400 text-sm">Password</p>
+                      <div className="flex items-center space-x-2">
+                        <p className="text-white bg-black/30 px-3 py-1.5 rounded text-sm font-mono">
+                          {game.password}
+                        </p>
+                        <FaKey className="text-white/70 w-4 h-4" />
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
         </motion.div>
       </motion.div>
 

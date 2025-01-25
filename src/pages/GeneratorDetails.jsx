@@ -53,57 +53,58 @@ function GeneratorDetails() {
 
         {/* Service Info */}
         <motion.div 
-          className="absolute top-1/2 -translate-y-1/2 left-16 w-1/2 space-y-6"
+          className="absolute inset-0 flex items-end pb-32"
           initial={{ x: -50, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ delay: 0.3, duration: 0.8 }}
         >
-          <div className="space-y-3">
-            <div className="flex items-center space-x-4">
-              <span className="px-3 py-1 bg-white/10 backdrop-blur-sm rounded-full text-white/90 text-xs font-medium">
-                PREMIUM SERVICE
-              </span>
-              {service.isCookie && (
-                <span className="px-3 py-1 bg-yellow-500/20 backdrop-blur-sm rounded-full text-yellow-400 text-xs font-medium">
-                  Cookie Required
+            <div className="w-[500px] ml-16 space-y-6">
+              <h1 className="text-5xl font-bold text-white">{service.name}</h1>
+
+              <div className="flex items-center space-x-6">
+                {service.isCookie && (
+                  <span className="px-3 py-1 bg-yellow-500/20 backdrop-blur-sm rounded-full text-yellow-400 text-xs font-medium">
+                    Cookie Required
+                  </span>
+                )}
+                <span className="px-3 py-1 bg-white/10 backdrop-blur-sm rounded-full text-white/90 text-xs font-medium">
+                  PREMIUM SERVICE
                 </span>
-              )}
+              </div>
+
+              <p className="text-lg text-white/90">{service.description}</p>
+
+              {/* Service Access */}
+              <div className="space-y-4 bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
+                <h3 className="text-xl font-bold text-white">Service Access</h3>
+                <p className="text-white/90">
+                  Click on the "Access Service" button to {service.isCookie ? 'download required cookies' : 'copy your MEGA link and paste it intro an new page'}.
+                </p>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex flex-col space-y-2">
+                {service.isCookie && service.megaUrl ? (
+                  <a
+                    href={service.megaUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center px-6 py-2.5 bg-white text-black rounded-lg hover:bg-gray-200 transition-all duration-300 text-base font-semibold group w-full"
+                  >
+                    <FaDownload className="mr-2 group-hover:translate-y-1 transition-transform duration-300" />
+                    Access Service
+                  </a>
+                ) : (
+                  <button
+                    onClick={() => copyToClipboard(randomAccount)}
+                    className="flex items-center justify-center px-6 py-2.5 bg-white text-black rounded-lg hover:bg-gray-200 transition-all duration-300 text-base font-semibold group w-full"
+                  >
+                    <FaKey className="mr-2 group-hover:rotate-12 transition-transform duration-300" />
+                    Access Service
+                  </button>
+                )}
+              </div>
             </div>
-            <h1 className="text-6xl font-bold text-white">{service.name}</h1>
-          </div>
-
-          <p className="text-lg text-white/90">{service.description}</p>
-
-          {/* Service Access */}
-          <div className="space-y-4 bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
-            <h3 className="text-xl font-bold text-white">Service Access</h3>
-            <p className="text-white/90">
-              Click on the "Access Service" button to {service.isCookie ? 'download required cookies' : 'copy your MEGA link and paste it intro an new page'}.
-            </p>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex items-center space-x-4">
-            {service.isCookie && service.megaUrl ? (
-              <a
-                href={service.megaUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center px-8 py-4 bg-white text-black rounded-lg hover:bg-gray-200 transition-all duration-300 transform hover:scale-105 text-lg font-semibold group"
-              >
-                <FaDownload className="mr-2 group-hover:translate-y-1 transition-transform duration-300" />
-                Access Service
-              </a>
-            ) : (
-              <button
-                onClick={() => copyToClipboard(randomAccount)}
-                className="flex items-center px-8 py-4 bg-white text-black rounded-lg hover:bg-gray-200 transition-all duration-300 transform hover:scale-105 text-lg font-semibold group"
-              >
-                <FaKey className="mr-2 group-hover:rotate-12 transition-transform duration-300" />
-                Access Service
-              </button>
-            )}
-          </div>
         </motion.div>
       </motion.div>
 

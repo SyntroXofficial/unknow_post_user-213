@@ -109,103 +109,87 @@ function TVShow() {
           <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent" />
         </div>
 
-        {/* Show Info */}
+        {/* Show Info - Moved down */}
         <motion.div 
-          className="absolute top-1/2 -translate-y-1/2 left-16 w-1/2 space-y-6"
+          className="absolute inset-0 flex items-end pb-32"
           initial={{ x: -50, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ delay: 0.3, duration: 0.8 }}
         >
-          <div className="space-y-3">
-            <div className="flex items-center space-x-4">
-              <span className="px-3 py-1 bg-white/10 backdrop-blur-sm rounded-full text-white/90 text-xs font-medium">
-                FEATURED TV SHOW
-              </span>
-              <span className="px-3 py-1 bg-white/10 backdrop-blur-sm rounded-full text-white/90 text-xs font-medium">
-                {show.genres[0]?.name}
-              </span>
+          <div className="w-[500px] ml-16 space-y-6">
+            <h1 className="text-5xl font-bold text-white">{show.name}</h1>
+
+            <div className="flex items-center space-x-6">
+              <div className="flex items-center">
+                <FaStar className="text-yellow-500 w-4 h-4 mr-2" />
+                <span className="text-white font-bold">{matchScore}% Match</span>
+              </div>
+              <span className="text-white/70">{show.first_air_date?.split('-')[0]}</span>
+              <span className="px-2 py-1 border border-white/20 text-white/70 text-sm">TV-MA</span>
+              <span className="text-white/70">{show.number_of_seasons} Seasons</span>
             </div>
-            <h1 className="text-6xl font-bold text-white">{show.name}</h1>
-          </div>
 
-          <div className="flex items-center space-x-4">
-            <span className="flex items-center">
-              <FaStar className="text-yellow-500 w-5 h-5 mr-1" />
-              <span className="text-white font-bold">{matchScore}% Match</span>
-            </span>
-            <span className="text-white/70">{show.first_air_date?.split('-')[0]}</span>
-            <span className="px-2 py-1 border border-white/20 text-white/70 text-sm">TV-MA</span>
-            <span className="text-white/70">{show.number_of_seasons} Seasons</span>
-          </div>
+            <p className="text-lg text-white/90">{show.overview}</p>
 
-          <p className="text-lg text-white/90">{show.overview}</p>
+            {/* Episode Selection - Made smaller */}
+            <div className="flex flex-col space-y-2">
+              <div className="flex gap-3">
+                <select 
+                  value={season}
+                  onChange={(e) => setSeason(Number(e.target.value))}
+                  className="bg-white/10 backdrop-blur-sm text-white px-3 py-2 rounded-lg border border-white/20 focus:border-white focus:outline-none appearance-none cursor-pointer flex-1"
+                >
+                  {Array.from({ length: show.number_of_seasons }, (_, i) => (
+                    <option key={i + 1} value={i + 1}>
+                      Season {i + 1}
+                    </option>
+                  ))}
+                </select>
+                
+                <select 
+                  value={episode}
+                  onChange={(e) => setEpisode(Number(e.target.value))}
+                  className="bg-white/10 backdrop-blur-sm text-white px-3 py-2 rounded-lg border border-white/20 focus:border-white focus:outline-none appearance-none cursor-pointer flex-1"
+                >
+                  {Array.from({ length: seasonDetails.episodes?.length || 0 }, (_, i) => (
+                    <option key={i + 1} value={i + 1}>
+                      Episode {i + 1}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-          {/* Episode Selection */}
-          <div className="flex gap-4 items-center">
-            <select 
-              value={season}
-              onChange={(e) => setSeason(Number(e.target.value))}
-              className="bg-white/10 backdrop-blur-sm text-white px-4 py-2 rounded-lg border border-white/20 focus:border-white focus:outline-none appearance-none cursor-pointer"
-            >
-              {Array.from({ length: show.number_of_seasons }, (_, i) => (
-                <option key={i + 1} value={i + 1}>
-                  Season {i + 1}
-                </option>
-              ))}
-            </select>
-            
-            <select 
-              value={episode}
-              onChange={(e) => setEpisode(Number(e.target.value))}
-              className="bg-white/10 backdrop-blur-sm text-white px-4 py-2 rounded-lg border border-white/20 focus:border-white focus:outline-none appearance-none cursor-pointer"
-            >
-              {Array.from({ length: seasonDetails.episodes?.length || 0 }, (_, i) => (
-                <option key={i + 1} value={i + 1}>
-                  Episode {i + 1}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Streaming Buttons */}
-          <div className="flex items-center space-x-4">
-            <button
-              onClick={() => handlePlay('server1')}
-              className="flex items-center px-8 py-4 bg-white text-black rounded-lg hover:bg-gray-200 transition-all duration-300 transform hover:scale-105 text-lg font-semibold group"
-            >
-              <FaPlay className="mr-2 group-hover:translate-x-1 transition-transform duration-300" />
-              Watch Now
-            </button>
-            <button
-              onClick={() => handlePlay('server2')}
-              className="flex items-center px-8 py-4 bg-white/10 backdrop-blur-sm text-white rounded-lg hover:bg-white/20 transition-all duration-300 transform hover:scale-105 text-lg font-semibold border border-white/20 group"
-            >
-              <FaServer className="mr-2 group-hover:rotate-12 transition-transform duration-300" />
-              Server 2
-            </button>
-            <button
-              onClick={() => handlePlay('server3')}
-              className="flex items-center px-8 py-4 bg-white/10 backdrop-blur-sm text-white rounded-lg hover:bg-white/20 transition-all duration-300 transform hover:scale-105 text-lg font-semibold border border-white/20 group"
-            >
-              <FaServer className="mr-2 group-hover:rotate-12 transition-transform duration-300" />
-              Server 3
-            </button>
-            <button
-              onClick={() => handlePlay('server4')}
-              className="flex items-center px-8 py-4 bg-white/10 backdrop-blur-sm text-white rounded-lg hover:bg-white/20 transition-all duration-300 transform hover:scale-105 text-lg font-semibold border border-white/20 group"
-            >
-              <FaServer className="mr-2 group-hover:rotate-12 transition-transform duration-300" />
-              Server 4
-            </button>
-          </div>
-
-          {/* Show Features */}
-          <div className="flex items-center space-x-6 pt-4">
-            <div className="px-6 py-2 bg-white/10 backdrop-blur-sm text-white font-bold rounded-lg">
-              {show.genres[0]?.name}
-            </div>
-            <div className="px-6 py-2 bg-white/10 backdrop-blur-sm text-white font-bold rounded-lg">
-              {show.original_language.toUpperCase()}
+              {/* Streaming Buttons - Made smaller */}
+              <button
+                onClick={() => handlePlay('server1')}
+                className="flex items-center justify-center px-6 py-2.5 bg-white text-black rounded-lg hover:bg-gray-200 transition-all duration-300 text-base font-semibold group w-full"
+              >
+                <FaPlay className="mr-2 group-hover:translate-x-1 transition-transform duration-300" />
+                Watch Now
+              </button>
+              <div className="grid grid-cols-3 gap-2">
+                <button
+                  onClick={() => handlePlay('server2')}
+                  className="flex items-center justify-center px-3 py-2 bg-white/10 backdrop-blur-sm text-white rounded-lg hover:bg-white/20 transition-all duration-300 text-sm font-semibold border border-white/20 group"
+                >
+                  <FaServer className="mr-2 group-hover:rotate-12 transition-transform duration-300" />
+                  Server 2
+                </button>
+                <button
+                  onClick={() => handlePlay('server3')}
+                  className="flex items-center justify-center px-3 py-2 bg-white/10 backdrop-blur-sm text-white rounded-lg hover:bg-white/20 transition-all duration-300 text-sm font-semibold border border-white/20 group"
+                >
+                  <FaServer className="mr-2 group-hover:rotate-12 transition-transform duration-300" />
+                  Server 3
+                </button>
+                <button
+                  onClick={() => handlePlay('server4')}
+                  className="flex items-center justify-center px-3 py-2 bg-white/10 backdrop-blur-sm text-white rounded-lg hover:bg-white/20 transition-all duration-300 text-sm font-semibold border border-white/20 group"
+                >
+                  <FaServer className="mr-2 group-hover:rotate-12 transition-transform duration-300" />
+                  Server 4
+                </button>
+              </div>
             </div>
           </div>
         </motion.div>

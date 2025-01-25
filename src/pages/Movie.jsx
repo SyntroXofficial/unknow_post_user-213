@@ -83,78 +83,62 @@ function Movie() {
           <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent" />
         </div>
 
-        {/* Movie Info */}
+        {/* Movie Info - Moved down */}
         <motion.div 
-          className="absolute top-1/2 -translate-y-1/2 left-16 w-1/2 space-y-6"
+          className="absolute inset-0 flex items-end pb-32"
           initial={{ x: -50, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ delay: 0.3, duration: 0.8 }}
         >
-          <div className="space-y-3">
-            <div className="flex items-center space-x-4">
-              <span className="px-3 py-1 bg-white/10 backdrop-blur-sm rounded-full text-white/90 text-xs font-medium">
-                FEATURED MOVIE
+          <div className="w-[500px] ml-16 space-y-6">
+            <h1 className="text-5xl font-bold text-white">{movie.title}</h1>
+
+            <div className="flex items-center space-x-6">
+              <div className="flex items-center">
+                <FaStar className="text-yellow-500 w-4 h-4 mr-2" />
+                <span className="text-white font-bold">{matchScore}% Match</span>
+              </div>
+              <span className="text-white/70">{movie.release_date?.split('-')[0]}</span>
+              <span className="px-2 py-1 border border-white/20 text-white/70 text-sm">
+                {movie.adult ? 'R' : 'PG-13'}
               </span>
-              <span className="px-3 py-1 bg-white/10 backdrop-blur-sm rounded-full text-white/90 text-xs font-medium">
-                {movie.genres[0]?.name}
-              </span>
+              <span className="text-white/70">{Math.floor(movie.runtime / 60)}h {movie.runtime % 60}m</span>
             </div>
-            <h1 className="text-6xl font-bold text-white">{movie.title}</h1>
-          </div>
 
-          <div className="flex items-center space-x-4">
-            <span className="flex items-center">
-              <FaStar className="text-yellow-500 w-5 h-5 mr-1" />
-              <span className="text-white font-bold">{matchScore}% Match</span>
-            </span>
-            <span className="text-white/70">{movie.release_date?.split('-')[0]}</span>
-            <span className="px-2 py-1 border border-white/20 text-white/70 text-sm">
-              {movie.adult ? 'R' : 'PG-13'}
-            </span>
-            <span className="text-white/70">{Math.floor(movie.runtime / 60)}h {movie.runtime % 60}m</span>
-          </div>
+            <p className="text-lg text-white/90">{movie.overview}</p>
 
-          <p className="text-lg text-white/90">{movie.overview}</p>
-
-          {/* Streaming Buttons */}
-          <div className="flex items-center space-x-4">
-            <button
-              onClick={() => handlePlay('server1')}
-              className="flex items-center px-8 py-4 bg-white text-black rounded-lg hover:bg-gray-200 transition-all duration-300 transform hover:scale-105 text-lg font-semibold group"
-            >
-              <FaPlay className="mr-2 group-hover:translate-x-1 transition-transform duration-300" />
-              Watch Now
-            </button>
-            <button
-              onClick={() => handlePlay('server2')}
-              className="flex items-center px-8 py-4 bg-white/10 backdrop-blur-sm text-white rounded-lg hover:bg-white/20 transition-all duration-300 transform hover:scale-105 text-lg font-semibold border border-white/20 group"
-            >
-              <FaServer className="mr-2 group-hover:rotate-12 transition-transform duration-300" />
-              Server 2
-            </button>
-            <button
-              onClick={() => handlePlay('server3')}
-              className="flex items-center px-8 py-4 bg-white/10 backdrop-blur-sm text-white rounded-lg hover:bg-white/20 transition-all duration-300 transform hover:scale-105 text-lg font-semibold border border-white/20 group"
-            >
-              <FaServer className="mr-2 group-hover:rotate-12 transition-transform duration-300" />
-              Server 3
-            </button>
-            <button
-              onClick={() => handlePlay('server4')}
-              className="flex items-center px-8 py-4 bg-white/10 backdrop-blur-sm text-white rounded-lg hover:bg-white/20 transition-all duration-300 transform hover:scale-105 text-lg font-semibold border border-white/20 group"
-            >
-              <FaServer className="mr-2 group-hover:rotate-12 transition-transform duration-300" />
-              Server 4
-            </button>
-          </div>
-
-          {/* Movie Features */}
-          <div className="flex items-center space-x-6 pt-4">
-            <div className="px-6 py-2 bg-white/10 backdrop-blur-sm text-white font-bold rounded-lg">
-              {movie.genres[0]?.name}
-            </div>
-            <div className="px-6 py-2 bg-white/10 backdrop-blur-sm text-white font-bold rounded-lg">
-              {movie.original_language.toUpperCase()}
+            {/* Streaming Buttons - Made smaller */}
+            <div className="flex flex-col space-y-2">
+              <button
+                onClick={() => handlePlay('server1')}
+                className="flex items-center justify-center px-6 py-2.5 bg-white text-black rounded-lg hover:bg-gray-200 transition-all duration-300 text-base font-semibold group w-full"
+              >
+                <FaPlay className="mr-2 group-hover:translate-x-1 transition-transform duration-300" />
+                Watch Now
+              </button>
+              <div className="grid grid-cols-3 gap-2">
+                <button
+                  onClick={() => handlePlay('server2')}
+                  className="flex items-center justify-center px-3 py-2 bg-white/10 backdrop-blur-sm text-white rounded-lg hover:bg-white/20 transition-all duration-300 text-sm font-semibold border border-white/20 group"
+                >
+                  <FaServer className="mr-2 group-hover:rotate-12 transition-transform duration-300" />
+                  Server 2
+                </button>
+                <button
+                  onClick={() => handlePlay('server3')}
+                  className="flex items-center justify-center px-3 py-2 bg-white/10 backdrop-blur-sm text-white rounded-lg hover:bg-white/20 transition-all duration-300 text-sm font-semibold border border-white/20 group"
+                >
+                  <FaServer className="mr-2 group-hover:rotate-12 transition-transform duration-300" />
+                  Server 3
+                </button>
+                <button
+                  onClick={() => handlePlay('server4')}
+                  className="flex items-center justify-center px-3 py-2 bg-white/10 backdrop-blur-sm text-white rounded-lg hover:bg-white/20 transition-all duration-300 text-sm font-semibold border border-white/20 group"
+                >
+                  <FaServer className="mr-2 group-hover:rotate-12 transition-transform duration-300" />
+                  Server 4
+                </button>
+              </div>
             </div>
           </div>
         </motion.div>
@@ -234,7 +218,7 @@ function Movie() {
           className="bg-white/5 rounded-xl p-6 border border-white/10"
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.7, duration: 0.8 }}
+          transition={{ delay: 0.7, duration: 0.8  }}
         >
           <h2 className="text-2xl font-bold text-white mb-4">Additional Information</h2>
           <div className="grid grid-cols-3 gap-6">
