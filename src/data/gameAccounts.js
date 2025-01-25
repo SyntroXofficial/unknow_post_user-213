@@ -1,6 +1,27 @@
 // Game account arrays
 export const mythicAccounts = [
   {
+    game: 'Atomic Heart',
+    username: 'Maksimqb',
+    password: 'Anpol2005.',
+    imageUrl: 'https://image.api.playstation.com/vulcan/ap/rnd/202209/2815/ghdxLSLpUl24o2Q1eq3yTaji.jpg',
+    description: '• Full Game Access\n• First-Person Shooter with RPG Elements\n• Alternate Soviet Universe Setting\n• Unique Weapons and Gadgets\n• Intense Combat and Exploration\n• Mysterious Storyline',
+    features: [
+      { label: 'Region', value: 'Global' },
+      { label: 'Platform', value: 'Steam' },
+      { label: 'Rating', value: 'M (Mature)' },
+      { label: 'Genre', value: 'FPS/RPG' },
+      { label: 'Release', value: '2023' },
+      { label: 'Playtime', value: '20+ hours' }
+    ],
+    requirements: {
+      cpu: 'Intel Core i5-2500 or AMD Ryzen 3 1200',
+      gpu: 'NVIDIA GeForce GTX 960 or AMD Radeon R9 380',
+      ram: '8 GB',
+      storage: '90 GB SSD'
+    }
+  },
+  {
     game: 'Far Cry 6',
     username: 'luisvnzla18@gmail.com',
     password: 'Luis2021.',
