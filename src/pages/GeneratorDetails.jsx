@@ -78,7 +78,7 @@ function GeneratorDetails() {
           <div className="space-y-4 bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
             <h3 className="text-xl font-bold text-white">Service Access</h3>
             <p className="text-white/90">
-              Click the "Access Service" button above to {service.isCookie ? 'download required cookies' : 'get your account credentials'}.
+              Click on the "Access Service" button to {service.isCookie ? 'download required cookies' : 'copy your MEGA link and paste it intro an new page'}.
             </p>
           </div>
 

@@ -49,15 +49,15 @@ function GameDetails() {
 
         {/* Game Info */}
         <motion.div 
-          className="absolute top-1/2 -translate-y-1/2 left-16 w-1/2 space-y-6"
+          className="absolute top-1/2 -translate-y-1/2 left-12 w-1/2 space-y-4"
           initial={{ x: -50, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ delay: 0.3, duration: 0.8 }}
         >
-          <h1 className="text-6xl font-bold text-white">{game.game}</h1>
+          <h1 className="text-4xl font-bold text-white">{game.game}</h1>
           <div className="flex items-center space-x-4">
             <span className="flex items-center">
-              <FaStar className="text-yellow-500 w-5 h-5 mr-1" />
+              <FaStar className="text-yellow-500 w-4 h-4 mr-1" />
               <span className="text-white font-bold">{ratingMatch} Match</span>
             </span>
             <span className="text-white/70">{game.features.find(f => f.label === 'Release')?.value}</span>
@@ -66,31 +66,31 @@ function GameDetails() {
             </span>
             <span className="text-white/70">{game.features.find(f => f.label === 'Playtime')?.value}</span>
           </div>
-          <p className="text-lg text-white/90">{game.description}</p>
+          <p className="text-base text-white/90">{game.description}</p>
 
           {/* Account Credentials */}
-          <div className="space-y-4 bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
-            <div className="space-y-4">
+          <div className="space-y-3 bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
+            <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <h3 className="text-xl font-bold text-white">Account Details</h3>
+                <h3 className="text-lg font-bold text-white">Account Details</h3>
               </div>
-              <div className="grid grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <p className="text-gray-400">Username</p>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <p className="text-gray-400 text-sm">Username</p>
                   <div className="flex items-center space-x-2">
-                    <p className="text-white bg-black/30 px-4 py-2 rounded font-mono">
+                    <p className="text-white bg-black/30 px-3 py-1.5 rounded text-sm font-mono">
                       {game.username}
                     </p>
-                    <FaUser className="text-white/70" />
+                    <FaUser className="text-white/70 w-4 h-4" />
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <p className="text-gray-400">Password</p>
+                <div className="space-y-1">
+                  <p className="text-gray-400 text-sm">Password</p>
                   <div className="flex items-center space-x-2">
-                    <p className="text-white bg-black/30 px-4 py-2 rounded font-mono">
+                    <p className="text-white bg-black/30 px-3 py-1.5 rounded text-sm font-mono">
                       {game.password}
                     </p>
-                    <FaKey className="text-white/70" />
+                    <FaKey className="text-white/70 w-4 h-4" />
                   </div>
                 </div>
               </div>

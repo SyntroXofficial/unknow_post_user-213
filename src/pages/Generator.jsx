@@ -129,60 +129,43 @@ function Generator() {
     <div className="min-h-screen bg-black">
       {/* Featured Section */}
       {featuredService && (
-        <div className="relative h-[85vh]">
+        <div className="relative h-[90vh]">
           <div className="absolute inset-0">
-            <img
-              src={featuredService.imageUrl}
-              alt={featuredService.name}
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/50 to-transparent" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" />
-            <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 via-transparent to-blue-900/20 opacity-60" />
+            <div className="relative w-full h-full">
+              <img
+                src={featuredService.imageUrl}
+                alt={featuredService.name}
+                className="absolute inset-0 w-full h-full object-cover object-center"
+                style={{ objectPosition: '50% 20%' }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/50 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" />
+            </div>
           </div>
 
-          <div className="absolute bottom-0 left-0 right-0 pb-32 px-12">
+          <div className="absolute bottom-0 left-0 right-0 pb-24 px-12">
             <div className="max-w-2xl space-y-6">
-              <div className="space-y-3">
-                <div className="flex items-center space-x-4">
-                  <span className="px-3 py-1 bg-white/10 backdrop-blur-sm rounded-full text-white/90 text-xs font-medium">
-                    FEATURED SERVICE
-                  </span>
-                  {featuredService.isCookie && (
-                    <span className="flex items-center space-x-2 px-3 py-1 bg-yellow-500/10 backdrop-blur-sm rounded-full text-yellow-400 text-xs font-medium">
-                      <FaCookie className="w-3 h-3" />
-                      <span>Cookie Required</span>
-                    </span>
-                  )}
-                </div>
-                <h1 className="text-5xl font-bold text-white tracking-tight">
-                  {featuredService.name}
-                </h1>
-              </div>
-              <p className="text-lg text-white/90 leading-relaxed max-w-xl">
+              <h1 className="text-4xl font-bold text-white tracking-tight">
+                {featuredService.name}
+              </h1>
+              <p className="text-base text-white/90 leading-relaxed max-w-xl line-clamp-2">
                 {featuredService.description}
               </p>
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-3">
                 <Link
                   to={`/generator/${featuredServiceKey}`}
-                  className="flex items-center px-8 py-4 bg-white text-black rounded-lg hover:bg-gray-200 transition-all duration-300 transform hover:scale-105 text-lg font-semibold group"
+                  className="flex items-center px-6 py-3 bg-white text-black rounded-lg hover:bg-gray-200 transition-all duration-300 text-sm font-semibold group"
                 >
                   <FaRandom className="mr-2 group-hover:rotate-180 transition-transform duration-500" />
                   Get Access
                 </Link>
                 <Link
                   to={`/generator/${featuredServiceKey}`}
-                  className="flex items-center px-8 py-4 bg-white/10 backdrop-blur-sm text-white rounded-lg hover:bg-white/20 transition-all duration-300 transform hover:scale-105 text-lg font-semibold border border-white/20 group"
+                  className="flex items-center px-6 py-3 bg-white/10 backdrop-blur-sm text-white rounded-lg hover:bg-white/20 transition-all duration-300 text-sm font-semibold border border-white/20 group"
                 >
                   <FaInfoCircle className="mr-2 group-hover:rotate-12 transition-transform duration-300" />
                   More Info
                 </Link>
-              </div>
-              <div className="flex items-center space-x-4">
-                <div className="flex items-center space-x-2">
-                  <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-                  <span className="text-white/80 text-sm">Active Service</span>
-                </div>
               </div>
             </div>
           </div>

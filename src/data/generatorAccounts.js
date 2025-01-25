@@ -4,18 +4,17 @@ export const accountLists = {
     description: 'Premium Netflix accounts with 4K UHD streaming',
     imageUrl: 'https://images7.alphacoders.com/115/1152297.jpg',
     inStock: 1,
-    isCookie: true,
-    megaUrl: 'https://mega.nz/folder/example1',
+    isCookie: false,
     accounts: [
-      'netflix_user1:pass123|Premium|Valid until: 2024-12-31',
-      'netflix_user2:pass456|Premium|Valid until: 2024-12-31',
-      'netflix_user3:pass789|Premium|Valid until: 2024-12-31',
+      'spotify_user1:pass123|Premium|Valid until: 2024-12-31',
+      'spotify_user2:pass456|Premium|Valid until: 2024-12-31',
+      'spotify_user3:pass789|Premium|Valid until: 2024-12-31',
     ]
   },
   spotify: {
     name: 'Spotify',
     description: 'Premium Spotify accounts with high-quality audio',
-    imageUrl: 'https://storage.googleapis.com/pr-newsroom-wp/1/2024/03/Generic-FTR-headers_V9-1.png',
+    imageUrl: 'https://i.ytimg.com/vi/pkXrny5QZLU/maxresdefault.jpg',
     inStock: 1,
     isCookie: false,
     accounts: [
@@ -77,14 +76,13 @@ export const accountLists = {
   amazonprime: {
     name: 'Amazon Prime',
     description: 'Full Amazon Prime membership access',
-    imageUrl: 'https://images.unsplash.com/photo-1662466767400-27c176fab51b?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8YW1hem9uJTIwcHJpbWUlMjB2aWRlb3xlbnwwfHwwfHx8MA%3D%3D',
+    imageUrl: 'https://static1.anpoimages.com/wordpress/wp-content/uploads/2022/05/thibault-penin-GgOitQkoioo-unsplash.jpg',
     inStock: 1,
-    isCookie: true,
-    megaUrl: 'https://mega.nz/folder/example4',
+    isCookie: false,
     accounts: [
-      'prime_user1:pass123|Premium|Valid until: 2024-12-31',
-      'prime_user2:pass456|Premium|Valid until: 2024-12-31',
-      'prime_user3:pass789|Premium|Valid until: 2024-12-31',
+      'spotify_user1:pass123|Premium|Valid until: 2024-12-31',
+      'spotify_user2:pass456|Premium|Valid until: 2024-12-31',
+      'spotify_user3:pass789|Premium|Valid until: 2024-12-31',
     ]
   },
   duolingo: {
@@ -102,7 +100,7 @@ export const accountLists = {
   chatgpt: {
     name: 'ChatGPT',
     description: 'Premium ChatGPT accounts with GPT-4 access',
-    imageUrl: 'https://wallpapers.com/images/hd/chatgpt-6zhb18pem7l42g36.jpg',
+    imageUrl: 'https://sm.pcmag.com/t/pcmag_me/review/c/chatgpt/chatgpt_7ghp.1920.jpg',
     inStock: 1,
     isCookie: false,
     accounts: [
@@ -186,7 +184,7 @@ export const accountLists = {
   battlenet: {
     name: 'Battle.net',
     description: 'Access to Blizzard games and content',
-    imageUrl: 'https://us.shop.battle.net/static/opengraph.png',
+    imageUrl: 'https://static.invenglobal.com/upload/image/2018/11/02/i1541183391530612.jpeg',
     inStock: 1,
     isCookie: false,
     accounts: [

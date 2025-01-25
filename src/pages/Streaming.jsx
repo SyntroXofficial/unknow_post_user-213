@@ -1,5 +1,3 @@
-{/* I'll provide the full updated code for the Streaming page that matches the Games page styling */}
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -44,21 +42,52 @@ function Streaming() {
   const [viewMode, setViewMode] = useState('grid');
   const [trending, setTrending] = useState([]);
   const [currentFeaturedIndex, setCurrentFeaturedIndex] = useState(0);
+  const [trendingMovies, setTrendingMovies] = useState([]);
+  const [popularMovies, setPopularMovies] = useState([]);
+  const [topRatedShows, setTopRatedShows] = useState([]);
+  const [topRatedMovies, setTopRatedMovies] = useState([]);
+  const [popularShows, setPopularShows] = useState([]);
   const TMDB_TOKEN = 'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI3MmJhMTBjNDI5OTE0MTU3MzgwOGQyNzEwNGVkMThmYSIsInN1YiI6IjY0ZjVhNTUwMTIxOTdlMDBmZWE5MzdmMSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.84b7vWpVEilAbly4RpS01E9tyirHdhSXjcpfmTczI3Q';
 
   useEffect(() => {
-    const fetchContent = async () => {
+    const fetchAllContent = async () => {
       try {
-        const response = await axios.get('https://api.themoviedb.org/3/trending/all/day', {
-          headers: { 'Authorization': `Bearer ${TMDB_TOKEN}` }
-        });
-        setTrending(response.data.results.filter(item => item.backdrop_path && item.poster_path));
+        const [
+          trendingRes, 
+          popularMoviesRes, 
+          topShowsRes, 
+          topMoviesRes,
+          popularShowsRes
+        ] = await Promise.all([
+          axios.get('https://api.themoviedb.org/3/trending/all/day', {
+            headers: { 'Authorization': `Bearer ${TMDB_TOKEN}` }
+          }),
+          axios.get('https://api.themoviedb.org/3/movie/popular', {
+            headers: { 'Authorization': `Bearer ${TMDB_TOKEN}` }
+          }),
+          axios.get('https://api.themoviedb.org/3/tv/top_rated', {
+            headers: { 'Authorization': `Bearer ${TMDB_TOKEN}` }
+          }),
+          axios.get('https://api.themoviedb.org/3/movie/top_rated', {
+            headers: { 'Authorization': `Bearer ${TMDB_TOKEN}` }
+          }),
+          axios.get('https://api.themoviedb.org/3/tv/popular', {
+            headers: { 'Authorization': `Bearer ${TMDB_TOKEN}` }
+          })
+        ]);
+
+        setTrending(trendingRes.data.results.filter(item => item.backdrop_path && item.poster_path).slice(0, 6));
+        setTrendingMovies(trendingRes.data.results.filter(item => item.media_type === 'movie').slice(0, 6));
+        setPopularMovies(popularMoviesRes.data.results.slice(0, 6));
+        setTopRatedShows(topShowsRes.data.results.slice(0, 6));
+        setTopRatedMovies(topMoviesRes.data.results.slice(0, 6));
+        setPopularShows(popularShowsRes.data.results.slice(0, 6));
       } catch (error) {
-        console.error('Error fetching trending content:', error);
+        console.error('Error fetching content:', error);
       }
     };
 
-    fetchContent();
+    fetchAllContent();
   }, []);
 
   useEffect(() => {
@@ -98,57 +127,108 @@ function Streaming() {
 
   const featuredContent = trending[currentFeaturedIndex];
 
+  const CategorySection = ({ title, items, type = 'movie' }) => (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold text-white">{title}</h2>
+      </div>
+      <div className="grid grid-cols-6 gap-6">
+        {items.map((item) => (
+          <Link 
+            key={item.id}
+            to={`/${type}/${item.id}`}
+            className="transform transition-all duration-300 group"
+          >
+            <div className="relative rounded-xl overflow-hidden bg-gradient-to-br from-white/10 to-white/5 border border-white/10 hover:border-white/30 transition-all duration-300 shadow-lg hover:shadow-white/20">
+              <div className="aspect-[2/3] relative">
+                <img
+                  src={`https://image.tmdb.org/t/p/w500${item.poster_path}`}
+                  alt={item.title || item.name}
+                  className="absolute inset-0 w-full h-full object-cover"
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300">
+                  <div className="absolute bottom-0 left-0 right-0 p-4">
+                    <p className="text-white/90 text-sm line-clamp-3">
+                      {item.overview}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="p-4 space-y-3 bg-gradient-to-b from-transparent to-black/50">
+                <h3 className="text-white font-semibold text-lg line-clamp-1">
+                  {item.title || item.name}
+                </h3>
+                <div className="flex items-center gap-4 text-sm">
+                  <div className="flex items-center text-yellow-500">
+                    <FaStar className="w-4 h-4 mr-1" />
+                    <span>{item.vote_average?.toFixed(1)}</span>
+                  </div>
+                  <div className="flex items-center text-gray-400">
+                    <FaCalendar className="w-4 h-4 mr-1" />
+                    <span>{(item.release_date || item.first_air_date)?.split('-')[0]}</span>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between text-sm pt-2 border-t border-white/10">
+                  <div className="flex items-center text-gray-400">
+                    <FaLanguage className="w-4 h-4 mr-1" />
+                    <span>{item.original_language?.toUpperCase()}</span>
+                  </div>
+                  <span className="text-white px-3 py-1.5 bg-white/10 rounded-lg font-medium group-hover:bg-white/20 transition-colors">
+                    Watch Now
+                  </span>
+                </div>
+              </div>
+            </div>
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-black">
       {/* Featured Content */}
       {featuredContent && (
-        <div className="relative h-[85vh]">
+        <div className="relative h-[90vh]">
           <div className="absolute inset-0">
-            <img
-              src={`https://image.tmdb.org/t/p/original${featuredContent.backdrop_path}`}
-              alt={featuredContent.title || featuredContent.name}
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/50 to-transparent" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" />
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-900/20 via-transparent to-purple-900/20 opacity-60" />
+            <div className="relative w-full h-full">
+              <img
+                src={`https://image.tmdb.org/t/p/original${featuredContent.backdrop_path}`}
+                alt={featuredContent.title || featuredContent.name}
+                className="absolute inset-0 w-full h-full object-cover object-center"
+                style={{ objectPosition: '50% 20%' }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/50 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" />
+            </div>
           </div>
 
-          <div className="absolute bottom-0 left-0 right-0 pb-32 px-12">
+          <div className="absolute bottom-0 left-0 right-0 pb-24 px-12">
             <div className="max-w-2xl space-y-6">
-              <div className="space-y-3">
-                <div className="flex items-center space-x-4">
-                  <span className="px-3 py-1 bg-white/10 backdrop-blur-sm rounded-full text-white/90 text-xs font-medium">
-                    FEATURED {featuredContent.media_type.toUpperCase()}
-                  </span>
-                  <span className="px-3 py-1 bg-white/10 backdrop-blur-sm rounded-full text-white/90 text-xs font-medium">
-                    {featuredContent.media_type === 'movie' ? 'Movie' : 'TV Show'}
-                  </span>
-                </div>
-                <h1 className="text-5xl font-bold text-white tracking-tight">
-                  {featuredContent.title || featuredContent.name}
-                </h1>
-              </div>
-              <p className="text-lg text-white/90 leading-relaxed max-w-xl line-clamp-2">
+              <h1 className="text-4xl font-bold text-white tracking-tight">
+                {featuredContent.title || featuredContent.name}
+              </h1>
+              <p className="text-base text-white/90 leading-relaxed max-w-xl line-clamp-2">
                 {featuredContent.overview}
               </p>
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-3">
                 <Link
                   to={`/${featuredContent.media_type}/${featuredContent.id}`}
-                  className="flex items-center px-8 py-4 bg-white text-black rounded-lg hover:bg-gray-200 transition-all duration-300 transform hover:scale-105 text-lg font-semibold group"
+                  className="flex items-center px-6 py-3 bg-white text-black rounded-lg hover:bg-gray-200 transition-all duration-300 text-sm font-semibold group"
                 >
                   <FaPlay className="mr-2 group-hover:translate-x-1 transition-transform duration-300" />
                   Watch Now
                 </Link>
                 <Link
                   to={`/${featuredContent.media_type}/${featuredContent.id}`}
-                  className="flex items-center px-8 py-4 bg-white/10 backdrop-blur-sm text-white rounded-lg hover:bg-white/20 transition-all duration-300 transform hover:scale-105 text-lg font-semibold border border-white/20 group"
+                  className="flex items-center px-6 py-3 bg-white/10 backdrop-blur-sm text-white rounded-lg hover:bg-white/20 transition-all duration-300 text-sm font-semibold border border-white/20 group"
                 >
                   <FaInfoCircle className="mr-2 group-hover:rotate-12 transition-transform duration-300" />
                   More Info
                 </Link>
               </div>
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-3">
                 <div className="flex items-center space-x-3 px-4 py-2 bg-black/30 backdrop-blur-sm rounded-lg border border-white/10">
                   <div className="flex items-center">
                     <FaStar className="text-yellow-500 w-4 h-4 mr-1" />
@@ -180,9 +260,6 @@ function Streaming() {
             <div className="flex items-center justify-between mb-6">
               <div className="space-y-2">
                 <h2 className="text-2xl font-bold text-white">Content Library</h2>
-                <p className="text-gray-400">
-                  {filteredContent.length} {filteredContent.length === 1 ? 'title' : 'titles'} available
-                </p>
               </div>
               <button
                 onClick={() => setShowFilters(!showFilters)}
@@ -263,82 +340,14 @@ function Streaming() {
             </AnimatePresence>
           </div>
 
-          {/* Content Grid */}
-          <motion.div 
-            className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6"
-            variants={container}
-            initial="hidden"
-            animate="show"
-          >
-            {filteredContent.map((item) => (
-              <motion.div
-                key={item.id}
-                variants={item}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Link 
-                  to={`/${item.media_type}/${item.id}`}
-                  className="transform transition-all duration-300 group"
-                >
-                  <div className="relative rounded-xl overflow-hidden bg-gradient-to-br from-white/10 to-white/5 border border-white/10 hover:border-white/30 transition-all duration-300 shadow-lg hover:shadow-white/20">
-                    <div className="aspect-[2/3] relative">
-                      <img
-                        src={`https://image.tmdb.org/t/p/w500${item.poster_path}`}
-                        alt={item.title || item.name}
-                        className="absolute inset-0 w-full h-full object-cover"
-                        loading="lazy"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300">
-                        <div className="absolute bottom-0 left-0 right-0 p-4">
-                          <div className="space-y-3">
-                            <div className="flex flex-wrap gap-2">
-                              <span className="px-2 py-1 bg-white/10 backdrop-blur-sm rounded-md text-white text-xs font-medium">
-                                {item.media_type === 'movie' ? 'Movie' : 'TV Show'}
-                              </span>
-                            </div>
-                            <p className="text-white/90 text-sm line-clamp-3">
-                              {item.overview}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                      {/* Status Badge */}
-                      <div className="absolute top-3 right-3">
-                        <span className="px-2 py-1 bg-green-500/90 backdrop-blur-sm rounded-md text-white text-xs font-medium">
-                          Available
-                        </span>
-                      </div>
-                    </div>
-                    <div className="p-4 space-y-3 bg-gradient-to-b from-transparent to-black/50">
-                      <h3 className="text-white font-semibold text-lg line-clamp-1">
-                        {item.title || item.name}
-                      </h3>
-                      <div className="flex items-center gap-4 text-sm">
-                        <div className="flex items-center text-yellow-500">
-                          <FaStar className="w-4 h-4 mr-1" />
-                          <span>{item.vote_average?.toFixed(1)}</span>
-                        </div>
-                        <div className="flex items-center text-gray-400">
-                          <FaCalendar className="w-4 h-4 mr-1" />
-                          <span>{(item.release_date || item.first_air_date)?.split('-')[0]}</span>
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-between text-sm pt-2 border-t border-white/10">
-                        <div className="flex items-center text-gray-400">
-                          <FaLanguage className="w-4 h-4 mr-1" />
-                          <span>{item.original_language?.toUpperCase()}</span>
-                        </div>
-                        <span className="text-white px-3 py-1.5 bg-white/10 rounded-lg font-medium group-hover:bg-white/20 transition-colors">
-                          Watch Now
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </Link>
-              </motion.div>
-            ))}
-          </motion.div>
+          {/* Categories */}
+          <div className="space-y-12">
+            <CategorySection title="Trending Now" items={trending} type="movie" />
+            <CategorySection title="Popular Movies" items={popularMovies} type="movie" />
+            <CategorySection title="Top Rated Movies" items={topRatedMovies} type="movie" />
+            <CategorySection title="Popular TV Shows" items={popularShows} type="tv" />
+            <CategorySection title="Top Rated TV Shows" items={topRatedShows} type="tv" />
+          </div>
 
           {/* No Results Message */}
           {filteredContent.length === 0 && (

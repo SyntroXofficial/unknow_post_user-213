@@ -75,19 +75,19 @@ function Important() {
               <div className="p-4 bg-black/50 rounded-lg border border-white/10">
                 <div className="flex items-start space-x-3">
                   <FaServer className="w-5 h-5 text-red-400 mt-1" />
-                  <p className="text-gray-300">Always disable cloud save and remote play in steam and other services in settings</p>
+                  <p className="text-gray-300">Always disable cloud save and remote play in steam settings</p>
                 </div>
               </div>
               <div className="p-4 bg-black/50 rounded-lg border border-white/10">
                 <div className="flex items-start space-x-3">
                   <FaLock className="w-5 h-5 text-red-400 mt-1" />
-                  <p className="text-gray-300">If disconnected, use offline mode or Big Picture mode steam only</p>
+                  <p className="text-gray-300">If disconnected, use offline mode or Big Picture mode Steam only</p>
                 </div>
               </div>
               <div className="p-4 bg-black/50 rounded-lg border border-white/10">
                 <div className="flex items-start space-x-3">
                   <FaUserLock className="w-5 h-5 text-red-400 mt-1" />
-                  <p className="text-gray-300">For guarded accounts, wait until unguarded or use a new account steam only</p>
+                  <p className="text-gray-300">For guarded accounts, wait until unguarded or use a new account Steam only</p>
                 </div>
               </div>
             </div>
@@ -108,7 +108,7 @@ function Important() {
               <div className="p-4 bg-black/50 rounded-lg border border-white/10">
                 <div className="flex items-start space-x-3">
                   <FaInfoCircle className="w-5 h-5 text-red-400 mt-1" />
-                  <p className="text-gray-300">Rockstar, and EA games may have additional protections so they are kind hard somtime we may or may not have games for dis services</p>
+                  <p className="text-gray-300">Rockstar, and EA games may have additional protections so we may not provider lots of stuff from dos services</p>
                 </div>
               </div>
               <div className="p-4 bg-black/50 rounded-lg border border-white/10">
@@ -141,7 +141,7 @@ function Important() {
               <div className="p-4 bg-black/50 rounded-lg border border-white/10">
                 <div className="flex items-start space-x-3">
                   <FaLock className="w-5 h-5 text-red-400 mt-1" />
-                  <p className="text-gray-300">Do not attempt to change account passwords</p>
+                  <p className="text-gray-300">Do not attempt to change account passwords or harm the accounts </p>
                 </div>
               </div>
             </div>

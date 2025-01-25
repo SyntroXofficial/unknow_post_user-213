@@ -123,70 +123,82 @@ function Games() {
       <motion.div 
         key={game.game}
         variants={item}
-        whileHover={{ scale: 1.03 }}
+        whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
         className="group"
       >
         <Link to={`/game/${gameUrl}`}>
-          <div className="relative rounded-xl overflow-hidden bg-gradient-to-br from-white/10 to-white/5 border border-white/10 hover:border-white/30 transition-all duration-300 shadow-lg hover:shadow-white/20">
-            <div className="aspect-[3/4] relative">
+          <div className="relative rounded-xl overflow-hidden bg-gradient-to-br from-white/10 to-white/5 border border-white/10 hover:border-white/30 transition-all duration-300 shadow-lg hover:shadow-white/20 h-full">
+            {/* Image Section - Fixed aspect ratio */}
+            <div className="aspect-[16/9] relative">
               <img
                 src={game.imageUrl}
                 alt={game.game}
                 className="absolute inset-0 w-full h-full object-cover"
                 loading="lazy"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300">
-                <div className="absolute bottom-0 left-0 right-0 p-4">
-                  <div className="space-y-3">
-                    <div className="flex flex-wrap gap-2">
-                      {game.features.find(f => f.label === 'Genre')?.value.split(' & ').map((genre, index) => (
-                        <span key={index} className="px-2 py-1 bg-white/10 backdrop-blur-sm rounded-md text-white text-xs font-medium">
-                          {genre}
-                        </span>
-                      ))}
-                    </div>
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        {getPlatformIcon(game.features.find(f => f.label === 'Platform')?.value)}
-                        <span className="text-white/90 text-sm">
-                          {game.features.find(f => f.label === 'Platform')?.value}
-                        </span>
-                      </div>
-                      <p className="text-white/90 text-sm line-clamp-3">
-                        {game.description}
-                      </p>
-                    </div>
+              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300" />
+            </div>
+
+            {/* Content Section - Fixed height */}
+            <div className="p-4 space-y-3">
+              <div className="flex items-start justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold text-white mb-2 line-clamp-1">{game.game}</h3>
+                  <div className="flex flex-wrap gap-1">
+                    {game.features.find(f => f.label === 'Genre')?.value.split(' & ').map((genre, index) => (
+                      <span key={index} className="px-2 py-0.5 bg-white/10 backdrop-blur-sm rounded-md text-white text-xs font-medium">
+                        {genre}
+                      </span>
+                    ))}
                   </div>
                 </div>
-              </div>
-              {/* Game Status Badge */}
-              <div className="absolute top-3 right-3">
-                <span className="px-2 py-1 bg-green-500/90 backdrop-blur-sm rounded-md text-white text-xs font-medium">
-                  Available
+                <span className="text-white px-3 py-1 bg-white/10 rounded-lg text-sm font-medium group-hover:bg-white/20 transition-colors">
+                  Play
                 </span>
               </div>
-            </div>
-            <div className="p-4 space-y-3 bg-gradient-to-b from-transparent to-black/50">
-              <h3 className="text-white font-semibold text-lg line-clamp-1">{game.game}</h3>
-              <div className="flex items-center gap-4 text-sm">
-                <div className="flex items-center text-yellow-500">
-                  <FaStar className="w-4 h-4 mr-1" />
-                  <span>{game.features.find(f => f.label === 'Rating')?.value}</span>
+
+              <p className="text-gray-300 text-sm line-clamp-2">
+                {game.description}
+              </p>
+
+              <div className="grid grid-cols-4 gap-2 pt-2 border-t border-white/10">
+                <div className="space-y-0.5">
+                  <p className="text-gray-400 text-xs">Platform</p>
+                  <div className="flex items-center gap-1">
+                    {getPlatformIcon(game.features.find(f => f.label === 'Platform')?.value)}
+                    <span className="text-white/90 text-xs">
+                      {game.features.find(f => f.label === 'Platform')?.value}
+                    </span>
+                  </div>
                 </div>
-                <div className="flex items-center text-gray-400">
-                  <FaCalendar className="w-4 h-4 mr-1" />
-                  <span>{game.features.find(f => f.label === 'Release')?.value}</span>
+                <div className="space-y-0.5">
+                  <p className="text-gray-400 text-xs">Release</p>
+                  <div className="flex items-center gap-1">
+                    <FaCalendar className="w-3 h-3 text-gray-400" />
+                    <span className="text-white/90 text-xs">
+                      {game.features.find(f => f.label === 'Release')?.value}
+                    </span>
+                  </div>
                 </div>
-              </div>
-              <div className="flex items-center justify-between text-sm pt-2 border-t border-white/10">
-                <div className="flex items-center text-gray-400">
-                  <FaClock className="w-4 h-4 mr-1" />
-                  <span>{game.features.find(f => f.label === 'Playtime')?.value}</span>
+                <div className="space-y-0.5">
+                  <p className="text-gray-400 text-xs">Rating</p>
+                  <div className="flex items-center gap-1">
+                    <FaStar className="w-3 h-3 text-yellow-500" />
+                    <span className="text-white/90 text-xs">
+                      {game.features.find(f => f.label === 'Rating')?.value}
+                    </span>
+                  </div>
                 </div>
-                <span className="text-white px-3 py-1.5 bg-white/10 rounded-lg font-medium group-hover:bg-white/20 transition-colors">
-                  Play Now
-                </span>
+                <div className="space-y-0.5">
+                  <p className="text-gray-400 text-xs">Playtime</p>
+                  <div className="flex items-center gap-1">
+                    <FaClock className="w-3 h-3 text-gray-400" />
+                    <span className="text-white/90 text-xs">
+                      {game.features.find(f => f.label === 'Playtime')?.value}
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -198,47 +210,39 @@ function Games() {
   return (
     <div className="min-h-screen bg-black">
       {/* Featured Game */}
-      <div className="relative h-[85vh]">
+      <div className="relative h-[90vh]">
         <div className="absolute inset-0">
-          <img
-            src={featuredGame.imageUrl}
-            alt={featuredGame.game}
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/50 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-900/20 via-transparent to-purple-900/20 opacity-60" />
+          <div className="relative w-full h-full">
+            <img
+              src={featuredGame.imageUrl}
+              alt={featuredGame.game}
+              className="absolute inset-0 w-full h-full object-cover object-center"
+              style={{ objectPosition: '50% 20%' }}
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/50 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" />
+          </div>
         </div>
 
-        <div className="absolute bottom-0 left-0 right-0 pb-32 px-12">
+        <div className="absolute bottom-0 left-0 right-0 pb-24 px-12">
           <div className="max-w-2xl space-y-6">
-            <div className="space-y-3">
-              <div className="flex items-center space-x-4">
-                <span className="px-3 py-1 bg-white/10 backdrop-blur-sm rounded-full text-white/90 text-xs font-medium">
-                  FEATURED GAME
-                </span>
-                <span className="px-3 py-1 bg-white/10 backdrop-blur-sm rounded-full text-white/90 text-xs font-medium">
-                  {featuredGame.features.find(f => f.label === 'Genre')?.value}
-                </span>
-              </div>
-              <h1 className="text-5xl font-bold text-white tracking-tight">
-                {featuredGame.game}
-              </h1>
-            </div>
-            <p className="text-lg text-white/90 leading-relaxed max-w-xl line-clamp-2">
+            <h1 className="text-4xl font-bold text-white tracking-tight">
+              {featuredGame.game}
+            </h1>
+            <p className="text-base text-white/90 leading-relaxed max-w-xl line-clamp-2">
               {featuredGame.description}
             </p>
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-3">
               <Link
                 to={`/game/${gameUrl}`}
-                className="flex items-center px-8 py-4 bg-white text-black rounded-lg hover:bg-gray-200 transition-all duration-300 transform hover:scale-105 text-lg font-semibold group"
+                className="flex items-center px-6 py-3 bg-white text-black rounded-lg hover:bg-gray-200 transition-all duration-300 text-sm font-semibold group"
               >
                 <FaGamepad className="mr-2 group-hover:rotate-12 transition-transform duration-300" />
                 Play Now
               </Link>
               <Link
                 to={`/game/${gameUrl}`}
-                className="flex items-center px-8 py-4 bg-white/10 backdrop-blur-sm text-white rounded-lg hover:bg-white/20 transition-all duration-300 transform hover:scale-105 text-lg font-semibold border border-white/20 group"
+                className="flex items-center px-6 py-3 bg-white/10 backdrop-blur-sm text-white rounded-lg hover:bg-white/20 transition-all duration-300 text-sm font-semibold border border-white/20 group"
               >
                 <FaInfoCircle className="mr-2 group-hover:rotate-12 transition-transform duration-300" />
                 More Info
@@ -246,7 +250,7 @@ function Games() {
             </div>
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-3 px-4 py-2 bg-black/30 backdrop-blur-sm rounded-lg border border-white/10">
-                <span className="text-white font-semibold">
+                <span className="text-white/80">
                   {featuredGame.features.find(f => f.label === 'Platform')?.value}
                 </span>
                 <div className="h-4 w-px bg-white/20" />
@@ -365,7 +369,7 @@ function Games() {
 
           {/* Games Grid */}
           <motion.div 
-            className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-5 gap-6"
+            className="grid grid-cols-5 gap-4"
             variants={container}
             initial="hidden"
             animate="show"

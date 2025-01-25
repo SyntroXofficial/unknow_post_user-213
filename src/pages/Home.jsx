@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FaGamepad, FaPlay, FaRandom, FaExclamationTriangle, FaDiscord } from 'react-icons/fa';
+import { FaGamepad, FaPlay, FaRandom, FaExclamationTriangle, FaDiscord, FaArrowRight } from 'react-icons/fa';
 
 const container = {
   hidden: { opacity: 0 },
@@ -29,129 +29,167 @@ const item = {
 
 function Home() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-black to-black text-white overflow-hidden">
+    <div className="min-h-screen bg-black text-white overflow-hidden">
       {/* Hero Section */}
       <motion.div 
-        className="relative min-h-screen flex items-center justify-center px-4 py-20 md:py-0"
+        className="relative min-h-screen flex items-center justify-center"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.8 }}
       >
+        {/* Background Image */}
         <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-gradient-to-b from-white/10 via-black/50 to-black" />
+          <img 
+            src="https://media.discordapp.net/attachments/1193190985614757969/1332661685072433203/Screenshot_201468-enhanced.png?ex=67961169&is=6794bfe9&hm=44601f40e9bfc6e7d450510e568df24219bb77397f19ab6624c90ffe561c23b2&=&format=webp&quality=lossless&width=2345&height=1309"
+            alt="Background"
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/60 to-black/90" />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,black_100%)] opacity-60" />
         </div>
         
         <motion.div 
-          className="relative z-10 w-full max-w-4xl mx-auto"
+          className="relative z-10 w-full max-w-7xl mx-auto px-6"
           initial={{ y: 50, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.2, duration: 0.8, type: "spring" }}
         >
-          <motion.h1 
-            className="text-4xl md:text-7xl font-bold mb-8 text-white"
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 0.4, duration: 0.6 }}
-          >
-            Premium Digital Services
-          </motion.h1>
-          
-          <motion.p 
-            className="text-xl md:text-2xl text-gray-300 mb-12 leading-relaxed px-4 md:px-0"
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.6, duration: 0.6 }}
-          >
-            Access exclusive games, streaming services, and generate premium accounts all in one place!
-          </motion.p>
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-12">
+            {/* Left Content */}
+            <div className="lg:w-1/2 space-y-8">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4, duration: 0.6 }}
+                className="space-y-4"
+              >
+                <span className="px-3 py-1 bg-white/10 backdrop-blur-sm rounded-full text-white/90 text-xs font-medium inline-block">
+                  WELCOME TO AZCORP
+                </span>
+                <h1 className="text-4xl lg:text-6xl font-bold leading-tight">
+                  Your Gateway to <br />
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-purple-500">
+                    Premium Digital Services
+                  </span>
+                </h1>
+                <p className="text-base lg:text-lg text-gray-400 max-w-xl">
+                  Experience unlimited access to premium games, streaming services, and exclusive content. 
+                  Join our community and unlock a world of digital entertainment.
+                </p>
+              </motion.div>
 
-          <motion.div 
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 px-4 md:px-0"
-            variants={container}
-            initial="hidden"
-            animate="show"
-          >
+              {/* CTA Buttons */}
+              <motion.div 
+                className="flex flex-wrap gap-4"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.6, duration: 0.6 }}
+              >
+                <Link to="/generator" className="group flex items-center px-6 py-3 bg-white text-black rounded-lg hover:bg-gray-200 transition-all duration-300 text-sm font-semibold">
+                  Get Started
+                  <FaArrowRight className="ml-2 group-hover:translate-x-1 transition-transform duration-300" />
+                </Link>
+                <a
+                  href="https://discord.gg/cFdRcKwvgx"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group flex items-center px-6 py-3 bg-[#5865F2] text-white rounded-lg hover:bg-[#4752C4] transition-all duration-300 text-sm font-semibold"
+                >
+                  <FaDiscord className="mr-2 group-hover:rotate-12 transition-transform duration-300" />
+                  Join Discord
+                </a>
+              </motion.div>
+            </div>
+
+            {/* Right Content - Feature Cards */}
             <motion.div 
-              variants={item} 
-              whileHover={{ scale: 1.05 }} 
-              whileTap={{ scale: 0.95 }}
+              className="lg:w-1/2 grid grid-cols-2 gap-4"
+              variants={container}
+              initial="hidden"
+              animate="show"
             >
-              <Link to="/generator" className="group block p-6 md:p-8 bg-white text-black rounded-2xl hover:bg-gray-100 transition-all duration-300 shadow-lg shadow-white/30">
-                <div className="flex flex-col items-center text-center space-y-4">
-                  <div className="p-4 bg-black/10 rounded-full">
-                    <FaRandom className="w-8 h-8" />
+              <motion.div variants={item} className="col-span-2">
+                <Link to="/games" className="block p-6 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 hover:border-white/20 transition-all duration-300 group">
+                  <div className="flex items-start space-x-4">
+                    <div className="p-3 bg-blue-500/10 rounded-lg group-hover:scale-110 transition-transform duration-300">
+                      <FaGamepad className="w-6 h-6 text-blue-500" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold mb-1">Premium Games</h3>
+                      <p className="text-sm text-gray-400">Access our vast collection of premium games instantly</p>
+                    </div>
                   </div>
-                  <span className="text-xl font-semibold">Account Generator</span>
-                  <p className="text-black/90 text-sm">Generate premium accounts instantly</p>
-                </div>
-              </Link>
-            </motion.div>
+                </Link>
+              </motion.div>
 
-            <motion.div 
-              variants={item} 
-              whileHover={{ scale: 1.05 }} 
-              whileTap={{ scale: 0.95 }}
-            >
-              <Link to="/games" className="group block p-6 md:p-8 bg-white text-black rounded-2xl hover:bg-gray-100 transition-all duration-300 shadow-lg shadow-white/30">
-                <div className="flex flex-col items-center text-center space-y-4">
-                  <div className="p-4 bg-black/10 rounded-full">
-                    <FaGamepad className="w-8 h-8" />
+              <motion.div variants={item}>
+                <Link to="/streaming" className="block p-6 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 hover:border-white/20 transition-all duration-300 group">
+                  <div className="flex items-start space-x-4">
+                    <div className="p-3 bg-purple-500/10 rounded-lg group-hover:scale-110 transition-transform duration-300">
+                      <FaPlay className="w-6 h-6 text-purple-500" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold mb-1">Streaming</h3>
+                      <p className="text-sm text-gray-400">Watch your favorite content</p>
+                    </div>
                   </div>
-                  <span className="text-xl font-semibold">Game Library</span>
-                  <p className="text-black/90 text-sm">Explore our vast collection of premium games</p>
-                </div>
-              </Link>
-            </motion.div>
+                </Link>
+              </motion.div>
 
-            <motion.div 
-              variants={item} 
-              whileHover={{ scale: 1.05 }} 
-              whileTap={{ scale: 0.95 }}
-            >
-              <Link to="/streaming" className="group block p-6 md:p-8 bg-white text-black rounded-2xl hover:bg-gray-100 transition-all duration-300 shadow-lg shadow-white/30">
-                <div className="flex flex-col items-center text-center space-y-4">
-                  <div className="p-4 bg-black/10 rounded-full">
-                    <FaPlay className="w-8 h-8" />
+              <motion.div variants={item}>
+                <Link to="/generator" className="block p-6 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 hover:border-white/20 transition-all duration-300 group">
+                  <div className="flex items-start space-x-4">
+                    <div className="p-3 bg-green-500/10 rounded-lg group-hover:scale-110 transition-transform duration-300">
+                      <FaRandom className="w-6 h-6 text-green-500" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold mb-1">Generator</h3>
+                      <p className="text-sm text-gray-400">Generate premium accounts</p>
+                    </div>
                   </div>
-                  <span className="text-xl font-semibold">Streaming Services</span>
-                  <p className="text-black/90 text-sm">Watch your favorite movies and TV shows</p>
-                </div>
-              </Link>
-            </motion.div>
+                </Link>
+              </motion.div>
 
-            <motion.div 
-              variants={item} 
-              whileHover={{ scale: 1.05 }} 
-              whileTap={{ scale: 0.95 }}
-            >
-              <Link to="/important" className="group block p-6 md:p-8 bg-red-500 text-white rounded-2xl hover:bg-red-600 transition-all duration-300 shadow-lg shadow-red-500/30">
-                <div className="flex flex-col items-center text-center space-y-4">
-                  <div className="p-4 bg-white/20 rounded-full">
-                    <FaExclamationTriangle className="w-8 h-8" />
+              <motion.div variants={item} className="col-span-2">
+                <Link to="/important" className="block p-6 bg-red-500/5 backdrop-blur-sm rounded-xl border border-red-500/10 hover:border-red-500/20 transition-all duration-300 group">
+                  <div className="flex items-start space-x-4">
+                    <div className="p-3 bg-red-500/10 rounded-lg group-hover:scale-110 transition-transform duration-300">
+                      <FaExclamationTriangle className="w-6 h-6 text-red-500" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold mb-1">Important Information</h3>
+                      <p className="text-sm text-gray-400">Read our guidelines and warnings before starting</p>
+                    </div>
                   </div>
-                  <span className="text-xl font-semibold">Important Info</span>
-                  <p className="text-white/90 text-sm">Read important guidelines and warnings</p>
-                </div>
-              </Link>
+                </Link>
+              </motion.div>
             </motion.div>
-          </motion.div>
+          </div>
 
-          {/* Discord Button */}
+          {/* Stats Section */}
           <motion.div
-            className="mt-8 flex justify-center"
+            className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-4"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.8, duration: 0.6 }}
           >
-            <a
-              href="https://discord.gg/cFdRcKwvgx"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center space-x-3 px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-all duration-300 transform hover:scale-105 group shadow-lg shadow-blue-500/30"
-            >
-              <FaDiscord className="w-6 h-6 group-hover:rotate-12 transition-transform duration-300" />
-              <span className="text-lg font-semibold">Join Our Discord Server</span>
-            </a>
+            <div className="p-6 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10">
+              <div className="text-2xl font-bold mb-1">50+</div>
+              <div className="text-sm text-gray-400">Premium Games</div>
+            </div>
+            <div className="p-6 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10">
+              <div className="text-2xl font-bold mb-1">20+</div>
+              <div className="text-sm text-gray-400">Generator Services</div>
+            </div>
+            <div className="p-6 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10">
+              <div className="text-2xl font-bold mb-1">1000+</div>
+              <div className="text-sm text-gray-400">Active Users</div>
+            </div>
+            <div className="p-6 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10">
+              <div className="text-2xl font-bold mb-1">24/7</div>
+              <div className="text-sm text-gray-400">Support Available</div>
+            </div>
           </motion.div>
         </motion.div>
       </motion.div>
