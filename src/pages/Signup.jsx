@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { FaDiscord, FaEnvelope, FaLock, FaUser, FaExclamationTriangle } from 'react-icons/fa';
 import { auth, db } from '../firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, setDoc, collection, query, where, getDocs } from 'firebase/firestore';
 
 function Signup() {
   const navigate = useNavigate();
@@ -24,6 +24,13 @@ function Signup() {
     return /^\d{18}$/.test(id);
   };
 
+  const checkEmailExists = async (email) => {
+    const usersRef = collection(db, 'users');
+    const q = query(usersRef, where('email', '==', email));
+    const querySnapshot = await getDocs(q);
+    return !querySnapshot.empty;
+  };
+
   const handleSignup = async (e) => {
     e.preventDefault();
     setError('');
@@ -41,6 +48,13 @@ function Signup() {
     }
 
     try {
+      // Check if email already exists
+      const emailExists = await checkEmailExists(email);
+      if (emailExists) {
+        setError('This email is already registered. Please use a different email.');
+        return;
+      }
+
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       
       // Store additional user data in Firestore
@@ -53,7 +67,11 @@ function Signup() {
 
       navigate('/');
     } catch (error) {
-      setError('An error occurred during signup. Please try again.');
+      if (error.code === 'auth/email-already-in-use') {
+        setError('This email is already registered. Please use a different email.');
+      } else {
+        setError('An error occurred during signup. Please try again.');
+      }
     }
   };
 
