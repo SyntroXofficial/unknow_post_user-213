@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FaDiscord, FaEnvelope, FaLock, FaUser, FaExclamationTriangle } from 'react-icons/fa';
 import { auth, db } from '../firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { doc, setDoc, collection, query, where, getDocs } from 'firebase/firestore';
+import { doc, setDoc, collection, query, where, getDocs, getDoc } from 'firebase/firestore';
 
 function Signup() {
   const navigate = useNavigate();
@@ -14,6 +14,47 @@ function Signup() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isValidating, setIsValidating] = useState(false);
+  const [signupsRemaining, setSignupsRemaining] = useState(null);
+
+  useEffect(() => {
+    // Check remaining signups on component mount
+    checkRemainingSignups();
+  }, []);
+
+  const checkRemainingSignups = async () => {
+    try {
+      const statsRef = doc(db, 'system', 'signupStats');
+      const statsDoc = await getDoc(statsRef);
+      
+      if (statsDoc.exists()) {
+        const { lastReset, count } = statsDoc.data();
+        const now = new Date();
+        const resetTime = lastReset.toDate();
+        const hoursSinceReset = (now - resetTime) / (1000 * 60 * 60);
+
+        if (hoursSinceReset >= 25) {
+          // Reset counter if 25 hours have passed
+          await setDoc(statsRef, {
+            lastReset: now,
+            count: 0
+          });
+          setSignupsRemaining(25);
+        } else {
+          setSignupsRemaining(25 - count);
+        }
+      } else {
+        // Initialize stats if they don't exist
+        await setDoc(statsRef, {
+          lastReset: new Date(),
+          count: 0
+        });
+        setSignupsRemaining(25);
+      }
+    } catch (error) {
+      console.error('Error checking signup stats:', error);
+      setError('Unable to check signup availability');
+    }
+  };
 
   const validateEmail = (email) => {
     const allowedDomains = ['gmail.com', 'proton.me', 'outlook.com'];
@@ -23,24 +64,32 @@ function Signup() {
 
   const validateDiscordId = async (id) => {
     try {
-      console.log('Validating Discord ID:', id);
-      const response = await fetch(`https://discord-lookup.vercel.app/api/user/${id}`);
+      const options = {
+        method: 'GET',
+        headers: {
+          'x-rapidapi-key': 'bf35cf1718msh1c6292a61e1a78cp138de3jsnb78afd54c5d0',
+          'x-rapidapi-host': 'discord-lookup.p.rapidapi.com'
+        }
+      };
+
+      const response = await fetch(`https://discord-lookup.p.rapidapi.com/user/${id}`, options);
       
       if (!response.ok) {
         console.error('Discord API Error:', response.status);
-        throw new Error('Discord API error');
+        throw new Error('Failed to validate Discord ID');
       }
 
       const data = await response.json();
       console.log('Discord API Response:', data);
       
-      if (data.error || !data.tag) {
+      if (data.error || !data.username) {
         console.error('Invalid Discord data:', data);
         throw new Error('Invalid Discord ID');
       }
       
       return {
-        discordUsername: data.tag || 'Unknown',
+        discordUsername: data.username || 'Unknown',
+        discordDiscriminator: data.discriminator || '0000',
         discordAvatar: data.avatar || null,
         discordBanner: data.banner || null,
         discordBannerColor: data.banner_color || null,
@@ -72,6 +121,11 @@ function Signup() {
     setIsValidating(true);
 
     try {
+      // Check if signups are available
+      if (signupsRemaining <= 0) {
+        throw new Error('No signups available. Please try again in 25 hours.');
+      }
+
       // Basic validation
       if (!username || !discordId || !email || !password) {
         throw new Error('All fields are required');
@@ -102,6 +156,17 @@ function Signup() {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       console.log('Firebase user created:', userCredential.user.uid);
 
+      // Update signup counter
+      const statsRef = doc(db, 'system', 'signupStats');
+      const statsDoc = await getDoc(statsRef);
+      if (statsDoc.exists()) {
+        const { count } = statsDoc.data();
+        await setDoc(statsRef, {
+          lastReset: statsDoc.data().lastReset,
+          count: count + 1
+        });
+      }
+
       // Store additional user data in Firestore
       const userData = {
         username,
@@ -127,6 +192,28 @@ function Signup() {
     }
   };
 
+  if (signupsRemaining === 0) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center px-4">
+        <div className="bg-white/5 backdrop-blur-sm rounded-xl p-8 border border-white/10 max-w-md w-full">
+          <div className="text-center mb-6">
+            <FaExclamationTriangle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+            <h2 className="text-2xl font-bold text-white">Signups Temporarily Closed</h2>
+            <p className="text-gray-400 mt-2">
+              We've reached our daily signup limit. Please try again in 25 hours.
+            </p>
+          </div>
+          <Link
+            to="/"
+            className="block w-full text-center bg-white text-black rounded-lg py-3 font-semibold hover:bg-gray-200 transition-colors"
+          >
+            Return Home
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-black flex items-center justify-center px-4">
       <div className="max-w-md w-full space-y-8">
@@ -138,7 +225,9 @@ function Signup() {
         >
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold text-white">Create Account</h2>
-            <p className="mt-2 text-gray-400">Join our community today</p>
+            <p className="mt-2 text-gray-400">
+              {signupsRemaining} slots remaining today
+            </p>
           </div>
 
           <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 mb-6">
