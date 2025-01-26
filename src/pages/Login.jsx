@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FaDiscord, FaEnvelope, FaLock, FaUser, FaExclamationTriangle } from 'react-icons/fa';
 import { auth } from '../firebase';
@@ -7,15 +7,23 @@ import { signInWithEmailAndPassword } from 'firebase/auth';
 
 function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const sessionMessage = location.state?.message;
+
+  useEffect(() => {
+    if (sessionMessage) {
+      setError(sessionMessage);
+    }
+  }, [sessionMessage]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      navigate('/');
+      navigate(location.state?.from?.pathname || '/');
     } catch (error) {
       setError('Invalid credentials. Please try again.');
     }

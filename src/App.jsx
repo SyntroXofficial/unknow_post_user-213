@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
@@ -22,7 +22,29 @@ import { doc, updateDoc, serverTimestamp, increment } from 'firebase/firestore';
 
 function PrivateRoute({ children }) {
   const location = useLocation();
+  const navigate = useNavigate();
   const user = auth.currentUser;
+
+  useEffect(() => {
+    if (user) {
+      // Check last login time
+      const lastLoginTime = user.metadata.lastLoginAt;
+      const currentTime = Date.now();
+      const timeDiff = currentTime - lastLoginTime;
+      const hoursDiff = timeDiff / (1000 * 60 * 60); // Convert to hours
+
+      if (hoursDiff >= 24) {
+        // Force logout if more than 24 hours have passed
+        auth.signOut();
+        navigate('/login', { 
+          state: { 
+            from: location,
+            message: 'Your session has expired. Please log in again.' 
+          } 
+        });
+      }
+    }
+  }, [user, navigate, location]);
 
   if (!user) {
     return <Navigate to="/login" state={{ from: location }} replace />;
@@ -41,102 +63,6 @@ function AdminRoute({ children }) {
   }
 
   return children;
-}
-
-function AnimatedRoutes() {
-  const location = useLocation();
-
-  return (
-    <AnimatePresence mode="wait">
-      <TransitionLayout key={location.pathname}>
-        <Routes location={location} key={location.pathname}>
-          <Route path="/" element={
-            <PageTransition>
-              <Home />
-            </PageTransition>
-          } />
-          <Route path="/login" element={
-            <PageTransition>
-              <Login />
-            </PageTransition>
-          } />
-          <Route path="/signup" element={
-            <PageTransition>
-              <Signup />
-            </PageTransition>
-          } />
-          <Route path="/streaming" element={
-            <PageTransition>
-              <PrivateRoute>
-                <Streaming />
-              </PrivateRoute>
-            </PageTransition>
-          } />
-          <Route path="/games" element={
-            <PageTransition>
-              <PrivateRoute>
-                <Games />
-              </PrivateRoute>
-            </PageTransition>
-          } />
-          <Route path="/game/:id" element={
-            <PageTransition>
-              <PrivateRoute>
-                <GameDetails />
-              </PrivateRoute>
-            </PageTransition>
-          } />
-          <Route path="/generator" element={
-            <PageTransition>
-              <PrivateRoute>
-                <Generator />
-              </PrivateRoute>
-            </PageTransition>
-          } />
-          <Route path="/generator/:id" element={
-            <PageTransition>
-              <PrivateRoute>
-                <GeneratorDetails />
-              </PrivateRoute>
-            </PageTransition>
-          } />
-          <Route path="/important" element={
-            <PageTransition>
-              <Important />
-            </PageTransition>
-          } />
-          <Route path="/movie/:id" element={
-            <PageTransition>
-              <PrivateRoute>
-                <Movie />
-              </PrivateRoute>
-            </PageTransition>
-          } />
-          <Route path="/tv/:id" element={
-            <PageTransition>
-              <PrivateRoute>
-                <TVShow />
-              </PrivateRoute>
-            </PageTransition>
-          } />
-          <Route path="/search" element={
-            <PageTransition>
-              <PrivateRoute>
-                <Search />
-              </PrivateRoute>
-            </PageTransition>
-          } />
-          <Route path="/admin" element={
-            <PageTransition>
-              <AdminRoute>
-                <AdminDashboard />
-              </AdminRoute>
-            </PageTransition>
-          } />
-        </Routes>
-      </TransitionLayout>
-    </AnimatePresence>
-  );
 }
 
 function App() {
@@ -240,6 +166,102 @@ function App() {
         <Navbar isSidebarOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen} />
       </div>
     </Router>
+  );
+}
+
+function AnimatedRoutes() {
+  const location = useLocation();
+
+  return (
+    <AnimatePresence mode="wait">
+      <TransitionLayout key={location.pathname}>
+        <Routes location={location} key={location.pathname}>
+          <Route path="/" element={
+            <PageTransition>
+              <Home />
+            </PageTransition>
+          } />
+          <Route path="/login" element={
+            <PageTransition>
+              <Login />
+            </PageTransition>
+          } />
+          <Route path="/signup" element={
+            <PageTransition>
+              <Signup />
+            </PageTransition>
+          } />
+          <Route path="/streaming" element={
+            <PageTransition>
+              <PrivateRoute>
+                <Streaming />
+              </PrivateRoute>
+            </PageTransition>
+          } />
+          <Route path="/games" element={
+            <PageTransition>
+              <PrivateRoute>
+                <Games />
+              </PrivateRoute>
+            </PageTransition>
+          } />
+          <Route path="/game/:id" element={
+            <PageTransition>
+              <PrivateRoute>
+                <GameDetails />
+              </PrivateRoute>
+            </PageTransition>
+          } />
+          <Route path="/generator" element={
+            <PageTransition>
+              <PrivateRoute>
+                <Generator />
+              </PrivateRoute>
+            </PageTransition>
+          } />
+          <Route path="/generator/:id" element={
+            <PageTransition>
+              <PrivateRoute>
+                <GeneratorDetails />
+              </PrivateRoute>
+            </PageTransition>
+          } />
+          <Route path="/important" element={
+            <PageTransition>
+              <Important />
+            </PageTransition>
+          } />
+          <Route path="/movie/:id" element={
+            <PageTransition>
+              <PrivateRoute>
+                <Movie />
+              </PrivateRoute>
+            </PageTransition>
+          } />
+          <Route path="/tv/:id" element={
+            <PageTransition>
+              <PrivateRoute>
+                <TVShow />
+              </PrivateRoute>
+            </PageTransition>
+          } />
+          <Route path="/search" element={
+            <PageTransition>
+              <PrivateRoute>
+                <Search />
+              </PrivateRoute>
+            </PageTransition>
+          } />
+          <Route path="/admin" element={
+            <PageTransition>
+              <AdminRoute>
+                <AdminDashboard />
+              </AdminRoute>
+            </PageTransition>
+          } />
+        </Routes>
+      </TransitionLayout>
+    </AnimatePresence>
   );
 }
 
