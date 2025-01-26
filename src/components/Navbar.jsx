@@ -1,14 +1,21 @@
 import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   FaDiscord, FaHome, FaPlay, FaGamepad, 
   FaExclamationTriangle, FaRandom, FaEyeSlash, FaEye,
-  FaBars, FaTimes, FaArrowRight
+  FaBars, FaTimes, FaArrowRight, FaUser, FaSignInAlt,
+  FaUserShield
 } from 'react-icons/fa';
+import { auth } from '../firebase';
+import { signOut } from 'firebase/auth';
 
 function Navbar({ isSidebarOpen, setIsSidebarOpen }) {
   const location = useLocation();
+  const navigate = useNavigate();
   const [isVisible, setIsVisible] = useState(true);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const user = auth.currentUser;
+  const isAdmin = user?.email === 'andres_rios_xyz@outlook.com';
 
   const isActive = (path) => {
     return location.pathname === path;
@@ -18,6 +25,20 @@ function Navbar({ isSidebarOpen, setIsSidebarOpen }) {
     setIsSidebarOpen(!isSidebarOpen);
     setIsVisible(!isSidebarOpen);
   };
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      navigate('/');
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+  };
+
+  const publicPages = ['/', '/important', '/login', '/signup'];
+  if (!user && !publicPages.includes(location.pathname)) {
+    navigate('/login');
+  }
 
   return (
     <>
@@ -55,41 +76,45 @@ function Navbar({ isSidebarOpen, setIsSidebarOpen }) {
           <FaHome className="w-4 h-4" />
         </Link>
 
-        <Link 
-          to="/generator" 
-          className={`p-2 rounded-lg transition-all duration-300 group ${
-            isActive('/generator') 
-              ? 'bg-white text-black' 
-              : 'text-white/70 hover:text-white hover:bg-white/10'
-          }`}
-          title="Generator"
-        >
-          <FaRandom className="w-4 h-4" />
-        </Link>
+        {user && (
+          <>
+            <Link 
+              to="/generator" 
+              className={`p-2 rounded-lg transition-all duration-300 group ${
+                isActive('/generator') 
+                  ? 'bg-white text-black' 
+                  : 'text-white/70 hover:text-white hover:bg-white/10'
+              }`}
+              title="Generator"
+            >
+              <FaRandom className="w-4 h-4" />
+            </Link>
 
-        <Link 
-          to="/streaming" 
-          className={`p-2 rounded-lg transition-all duration-300 group ${
-            isActive('/streaming') 
-              ? 'bg-white text-black' 
-              : 'text-white/70 hover:text-white hover:bg-white/10'
-          }`}
-          title="Streaming"
-        >
-          <FaPlay className="w-4 h-4" />
-        </Link>
+            <Link 
+              to="/streaming" 
+              className={`p-2 rounded-lg transition-all duration-300 group ${
+                isActive('/streaming') 
+                  ? 'bg-white text-black' 
+                  : 'text-white/70 hover:text-white hover:bg-white/10'
+              }`}
+              title="Streaming"
+            >
+              <FaPlay className="w-4 h-4" />
+            </Link>
 
-        <Link 
-          to="/games" 
-          className={`p-2 rounded-lg transition-all duration-300 group ${
-            isActive('/games') 
-              ? 'bg-white text-black' 
-              : 'text-white/70 hover:text-white hover:bg-white/10'
-          }`}
-          title="Games"
-        >
-          <FaGamepad className="w-4 h-4" />
-        </Link>
+            <Link 
+              to="/games" 
+              className={`p-2 rounded-lg transition-all duration-300 group ${
+                isActive('/games') 
+                  ? 'bg-white text-black' 
+                  : 'text-white/70 hover:text-white hover:bg-white/10'
+              }`}
+              title="Games"
+            >
+              <FaGamepad className="w-4 h-4" />
+            </Link>
+          </>
+        )}
 
         <Link 
           to="/important" 
@@ -112,6 +137,64 @@ function Navbar({ isSidebarOpen, setIsSidebarOpen }) {
         >
           <FaDiscord className="w-4 h-4" />
         </a>
+
+        {isAdmin && (
+          <Link
+            to="/admin"
+            className={`p-2 rounded-lg transition-all duration-300 group ${
+              isActive('/admin')
+                ? 'bg-purple-500 text-white'
+                : 'text-purple-500/70 hover:text-purple-500 hover:bg-purple-500/10'
+            }`}
+            title="Admin Dashboard"
+          >
+            <FaUserShield className="w-4 h-4" />
+          </Link>
+        )}
+
+        {user ? (
+          <div className="relative">
+            <button
+              onClick={() => setShowUserMenu(!showUserMenu)}
+              className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-300"
+              title="Account"
+            >
+              <FaUser className="w-4 h-4" />
+            </button>
+            {showUserMenu && (
+              <div className="absolute right-0 mt-2 w-94 bg-black/90 backdrop-blur-sm rounded-lg border border-white/10 shadow-lg">
+                <div className="p-4 border-b border-white/10">
+                  <p className="text-white font-medium truncate">{user.email}</p>
+                  <p className="text-gray-400 text-sm">Logged in</p>
+                </div>
+                {isAdmin && (
+                  <Link
+                    to="/admin"
+                    className="w-full text-left px-4 py-3 text-white/70 hover:text-white hover:bg-white/10 transition-colors flex items-center"
+                  >
+                    <FaUserShield className="w-4 h-4 mr-2" />
+                    Admin Dashboard
+                  </Link>
+                )}
+                <button
+                  onClick={handleLogout}
+                  className="w-full text-left px-4 py-3 text-white/70 hover:text-white hover:bg-white/10 transition-colors flex items-center"
+                >
+                  <FaSignInAlt className="w-4 h-4 mr-2" />
+                  Sign Out
+                </button>
+              </div>
+            )}
+          </div>
+        ) : (
+          <Link
+            to="/login"
+            className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-300"
+            title="Sign In"
+          >
+            <FaSignInAlt className="w-4 h-4" />
+          </Link>
+        )}
       </div>
 
       {/* Mini Sidebar */}
@@ -129,35 +212,39 @@ function Navbar({ isSidebarOpen, setIsSidebarOpen }) {
             <FaHome className="w-5 h-5" />
           </Link>
 
-          <Link 
-            to="/generator"
-            onClick={toggleSidebar}
-            className={`p-3 rounded-lg transition-all duration-300 ${
-              isActive('/generator') ? 'bg-white text-black' : 'text-white/70 hover:text-white hover:bg-white/10'
-            }`}
-          >
-            <FaRandom className="w-5 h-5" />
-          </Link>
+          {user && (
+            <>
+              <Link 
+                to="/generator"
+                onClick={toggleSidebar}
+                className={`p-3 rounded-lg transition-all duration-300 ${
+                  isActive('/generator') ? 'bg-white text-black' : 'text-white/70 hover:text-white hover:bg-white/10'
+                }`}
+              >
+                <FaRandom className="w-5 h-5" />
+              </Link>
 
-          <Link 
-            to="/streaming"
-            onClick={toggleSidebar}
-            className={`p-3 rounded-lg transition-all duration-300 ${
-              isActive('/streaming') ? 'bg-white text-black' : 'text-white/70 hover:text-white hover:bg-white/10'
-            }`}
-          >
-            <FaPlay className="w-5 h-5" />
-          </Link>
+              <Link 
+                to="/streaming"
+                onClick={toggleSidebar}
+                className={`p-3 rounded-lg transition-all duration-300 ${
+                  isActive('/streaming') ? 'bg-white text-black' : 'text-white/70 hover:text-white hover:bg-white/10'
+                }`}
+              >
+                <FaPlay className="w-5 h-5" />
+              </Link>
 
-          <Link 
-            to="/games"
-            onClick={toggleSidebar}
-            className={`p-3 rounded-lg transition-all duration-300 ${
-              isActive('/games') ? 'bg-white text-black' : 'text-white/70 hover:text-white hover:bg-white/10'
-            }`}
-          >
-            <FaGamepad className="w-5 h-5" />
-          </Link>
+              <Link 
+                to="/games"
+                onClick={toggleSidebar}
+                className={`p-3 rounded-lg transition-all duration-300 ${
+                  isActive('/games') ? 'bg-white text-black' : 'text-white/70 hover:text-white hover:bg-white/10'
+                }`}
+              >
+                <FaGamepad className="w-5 h-5" />
+              </Link>
+            </>
+          )}
 
           <Link 
             to="/important"
@@ -169,6 +256,18 @@ function Navbar({ isSidebarOpen, setIsSidebarOpen }) {
             <FaExclamationTriangle className="w-5 h-5" />
           </Link>
 
+          {isAdmin && (
+            <Link
+              to="/admin"
+              onClick={toggleSidebar}
+              className={`p-3 rounded-lg transition-all duration-300 ${
+                isActive('/admin') ? 'bg-purple-500 text-white' : 'text-purple-500/70 hover:text-purple-500 hover:bg-purple-500/10'
+              }`}
+            >
+              <FaUserShield className="w-5 h-5" />
+            </Link>
+          )}
+
           <a 
             href="https://discord.gg/cFdRcKwvgx"
             target="_blank"
@@ -178,7 +277,23 @@ function Navbar({ isSidebarOpen, setIsSidebarOpen }) {
             <FaDiscord className="w-5 h-5" />
           </a>
 
-          {/* Close Sidebar Button */}
+          {user ? (
+            <button
+              onClick={handleLogout}
+              className="p-3 text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-300"
+            >
+              <FaSignInAlt className="w-5 h-5" />
+            </button>
+          ) : (
+            <Link
+              to="/login"
+              onClick={toggleSidebar}
+              className="p-3 text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-300"
+            >
+              <FaSignInAlt className="w-5 h-5" />
+            </Link>
+          )}
+
           <button
             onClick={() => {
               setIsSidebarOpen(false);

@@ -1,7 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FaGamepad, FaPlay, FaRandom, FaExclamationTriangle, FaDiscord, FaArrowRight } from 'react-icons/fa';
+import { FaGamepad, FaPlay, FaRandom, FaExclamationTriangle, FaDiscord, FaArrowRight, FaSignInAlt } from 'react-icons/fa';
+import { auth } from '../firebase';
 
 const container = {
   hidden: { opacity: 0 },
@@ -28,6 +29,8 @@ const item = {
 };
 
 function Home() {
+  const user = auth.currentUser;
+
   return (
     <div className="min-h-screen bg-black text-white overflow-hidden">
       {/* Hero Section */}
@@ -86,10 +89,23 @@ function Home() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.6, duration: 0.6 }}
               >
-                <Link to="/generator" className="group flex items-center px-6 py-3 bg-white text-black rounded-lg hover:bg-gray-200 transition-all duration-300 text-sm font-semibold">
-                  Get Started
-                  <FaArrowRight className="ml-2 group-hover:translate-x-1 transition-transform duration-300" />
-                </Link>
+                {user ? (
+                  <Link to="/generator" className="group flex items-center px-6 py-3 bg-white text-black rounded-lg hover:bg-gray-200 transition-all duration-300 text-sm font-semibold">
+                    Access Premium Content
+                    <FaArrowRight className="ml-2 group-hover:translate-x-1 transition-transform duration-300" />
+                  </Link>
+                ) : (
+                  <>
+                    <Link to="/login" className="group flex items-center px-6 py-3 bg-white text-black rounded-lg hover:bg-gray-200 transition-all duration-300 text-sm font-semibold">
+                      Sign In
+                      <FaSignInAlt className="ml-2 group-hover:translate-x-1 transition-transform duration-300" />
+                    </Link>
+                    <Link to="/signup" className="group flex items-center px-6 py-3 bg-white/10 backdrop-blur-sm text-white rounded-lg hover:bg-white/20 transition-all duration-300 text-sm font-semibold border border-white/20">
+                      Create Account
+                      <FaArrowRight className="ml-2 group-hover:translate-x-1 transition-transform duration-300" />
+                    </Link>
+                  </>
+                )}
                 <a
                   href="https://discord.gg/cFdRcKwvgx"
                   target="_blank"
@@ -110,7 +126,7 @@ function Home() {
               animate="show"
             >
               <motion.div variants={item} className="col-span-2">
-                <Link to="/games" className="block p-6 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 hover:border-white/20 transition-all duration-300 group">
+                <Link to={user ? "/games" : "/login"} className="block p-6 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 hover:border-white/20 transition-all duration-300 group">
                   <div className="flex items-start space-x-4">
                     <div className="p-3 bg-blue-500/10 rounded-lg group-hover:scale-110 transition-transform duration-300">
                       <FaGamepad className="w-6 h-6 text-blue-500" />
@@ -124,7 +140,7 @@ function Home() {
               </motion.div>
 
               <motion.div variants={item}>
-                <Link to="/streaming" className="block p-6 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 hover:border-white/20 transition-all duration-300 group">
+                <Link to={user ? "/streaming" : "/login"} className="block p-6 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 hover:border-white/20 transition-all duration-300 group">
                   <div className="flex items-start space-x-4">
                     <div className="p-3 bg-purple-500/10 rounded-lg group-hover:scale-110 transition-transform duration-300">
                       <FaPlay className="w-6 h-6 text-purple-500" />
@@ -138,7 +154,7 @@ function Home() {
               </motion.div>
 
               <motion.div variants={item}>
-                <Link to="/generator" className="block p-6 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 hover:border-white/20 transition-all duration-300 group">
+                <Link to={user ? "/generator" : "/login"} className="block p-6 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 hover:border-white/20 transition-all duration-300 group">
                   <div className="flex items-start space-x-4">
                     <div className="p-3 bg-green-500/10 rounded-lg group-hover:scale-110 transition-transform duration-300">
                       <FaRandom className="w-6 h-6 text-green-500" />
