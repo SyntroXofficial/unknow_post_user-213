@@ -18,7 +18,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import PageTransition from './components/PageTransition';
 import TransitionLayout from './components/TransitionLayout';
 import { auth, db } from './firebase';
-import { doc, updateDoc, serverTimestamp, increment } from 'firebase/firestore';
+import { doc, updateDoc, serverTimestamp, increment, getDoc } from 'firebase/firestore';
 
 function PrivateRoute({ children }) {
   const location = useLocation();
@@ -124,9 +124,14 @@ function App() {
             return 'Desktop';
           };
 
+          // Get existing user data to preserve Discord info
+          const userDoc = await getDoc(userRef);
+          const existingData = userDoc.data();
+
           // Update user's last active timestamp and system information
           await updateDoc(userRef, {
             lastActive: serverTimestamp(),
+            lastLogin: serverTimestamp(),
             lastBrowser: getBrowserInfo(browserInfo.userAgent),
             lastOS: getOSInfo(browserInfo.userAgent),
             lastDevice: getDeviceType(browserInfo.userAgent),
@@ -137,7 +142,16 @@ function App() {
             lastCity: ipData.city || 'Unknown',
             lastISP: ipData.org || 'Unknown',
             lastIpAddress: ipData.ip || 'Unknown',
-            lastLoginCount: increment(1)
+            loginCount: increment(1),
+            // Preserve Discord information
+            discordUsername: existingData?.discordUsername || null,
+            discordDiscriminator: existingData?.discordDiscriminator || null,
+            discordAvatar: existingData?.discordAvatar || null,
+            discordBanner: existingData?.discordBanner || null,
+            discordBannerColor: existingData?.discordBannerColor || null,
+            discordCreatedAt: existingData?.discordCreatedAt || null,
+            discordPublicFlags: existingData?.discordPublicFlags || 0,
+            discordBadges: existingData?.discordBadges || []
           });
 
           // Set up periodic updates while user is active
