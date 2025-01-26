@@ -13,6 +13,7 @@ function Signup() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isValidating, setIsValidating] = useState(false);
 
   const validateEmail = (email) => {
     const allowedDomains = ['gmail.com', 'proton.me', 'outlook.com'];
@@ -20,58 +21,109 @@ function Signup() {
     return allowedDomains.includes(domain);
   };
 
-  const validateDiscordId = (id) => {
-    return /^\d{18}$/.test(id);
+  const validateDiscordId = async (id) => {
+    try {
+      console.log('Validating Discord ID:', id);
+      const response = await fetch(`https://discord-lookup.vercel.app/api/user/${id}`);
+      
+      if (!response.ok) {
+        console.error('Discord API Error:', response.status);
+        throw new Error('Discord API error');
+      }
+
+      const data = await response.json();
+      console.log('Discord API Response:', data);
+      
+      if (data.error || !data.tag) {
+        console.error('Invalid Discord data:', data);
+        throw new Error('Invalid Discord ID');
+      }
+      
+      return {
+        discordUsername: data.tag || 'Unknown',
+        discordAvatar: data.avatar || null,
+        discordBanner: data.banner || null,
+        discordBannerColor: data.banner_color || null,
+        discordCreatedAt: data.created_at || new Date().toISOString(),
+        discordPublicFlags: data.public_flags || 0,
+        discordBadges: data.badges || []
+      };
+    } catch (error) {
+      console.error('Discord validation error:', error);
+      throw new Error('Failed to validate Discord ID. Please try again.');
+    }
   };
 
   const checkEmailExists = async (email) => {
-    const usersRef = collection(db, 'users');
-    const q = query(usersRef, where('email', '==', email));
-    const querySnapshot = await getDocs(q);
-    return !querySnapshot.empty;
+    try {
+      const usersRef = collection(db, 'users');
+      const q = query(usersRef, where('email', '==', email));
+      const querySnapshot = await getDocs(q);
+      return !querySnapshot.empty;
+    } catch (error) {
+      console.error('Email check error:', error);
+      throw new Error('Failed to check email. Please try again.');
+    }
   };
 
   const handleSignup = async (e) => {
     e.preventDefault();
     setError('');
-
-    // Validate email domain
-    if (!validateEmail(email)) {
-      setError('Only Gmail, Proton, and Outlook emails are allowed.');
-      return;
-    }
-
-    // Validate Discord ID
-    if (!validateDiscordId(discordId)) {
-      setError('Discord ID must be exactly 18 numbers.');
-      return;
-    }
+    setIsValidating(true);
 
     try {
+      // Basic validation
+      if (!username || !discordId || !email || !password) {
+        throw new Error('All fields are required');
+      }
+
+      if (discordId.length !== 18 || !/^\d+$/.test(discordId)) {
+        throw new Error('Discord ID must be exactly 18 numbers');
+      }
+
+      // Validate email domain
+      if (!validateEmail(email)) {
+        throw new Error('Only Gmail, Proton, and Outlook emails are allowed');
+      }
+
       // Check if email already exists
       const emailExists = await checkEmailExists(email);
       if (emailExists) {
-        setError('This email is already registered. Please use a different email.');
-        return;
+        throw new Error('This email is already registered');
       }
 
+      // Validate Discord ID and get user details
+      console.log('Starting Discord validation...');
+      const discordDetails = await validateDiscordId(discordId);
+      console.log('Discord details:', discordDetails);
+
+      // Create Firebase auth user
+      console.log('Creating Firebase user...');
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      
+      console.log('Firebase user created:', userCredential.user.uid);
+
       // Store additional user data in Firestore
-      await setDoc(doc(db, 'users', userCredential.user.uid), {
+      const userData = {
         username,
         discordId,
         email,
-        createdAt: new Date().toISOString()
-      });
+        createdAt: new Date().toISOString(),
+        lastLogin: new Date().toISOString(),
+        loginCount: 0,
+        banned: false,
+        ...discordDetails
+      };
+
+      console.log('Storing user data:', userData);
+      await setDoc(doc(db, 'users', userCredential.user.uid), userData);
+      console.log('User data stored successfully');
 
       navigate('/');
     } catch (error) {
-      if (error.code === 'auth/email-already-in-use') {
-        setError('This email is already registered. Please use a different email.');
-      } else {
-        setError('An error occurred during signup. Please try again.');
-      }
+      console.error('Signup error:', error);
+      setError(error.message || 'An error occurred during signup. Please try again.');
+    } finally {
+      setIsValidating(false);
     }
   };
 
@@ -124,11 +176,12 @@ function Signup() {
                 <input
                   type="text"
                   value={discordId}
-                  onChange={(e) => setDiscordId(e.target.value)}
+                  onChange={(e) => setDiscordId(e.target.value.replace(/\D/g, '').slice(0, 18))}
                   className="w-full bg-black/50 text-white border border-white/20 rounded-lg px-4 py-2 pl-10 focus:outline-none focus:border-white/40"
                   placeholder="Enter your 18-digit Discord ID"
                   required
                   pattern="\d{18}"
+                  title="Discord ID must be exactly 18 numbers"
                 />
               </div>
               <p className="mt-1 text-gray-400 text-xs">Must be exactly 18 numbers</p>
@@ -175,9 +228,12 @@ function Signup() {
 
             <button
               type="submit"
-              className="w-full bg-white text-black rounded-lg py-3 font-semibold hover:bg-gray-200 transition-colors"
+              disabled={isValidating}
+              className={`w-full bg-white text-black rounded-lg py-3 font-semibold transition-colors ${
+                isValidating ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-200'
+              }`}
             >
-              Create Account
+              {isValidating ? 'Validating...' : 'Create Account'}
             </button>
           </form>
 
