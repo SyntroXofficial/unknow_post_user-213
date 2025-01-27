@@ -4,6 +4,42 @@ import { motion, AnimatePresence } from 'framer-motion';
 import data from '@emoji-mart/data';
 import Picker from '@emoji-mart/react';
 
+const availableTags = [
+  { name: 'Gaming', color: 'bg-blue-500' },
+  { name: 'Movies', color: 'bg-purple-500' },
+  { name: 'Important', color: 'bg-red-500' },
+  { name: 'Information', color: 'bg-green-500' },
+  { name: 'News', color: 'bg-yellow-500' },
+  { name: 'Problems', color: 'bg-orange-500' },
+  { name: 'Suggestions', color: 'bg-indigo-500' },
+  { name: 'Talk', color: 'bg-pink-500' }
+];
+
+const checkLinkSafety = async (text) => {
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  const urls = text.match(urlRegex);
+  
+  if (!urls) return { safe: true };
+
+  for (const url of urls) {
+    try {
+      const response = await fetch(`https://www.virustotal.com/vtapi/v2/url/report?apikey=4f73dd4688cb47325eb478e1a1bd8d0b8c5654b3497bd47f4f0bf0a96ba89846&resource=${encodeURIComponent(url)}`);
+      const data = await response.json();
+      
+      if (data.positives > 0) {
+        return { 
+          safe: false, 
+          message: `The link ${url} has been flagged as potentially malicious.`
+        };
+      }
+    } catch (error) {
+      console.error('Error checking URL safety:', error);
+    }
+  }
+  
+  return { safe: true };
+};
+
 function CreatePost({ 
   user,
   showProfileEdit,
@@ -19,6 +55,8 @@ function CreatePost({
   setPostTitle,
   newMessage,
   setNewMessage,
+  selectedTags,
+  setSelectedTags,
   cooldown,
   cooldownTime,
   handleSubmit
@@ -27,6 +65,14 @@ function CreatePost({
 
   const onEmojiSelect = (emoji) => {
     setNewMessage((prev) => prev + emoji.native);
+  };
+
+  const toggleTag = (tag) => {
+    if (selectedTags.includes(tag)) {
+      setSelectedTags(selectedTags.filter(t => t !== tag));
+    } else if (selectedTags.length < 3) {
+      setSelectedTags([...selectedTags, tag]);
+    }
   };
 
   return (
@@ -120,6 +166,25 @@ function CreatePost({
                 className="w-full bg-[#272729] text-white p-4 rounded-md border border-[#343536] focus:outline-none focus:border-[#D7DADC]"
                 required
               />
+
+              <div className="flex flex-wrap gap-2">
+                {availableTags.map((tag) => (
+                  <button
+                    key={tag.name}
+                    type="button"
+                    onClick={() => toggleTag(tag.name)}
+                    className={`px-3 py-1 rounded-full text-white text-sm ${
+                      selectedTags.includes(tag.name) ? tag.color : 'bg-gray-600'
+                    }`}
+                  >
+                    {tag.name}
+                  </button>
+                ))}
+              </div>
+              {selectedTags.length === 3 && (
+                <p className="text-yellow-500 text-sm">Maximum 3 tags allowed</p>
+              )}
+
               <div className="relative">
                 <textarea
                   value={newMessage}
@@ -128,53 +193,56 @@ function CreatePost({
                   className="w-full bg-[#272729] text-white p-4 rounded-md border border-[#343536] focus:outline-none focus:border-[#D7DADC] min-h-[100px]"
                   required
                 />
-                <div className="absolute bottom-4 left-4">
-                  <button
-                    type="button"
-                    onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                    className="text-gray-400 hover:text-white transition-colors"
-                  >
-                    <FaRegSmile className="w-5 h-5" />
-                  </button>
-                  {showEmojiPicker && (
-                    <div className="absolute bottom-10 left-0 z-50">
-                      <Picker 
-                        data={data} 
-                        onEmojiSelect={onEmojiSelect}
-                        theme="dark"
-                      />
-                    </div>
-                  )}
-                </div>
               </div>
-              <div className="flex items-center justify-end space-x-2">
-                {cooldown && (
-                  <span className="text-gray-400">
-                    Wait {cooldownTime}s
-                  </span>
-                )}
+
+              <div className="flex items-center justify-between">
                 <button
                   type="button"
-                  onClick={() => {
-                    setShowPostOptions(false);
-                    setNewMessage('');
-                    setPostTitle('');
-                    setPostType('text');
-                  }}
-                  className="px-4 py-2 rounded-full text-gray-400 hover:bg-[#272729]"
+                  onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                  className="text-gray-400 hover:text-white transition-colors"
                 >
-                  Cancel
+                  <FaRegSmile className="w-5 h-5" />
                 </button>
-                <button
-                  type="submit"
-                  disabled={cooldown}
-                  className={`px-6 py-2 bg-white text-[#1A1A1B] rounded-full font-bold transition-colors ${
-                    cooldown ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-200'
-                  }`}
-                >
-                  Post
-                </button>
+                <div className="flex items-center space-x-2">
+                  {cooldown && (
+                    <span className="text-gray-400">
+                      Wait {cooldownTime}s
+                    </span>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowPostOptions(false);
+                      setNewMessage('');
+                      setPostTitle('');
+                      setPostType('text');
+                      setSelectedTags([]);
+                    }}
+                    className="px-4 py-2 rounded-full text-gray-400 hover:bg-[#272729]"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={cooldown}
+                    className={`px-6 py-2 bg-white text-[#1A1A1B] rounded-full font-bold transition-colors ${
+                      cooldown ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-200'
+                    }`}
+                  >
+                    Post
+                  </button>
+                </div>
               </div>
+
+              {showEmojiPicker && (
+                <div className="absolute bottom-full left-0 z-50 mb-2">
+                  <Picker 
+                    data={data} 
+                    onEmojiSelect={onEmojiSelect}
+                    theme="dark"
+                  />
+                </div>
+              )}
             </form>
           </motion.div>
         )}

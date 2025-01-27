@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FaGamepad, FaPlay, FaRandom, FaExclamationTriangle, FaDiscord, FaArrowRight, FaSignInAlt } from 'react-icons/fa';
+import { FaGamepad, FaPlay, FaRandom, FaExclamationTriangle, FaDiscord, FaArrowRight, FaSignInAlt, FaComments } from 'react-icons/fa';
 import { auth } from '../firebase';
 
 const container = {
@@ -80,6 +80,18 @@ function Home() {
                   Experience unlimited access to premium games, streaming services, and exclusive content. 
                   Join our community and unlock a world of digital entertainment.
                 </p>
+
+                {/* Important Information */}
+                <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 space-y-2">
+                  <h3 className="text-red-500 font-semibold flex items-center">
+                    <FaExclamationTriangle className="mr-2" />
+                    Important Information
+                  </h3>
+                  <ul className="text-red-400 text-sm space-y-2">
+                    <li>• Only 25 accounts can be created per day due to Discord API ID verification limitations - Dis wil be removed by time when we arent gono need discord no more </li>
+                    <li>• Community posts are limited to 4 images url per minute for security scanning and anti scame</li>
+                  </ul>
+                </div>
               </motion.div>
 
               {/* CTA Buttons */}
@@ -89,12 +101,7 @@ function Home() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.6, duration: 0.6 }}
               >
-                {user ? (
-                  <Link to="/generator" className="group flex items-center px-6 py-3 bg-white text-black rounded-lg hover:bg-gray-200 transition-all duration-300 text-sm font-semibold">
-                    Access Premium Content
-                    <FaArrowRight className="ml-2 group-hover:translate-x-1 transition-transform duration-300" />
-                  </Link>
-                ) : (
+                {!user && (
                   <>
                     <Link to="/login" className="group flex items-center px-6 py-3 bg-white text-black rounded-lg hover:bg-gray-200 transition-all duration-300 text-sm font-semibold">
                       Sign In
@@ -106,15 +113,6 @@ function Home() {
                     </Link>
                   </>
                 )}
-                <a
-                  href="https://discord.gg/cFdRcKwvgx"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group flex items-center px-6 py-3 bg-[#5865F2] text-white rounded-lg hover:bg-[#4752C4] transition-all duration-300 text-sm font-semibold"
-                >
-                  <FaDiscord className="mr-2 group-hover:rotate-12 transition-transform duration-300" />
-                  Join Discord
-                </a>
               </motion.div>
             </div>
 
@@ -125,7 +123,7 @@ function Home() {
               initial="hidden"
               animate="show"
             >
-              <motion.div variants={item} className="col-span-2">
+              <motion.div variants={item}>
                 <Link to={user ? "/games" : "/login"} className="block p-6 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 hover:border-white/20 transition-all duration-300 group">
                   <div className="flex items-start space-x-4">
                     <div className="p-3 bg-blue-500/10 rounded-lg group-hover:scale-110 transition-transform duration-300">
@@ -133,7 +131,7 @@ function Home() {
                     </div>
                     <div>
                       <h3 className="text-lg font-semibold mb-1">Premium Games</h3>
-                      <p className="text-sm text-gray-400">Access our vast collection of premium games instantly</p>
+                      <p className="text-sm text-gray-400">Access our vast collection of premium games</p>
                     </div>
                   </div>
                 </Link>
@@ -167,46 +165,54 @@ function Home() {
                 </Link>
               </motion.div>
 
-              <motion.div variants={item} className="col-span-2">
+              <motion.div variants={item}>
+                <Link to={user ? "/community" : "/login"} className="block p-6 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 hover:border-white/20 transition-all duration-300 group">
+                  <div className="flex items-start space-x-4">
+                    <div className="p-3 bg-indigo-500/10 rounded-lg group-hover:scale-110 transition-transform duration-300">
+                      <FaComments className="w-6 h-6 text-indigo-500" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold mb-1">Community</h3>
+                      <p className="text-sm text-gray-400">Join our growing community</p>
+                    </div>
+                  </div>
+                </Link>
+              </motion.div>
+
+              <motion.div variants={item}>
                 <Link to="/important" className="block p-6 bg-red-500/5 backdrop-blur-sm rounded-xl border border-red-500/10 hover:border-red-500/20 transition-all duration-300 group">
                   <div className="flex items-start space-x-4">
                     <div className="p-3 bg-red-500/10 rounded-lg group-hover:scale-110 transition-transform duration-300">
                       <FaExclamationTriangle className="w-6 h-6 text-red-500" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-semibold mb-1">Important Information</h3>
-                      <p className="text-sm text-gray-400">Read our guidelines and warnings before starting</p>
+                      <h3 className="text-lg font-semibold mb-1">Important</h3>
+                      <p className="text-sm text-gray-400">Read our guidelines</p>
                     </div>
                   </div>
                 </Link>
               </motion.div>
+
+              <motion.div variants={item}>
+                <a
+                  href="https://discord.gg/cFdRcKwvgx"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block p-6 bg-[#5865F2]/5 backdrop-blur-sm rounded-xl border border-[#5865F2]/10 hover:border-[#5865F2]/30 transition-all duration-300 group"
+                >
+                  <div className="flex items-start space-x-4">
+                    <div className="p-3 bg-[#5865F2]/10 rounded-lg group-hover:scale-110 transition-transform duration-300">
+                      <FaDiscord className="w-6 h-6 text-[#5865F2]" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold mb-1">Discord</h3>
+                      <p className="text-sm text-gray-400">Join our server</p>
+                    </div>
+                  </div>
+                </a>
+              </motion.div>
             </motion.div>
           </div>
-
-          {/* Stats Section */}
-          <motion.div
-            className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-4"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8, duration: 0.6 }}
-          >
-            <div className="p-6 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10">
-              <div className="text-2xl font-bold mb-1">50+</div>
-              <div className="text-sm text-gray-400">Premium Games</div>
-            </div>
-            <div className="p-6 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10">
-              <div className="text-2xl font-bold mb-1">20+</div>
-              <div className="text-sm text-gray-400">Generator Services</div>
-            </div>
-            <div className="p-6 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10">
-              <div className="text-2xl font-bold mb-1">1000+</div>
-              <div className="text-sm text-gray-400">Active Users</div>
-            </div>
-            <div className="p-6 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10">
-              <div className="text-2xl font-bold mb-1">24/7</div>
-              <div className="text-sm text-gray-400">Support Available</div>
-            </div>
-          </motion.div>
         </motion.div>
       </motion.div>
     </div>

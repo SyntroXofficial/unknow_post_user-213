@@ -1,9 +1,88 @@
-import React from 'react';
-import { FaUsers, FaUserFriends, FaRegCommentAlt, FaComments, FaRegStar, FaPlus, FaTimes } from 'react-icons/fa';
+import React, { useState } from 'react';
+import { FaUsers, FaUserFriends, FaRegCommentAlt, FaComments, FaRegStar, FaBullhorn, FaEdit } from 'react-icons/fa';
+import { auth, db } from '../../firebase';
+import { doc, updateDoc, setDoc, getDoc } from 'firebase/firestore';
 
-function Sidebar({ communityStats, showRules, setShowRules, communityRules }) {
+function Sidebar({ communityStats, communityRules, announcement }) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedAnnouncement, setEditedAnnouncement] = useState(announcement);
+  const isAdmin = auth.currentUser?.email === 'andres_rios_xyz@outlook.com';
+
+  const handleSaveAnnouncement = async () => {
+    if (!isAdmin) return;
+    
+    try {
+      const announcementRef = doc(db, 'system', 'announcement');
+      
+      // Check if the document exists
+      const docSnap = await getDoc(announcementRef);
+      
+      if (!docSnap.exists()) {
+        // Create the document if it doesn't exist
+        await setDoc(announcementRef, {
+          text: editedAnnouncement,
+          lastUpdated: new Date()
+        });
+      } else {
+        // Update the existing document
+        await updateDoc(announcementRef, {
+          text: editedAnnouncement,
+          lastUpdated: new Date()
+        });
+      }
+      
+      setIsEditing(false);
+    } catch (error) {
+      console.error('Error updating announcement:', error);
+    }
+  };
+
   return (
     <div className="w-80 space-y-4">
+      {/* Announcement */}
+      <div className="bg-[#1A1A1B] border border-[#343536] rounded-md p-4">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center space-x-2">
+            <FaBullhorn className="text-yellow-500" />
+            <h2 className="text-white font-bold">Announcement</h2>
+          </div>
+          {isAdmin && (
+            <button
+              onClick={() => setIsEditing(!isEditing)}
+              className="text-gray-400 hover:text-white"
+            >
+              <FaEdit className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+        {isEditing ? (
+          <div className="space-y-2">
+            <textarea
+              value={editedAnnouncement}
+              onChange={(e) => setEditedAnnouncement(e.target.value)}
+              className="w-full bg-black/50 text-white border border-white/20 rounded-lg px-4 py-2 focus:outline-none focus:border-white/40"
+              rows={3}
+            />
+            <div className="flex justify-end space-x-2">
+              <button
+                onClick={() => setIsEditing(false)}
+                className="px-3 py-1 text-gray-400 hover:text-white"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveAnnouncement}
+                className="px-3 py-1 bg-purple-500 text-white rounded-lg hover:bg-purple-600"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        ) : (
+          <p className="text-gray-400 text-sm">{announcement}</p>
+        )}
+      </div>
+
       {/* About Community */}
       <div className="bg-[#1A1A1B] border border-[#343536] rounded-md">
         <div className="p-4">
@@ -58,22 +137,14 @@ function Sidebar({ communityStats, showRules, setShowRules, communityRules }) {
       <div className="bg-[#1A1A1B] border border-[#343536] rounded-md p-4">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-white font-bold">Community Rules</h2>
-          <button
-            onClick={() => setShowRules(!showRules)}
-            className="text-gray-400 hover:bg-[#272729] p-1 rounded"
-          >
-            {showRules ? <FaTimes /> : <FaPlus />}
-          </button>
         </div>
-        {showRules && (
-          <div className="space-y-2">
-            {communityRules.map((rule, index) => (
-              <div key={index} className="text-gray-400 text-sm">
-                {index + 1}. {rule}
-              </div>
-            ))}
-          </div>
-        )}
+        <div className="space-y-2">
+          {communityRules.map((rule, index) => (
+            <div key={index} className="text-gray-400 text-sm">
+              {index + 1}. {rule}
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

@@ -15,11 +15,6 @@ function CommunityHeader() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-white text-2xl font-bold">AZCORP</h1>
-              <div className="flex items-center space-x-2 text-gray-400">
-                <span>azcorporation</span>
-                <span>•</span>
-                <span>Created Jan 27, 2025</span>
-              </div>
             </div>
           </div>
         </div>
