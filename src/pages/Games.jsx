@@ -42,7 +42,7 @@ function Games() {
   const [selectedRating, setSelectedRating] = useState('all');
   const [viewMode, setViewMode] = useState('grid');
   const [currentPage, setCurrentPage] = useState(1);
-  const gamesPerPage = 10;
+  const gamesPerPage = 6;
   
   useEffect(() => {
     if (allGames.length > 0) {
@@ -140,65 +140,68 @@ function Games() {
               <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300" />
             </div>
 
-            {/* Content Section - Fixed height */}
-            <div className="p-4 space-y-3">
+            {/* Content Section */}
+            <div className="p-6 space-y-4">
               <div className="flex items-start justify-between">
                 <div>
-                  <h3 className="text-lg font-semibold text-white mb-2 line-clamp-1">{game.game}</h3>
-                  <div className="flex flex-wrap gap-1">
+                  <h3 className="text-xl font-semibold text-white mb-3 line-clamp-1">{game.game}</h3>
+                  <div className="flex flex-wrap gap-2">
                     {game.features.find(f => f.label === 'Genre')?.value.split(' & ').map((genre, index) => (
-                      <span key={index} className="px-2 py-0.5 bg-white/10 backdrop-blur-sm rounded-md text-white text-xs font-medium">
+                      <span key={index} className="px-3 py-1 bg-white/10 backdrop-blur-sm rounded-md text-white text-sm font-medium">
                         {genre}
                       </span>
                     ))}
                   </div>
                 </div>
-                <span className="text-white px-3 py-1 bg-white/10 rounded-lg text-sm font-medium group-hover:bg-white/20 transition-colors">
-                  Play
-                </span>
               </div>
 
-              <p className="text-gray-300 text-sm line-clamp-2">
+              <p className="text-gray-300 text-base line-clamp-3">
                 {game.description}
               </p>
 
-              <div className="grid grid-cols-4 gap-2 pt-2 border-t border-white/10">
-                <div className="space-y-0.5">
-                  <p className="text-gray-400 text-xs">Platform</p>
+              <div className="grid grid-cols-4 gap-4 pt-4 border-t border-white/10">
+                <div className="space-y-1">
+                  <p className="text-gray-400 text-sm">Platform</p>
                   <div className="flex items-center gap-1">
                     {getPlatformIcon(game.features.find(f => f.label === 'Platform')?.value)}
-                    <span className="text-white/90 text-xs">
+                    <span className="text-white/90 text-sm">
                       {game.features.find(f => f.label === 'Platform')?.value}
                     </span>
                   </div>
                 </div>
-                <div className="space-y-0.5">
-                  <p className="text-gray-400 text-xs">Release</p>
+                <div className="space-y-1">
+                  <p className="text-gray-400 text-sm">Release</p>
                   <div className="flex items-center gap-1">
-                    <FaCalendar className="w-3 h-3 text-gray-400" />
-                    <span className="text-white/90 text-xs">
+                    <FaCalendar className="w-4 h-4 text-gray-400" />
+                    <span className="text-white/90 text-sm">
                       {game.features.find(f => f.label === 'Release')?.value}
                     </span>
                   </div>
                 </div>
-                <div className="space-y-0.5">
-                  <p className="text-gray-400 text-xs">Rating</p>
+                <div className="space-y-1">
+                  <p className="text-gray-400 text-sm">Rating</p>
                   <div className="flex items-center gap-1">
-                    <FaStar className="w-3 h-3 text-yellow-500" />
-                    <span className="text-white/90 text-xs">
+                    <FaStar className="w-4 h-4 text-yellow-500" />
+                    <span className="text-white/90 text-sm">
                       {game.features.find(f => f.label === 'Rating')?.value}
                     </span>
                   </div>
                 </div>
-                <div className="space-y-0.5">
-                  <p className="text-gray-400 text-xs">Playtime</p>
+                <div className="space-y-1">
+                  <p className="text-gray-400 text-sm">Playtime</p>
                   <div className="flex items-center gap-1">
-                    <FaClock className="w-3 h-3 text-gray-400" />
-                    <span className="text-white/90 text-xs">
+                    <FaClock className="w-4 h-4 text-gray-400" />
+                    <span className="text-white/90 text-sm">
                       {game.features.find(f => f.label === 'Playtime')?.value}
                     </span>
                   </div>
                 </div>
+              </div>
+
+              <div className="pt-4 flex justify-end">
+                <span className="text-white px-4 py-2 bg-white/10 rounded-lg text-sm font-medium group-hover:bg-white/20 transition-colors">
+                  Play Now
+                </span>
               </div>
             </div>
           </div>
@@ -274,102 +277,100 @@ function Games() {
           initial="hidden"
           animate="show"
         >
-          {/* Advanced Filter Controls */}
+          {/* Filter Controls */}
           <div className="bg-gradient-to-r from-white/10 to-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6 mb-8">
-            <div className="flex flex-col gap-6">
-              <div className="flex items-center justify-between">
-                <div className="space-y-2">
-                  <h2 className="text-2xl font-bold text-white">Game Library</h2>
-                  <p className="text-gray-400">
-                    {filteredGames.length} {filteredGames.length === 1 ? 'game' : 'games'} available
-                  </p>
-                </div>
-                <button
-                  onClick={() => setShowFilters(!showFilters)}
-                  className="flex items-center gap-2 px-4 py-2 bg-white/10 rounded-lg hover:bg-white/20 transition-colors text-white"
-                >
-                  <FaFilter />
-                  <span>Filters</span>
-                  <FaChevronDown className={`transform transition-transform ${showFilters ? 'rotate-180' : ''}`} />
-                </button>
+            <div className="flex items-center justify-between">
+              <div className="space-y-2">
+                <h2 className="text-2xl font-bold text-white">Game Library</h2>
+                <p className="text-gray-400">
+                  {filteredGames.length} {filteredGames.length === 1 ? 'game' : 'games'} available
+                </p>
               </div>
+              <button
+                onClick={() => setShowFilters(!showFilters)}
+                className="flex items-center gap-2 px-4 py-2 bg-white/10 rounded-lg hover:bg-white/20 transition-colors text-white"
+              >
+                <FaFilter />
+                <span>Filters</span>
+                <FaChevronDown className={`transform transition-transform ${showFilters ? 'rotate-180' : ''}`} />
+              </button>
+            </div>
 
-              <AnimatePresence>
-                {showFilters && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: 'auto', opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.3 }}
-                    className="overflow-hidden"
-                  >
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 pt-4 border-t border-white/10">
-                      <div className="space-y-2">
-                        <label className="text-gray-400 text-sm">Search Games</label>
-                        <div className="relative">
-                          <input
-                            type="text"
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            placeholder="Search by name or description..."
-                            className="w-full bg-black/50 text-white border border-white/20 rounded-lg px-4 py-2 pl-10 focus:outline-none focus:border-white/40"
-                          />
-                          <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                        </div>
-                      </div>
-
-                      <div className="space-y-2">
-                        <label className="text-gray-400 text-sm">Genre</label>
-                        <select
-                          value={filter}
-                          onChange={(e) => setFilter(e.target.value)}
-                          className="w-full bg-black/50 text-white border border-white/20 rounded-lg px-4 py-2 focus:outline-none focus:border-white/40"
-                        >
-                          <option value="all">All Genres</option>
-                          <option value="action">Action</option>
-                          <option value="rpg">RPG</option>
-                          <option value="horror">Horror</option>
-                          <option value="adventure">Adventure</option>
-                        </select>
-                      </div>
-
-                      <div className="space-y-2">
-                        <label className="text-gray-400 text-sm">Platform</label>
-                        <select
-                          value={selectedPlatform}
-                          onChange={(e) => setSelectedPlatform(e.target.value)}
-                          className="w-full bg-black/50 text-white border border-white/20 rounded-lg px-4 py-2 focus:outline-none focus:border-white/40"
-                        >
-                          <option value="all">All Platforms</option>
-                          <option value="pc">PC</option>
-                          <option value="playstation">PlayStation</option>
-                          <option value="xbox">Xbox</option>
-                        </select>
-                      </div>
-
-                      <div className="space-y-2">
-                        <label className="text-gray-400 text-sm">Sort By</label>
-                        <select
-                          value={sortBy}
-                          onChange={(e) => setSortBy(e.target.value)}
-                          className="w-full bg-black/50 text-white border border-white/20 rounded-lg px-4 py-2 focus:outline-none focus:border-white/40"
-                        >
-                          <option value="name">Name</option>
-                          <option value="rating">Rating</option>
-                          <option value="release">Release Date</option>
-                          <option value="playtime">Playtime</option>
-                        </select>
+            <AnimatePresence>
+              {showFilters && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="overflow-hidden"
+                >
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 pt-4 border-t border-white/10">
+                    <div className="space-y-2">
+                      <label className="text-gray-400 text-sm">Search Games</label>
+                      <div className="relative">
+                        <input
+                          type="text"
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          placeholder="Search by name or description..."
+                          className="w-full bg-black/50 text-white border border-white/20 rounded-lg px-4 py-2 pl-10 focus:outline-none focus:border-white/40"
+                        />
+                        <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                       </div>
                     </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
+
+                    <div className="space-y-2">
+                      <label className="text-gray-400 text-sm">Genre</label>
+                      <select
+                        value={filter}
+                        onChange={(e) => setFilter(e.target.value)}
+                        className="w-full bg-black/50 text-white border border-white/20 rounded-lg px-4 py-2 focus:outline-none focus:border-white/40"
+                      >
+                        <option value="all">All Genres</option>
+                        <option value="action">Action</option>
+                        <option value="rpg">RPG</option>
+                        <option value="horror">Horror</option>
+                        <option value="adventure">Adventure</option>
+                      </select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-gray-400 text-sm">Platform</label>
+                      <select
+                        value={selectedPlatform}
+                        onChange={(e) => setSelectedPlatform(e.target.value)}
+                        className="w-full bg-black/50 text-white border border-white/20 rounded-lg px-4 py-2 focus:outline-none focus:border-white/40"
+                      >
+                        <option value="all">All Platforms</option>
+                        <option value="pc">PC</option>
+                        <option value="playstation">PlayStation</option>
+                        <option value="xbox">Xbox</option>
+                      </select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-gray-400 text-sm">Sort By</label>
+                      <select
+                        value={sortBy}
+                        onChange={(e) => setSortBy(e.target.value)}
+                        className="w-full bg-black/50 text-white border border-white/20 rounded-lg px-4 py-2 focus:outline-none focus:border-white/40"
+                      >
+                        <option value="name">Name</option>
+                        <option value="rating">Rating</option>
+                        <option value="release">Release Date</option>
+                        <option value="playtime">Playtime</option>
+                      </select>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
           {/* Games Grid */}
           <motion.div 
-            className="grid grid-cols-5 gap-4"
+            className="grid grid-cols-3 gap-6"
             variants={container}
             initial="hidden"
             animate="show"
