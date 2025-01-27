@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FaEnvelope, FaLock, FaUser, FaExclamationTriangle } from 'react-icons/fa';
 import { auth, db } from '../firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { doc, setDoc, collection, query, where, getDocs, getDoc } from 'firebase/firestore';
+import { doc, setDoc, collection, query, where, getDocs } from 'firebase/firestore';
 
 function Signup() {
   const navigate = useNavigate();
@@ -13,47 +13,6 @@ function Signup() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isValidating, setIsValidating] = useState(false);
-  const [signupsRemaining, setSignupsRemaining] = useState(null);
-
-  useEffect(() => {
-    // Check remaining signups on component mount
-    checkRemainingSignups();
-  }, []);
-
-  const checkRemainingSignups = async () => {
-    try {
-      const statsRef = doc(db, 'system', 'signupStats');
-      const statsDoc = await getDoc(statsRef);
-      
-      if (statsDoc.exists()) {
-        const { lastReset, count } = statsDoc.data();
-        const now = new Date();
-        const resetTime = lastReset.toDate();
-        const hoursSinceReset = (now - resetTime) / (1000 * 60 * 60);
-
-        if (hoursSinceReset >= 25) {
-          // Reset counter if 25 hours have passed
-          await setDoc(statsRef, {
-            lastReset: now,
-            count: 0
-          });
-          setSignupsRemaining(25);
-        } else {
-          setSignupsRemaining(25 - count);
-        }
-      } else {
-        // Initialize stats if they don't exist
-        await setDoc(statsRef, {
-          lastReset: new Date(),
-          count: 0
-        });
-        setSignupsRemaining(25);
-      }
-    } catch (error) {
-      console.error('Error checking signup stats:', error);
-      setError('Unable to check signup availability');
-    }
-  };
 
   const validateEmail = (email) => {
     const allowedDomains = ['gmail.com', 'proton.me', 'outlook.com'];
@@ -79,11 +38,6 @@ function Signup() {
     setIsValidating(true);
 
     try {
-      // Check if signups are available
-      if (signupsRemaining <= 0) {
-        throw new Error('No signups available. Please try again in 25 hours.');
-      }
-
       // Basic validation
       if (!username || !email || !password) {
         throw new Error('All fields are required');
@@ -102,17 +56,6 @@ function Signup() {
 
       // Create Firebase auth user
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-
-      // Update signup counter
-      const statsRef = doc(db, 'system', 'signupStats');
-      const statsDoc = await getDoc(statsRef);
-      if (statsDoc.exists()) {
-        const { count } = statsDoc.data();
-        await setDoc(statsRef, {
-          lastReset: statsDoc.data().lastReset,
-          count: count + 1
-        });
-      }
 
       // Store user data in Firestore
       const userData = {
@@ -134,28 +77,6 @@ function Signup() {
     }
   };
 
-  if (signupsRemaining === 0) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center px-4">
-        <div className="bg-white/5 backdrop-blur-sm rounded-xl p-8 border border-white/10 max-w-md w-full">
-          <div className="text-center mb-6">
-            <FaExclamationTriangle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold text-white">Signups Temporarily Closed</h2>
-            <p className="text-gray-400 mt-2">
-              We've reached our daily signup limit. Please try again in 25 hours.
-            </p>
-          </div>
-          <Link
-            to="/"
-            className="block w-full text-center bg-white text-black rounded-lg py-3 font-semibold hover:bg-gray-200 transition-colors"
-          >
-            Return Home
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-black flex items-center justify-center px-4">
       <div className="max-w-md w-full space-y-8">
@@ -167,9 +88,6 @@ function Signup() {
         >
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold text-white">Create Account</h2>
-            <p className="mt-2 text-gray-400">
-              {signupsRemaining} slots remaining today
-            </p>
           </div>
 
           <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 mb-6">
