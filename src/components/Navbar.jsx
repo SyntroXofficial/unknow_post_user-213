@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
-  FaDiscord, FaHome, FaPlay, FaGamepad, 
+  FaHome, FaPlay, FaGamepad, 
   FaExclamationTriangle, FaRandom, FaEyeSlash, FaEye,
   FaBars, FaTimes, FaArrowRight, FaUser, FaSignInAlt,
   FaUserShield, FaComments
@@ -139,16 +139,6 @@ function Navbar({ isSidebarOpen, setIsSidebarOpen }) {
         >
           <FaExclamationTriangle className="w-4 h-4" />
         </Link>
-
-        <a 
-          href="https://discord.gg/cFdRcKwvgx" 
-          target="_blank" 
-          rel="noopener noreferrer"
-          className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-300 group"
-          title="Discord"
-        >
-          <FaDiscord className="w-4 h-4" />
-        </a>
 
         {isAdmin && (
           <Link
@@ -289,15 +279,6 @@ function Navbar({ isSidebarOpen, setIsSidebarOpen }) {
               <FaUserShield className="w-5 h-5" />
             </Link>
           )}
-
-          <a 
-            href="https://discord.gg/cFdRcKwvgx"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="p-3 text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-300"
-          >
-            <FaDiscord className="w-5 h-5" />
-          </a>
 
           {user ? (
             <button

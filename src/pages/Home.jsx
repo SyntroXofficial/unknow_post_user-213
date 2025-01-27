@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FaGamepad, FaPlay, FaRandom, FaExclamationTriangle, FaDiscord, FaArrowRight, FaSignInAlt, FaComments } from 'react-icons/fa';
+import { FaGamepad, FaPlay, FaRandom, FaExclamationTriangle, FaArrowRight, FaSignInAlt, FaComments } from 'react-icons/fa';
 import { auth } from '../firebase';
 
 const container = {
@@ -88,8 +88,7 @@ function Home() {
                     Important Information
                   </h3>
                   <ul className="text-red-400 text-sm space-y-2">
-                    <li>• Only 25 accounts can be created per day due to Discord API ID verification limitations - Dis wil be removed by time when we arent gono need discord no more </li>
-                    <li>• Community posts are limited to 4 images url per minute for security scanning and anti scame</li>
+                    <li>• Community posts are limited to 4 images url per minute for security scanning and anti scam</li>
                   </ul>
                 </div>
               </motion.div>
@@ -191,25 +190,6 @@ function Home() {
                     </div>
                   </div>
                 </Link>
-              </motion.div>
-
-              <motion.div variants={item}>
-                <a
-                  href="https://discord.gg/cFdRcKwvgx"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block p-6 bg-[#5865F2]/5 backdrop-blur-sm rounded-xl border border-[#5865F2]/10 hover:border-[#5865F2]/30 transition-all duration-300 group"
-                >
-                  <div className="flex items-start space-x-4">
-                    <div className="p-3 bg-[#5865F2]/10 rounded-lg group-hover:scale-110 transition-transform duration-300">
-                      <FaDiscord className="w-6 h-6 text-[#5865F2]" />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-semibold mb-1">Discord</h3>
-                      <p className="text-sm text-gray-400">Join our server</p>
-                    </div>
-                  </div>
-                </a>
               </motion.div>
             </motion.div>
           </div>
