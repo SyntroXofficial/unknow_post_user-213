@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import Navbar from './components/Navbar';
@@ -19,32 +19,45 @@ import PageTransition from './components/PageTransition';
 import TransitionLayout from './components/TransitionLayout';
 import { auth, db } from './firebase';
 import { doc, updateDoc, serverTimestamp, increment, getDoc } from 'firebase/firestore';
+import { onAuthStateChanged } from 'firebase/auth';
 
 function PrivateRoute({ children }) {
   const location = useLocation();
   const navigate = useNavigate();
-  const user = auth.currentUser;
+  const [authChecked, setAuthChecked] = useState(false);
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
-    if (user) {
-      // Check last login time
-      const lastLoginTime = user.metadata.lastLoginAt;
-      const currentTime = Date.now();
-      const timeDiff = currentTime - lastLoginTime;
-      const hoursDiff = timeDiff / (1000 * 60 * 60); // Convert to hours
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      setAuthChecked(true);
 
-      if (hoursDiff >= 24) {
-        // Force logout if more than 24 hours have passed
-        auth.signOut();
-        navigate('/login', { 
-          state: { 
-            from: location,
-            message: 'Your session has expired. Please log in again.' 
-          } 
-        });
+      if (currentUser) {
+        // Check last login time
+        const lastLoginTime = currentUser.metadata.lastLoginAt;
+        const currentTime = Date.now();
+        const timeDiff = currentTime - lastLoginTime;
+        const hoursDiff = timeDiff / (1000 * 60 * 60); // Convert to hours
+
+        if (hoursDiff >= 24) {
+          // Force logout if more than 24 hours have passed
+          auth.signOut();
+          navigate('/login', { 
+            state: { 
+              from: location,
+              message: 'Your session has expired. Please log in again.' 
+            } 
+          });
+        }
       }
-    }
-  }, [user, navigate, location]);
+    });
+
+    return () => unsubscribe();
+  }, [navigate, location]);
+
+  if (!authChecked) {
+    return null; // or a loading spinner
+  }
 
   if (!user) {
     return <Navigate to="/login" state={{ from: location }} replace />;
@@ -55,7 +68,22 @@ function PrivateRoute({ children }) {
 
 function AdminRoute({ children }) {
   const location = useLocation();
-  const user = auth.currentUser;
+  const [authChecked, setAuthChecked] = useState(false);
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      setAuthChecked(true);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  if (!authChecked) {
+    return null; // or a loading spinner
+  }
+
   const isAdmin = user?.email === 'andres_rios_xyz@outlook.com';
 
   if (!user || !isAdmin) {
@@ -66,10 +94,13 @@ function AdminRoute({ children }) {
 }
 
 function App() {
-  const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false);
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(async (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      setAuthChecked(true);
+      
       if (user) {
         const userRef = doc(db, 'users', user.uid);
         
@@ -170,6 +201,14 @@ function App() {
 
     return () => unsubscribe();
   }, []);
+
+  if (!authChecked) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="text-white text-xl">Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <Router>
