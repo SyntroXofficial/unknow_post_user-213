@@ -4,7 +4,7 @@ import {
   FaDiscord, FaHome, FaPlay, FaGamepad, 
   FaExclamationTriangle, FaRandom, FaEyeSlash, FaEye,
   FaBars, FaTimes, FaArrowRight, FaUser, FaSignInAlt,
-  FaUserShield
+  FaUserShield, FaComments
 } from 'react-icons/fa';
 import { auth } from '../firebase';
 import { signOut } from 'firebase/auth';
@@ -112,6 +112,18 @@ function Navbar({ isSidebarOpen, setIsSidebarOpen }) {
               title="Games"
             >
               <FaGamepad className="w-4 h-4" />
+            </Link>
+
+            <Link 
+              to="/community" 
+              className={`p-2 rounded-lg transition-all duration-300 group ${
+                isActive('/community') 
+                  ? 'bg-white text-black' 
+                  : 'text-white/70 hover:text-white hover:bg-white/10'
+              }`}
+              title="Community"
+            >
+              <FaComments className="w-4 h-4" />
             </Link>
           </>
         )}
@@ -242,6 +254,16 @@ function Navbar({ isSidebarOpen, setIsSidebarOpen }) {
                 }`}
               >
                 <FaGamepad className="w-5 h-5" />
+              </Link>
+
+              <Link 
+                to="/community"
+                onClick={toggleSidebar}
+                className={`p-3 rounded-lg transition-all duration-300 ${
+                  isActive('/community') ? 'bg-white text-black' : 'text-white/70 hover:text-white hover:bg-white/10'
+                }`}
+              >
+                <FaComments className="w-5 h-5" />
               </Link>
             </>
           )}
