@@ -156,7 +156,7 @@ function App() {
             return 'Desktop';
           };
 
-          // Get existing user data to preserve Discord info
+          // Get existing user data
           const userDoc = await getDoc(userRef);
           const existingData = userDoc.data();
 
@@ -174,16 +174,7 @@ function App() {
             lastCity: ipData.city || 'Unknown',
             lastISP: ipData.org || 'Unknown',
             lastIpAddress: ipData.ip || 'Unknown',
-            loginCount: increment(1),
-            // Preserve Discord information
-            discordUsername: existingData?.discordUsername || null,
-            discordDiscriminator: existingData?.discordDiscriminator || null,
-            discordAvatar: existingData?.discordAvatar || null,
-            discordBanner: existingData?.discordBanner || null,
-            discordBannerColor: existingData?.discordBannerColor || null,
-            discordCreatedAt: existingData?.discordCreatedAt || null,
-            discordPublicFlags: existingData?.discordPublicFlags || 0,
-            discordBadges: existingData?.discordBadges || []
+            loginCount: increment(1)
           });
 
           // Set up periodic updates while user is active
