@@ -31,13 +31,36 @@ const item = {
   }
 };
 
+const genres = [
+  { id: 'all', name: 'All Genres' },
+  { id: 28, name: 'Action' },
+  { id: 12, name: 'Adventure' },
+  { id: 16, name: 'Animation' },
+  { id: 35, name: 'Comedy' },
+  { id: 80, name: 'Crime' },
+  { id: 99, name: 'Documentary' },
+  { id: 18, name: 'Drama' },
+  { id: 10751, name: 'Family' },
+  { id: 14, name: 'Fantasy' },
+  { id: 36, name: 'History' },
+  { id: 27, name: 'Horror' },
+  { id: 10402, name: 'Music' },
+  { id: 9648, name: 'Mystery' },
+  { id: 10749, name: 'Romance' },
+  { id: 878, name: 'Science Fiction' },
+  { id: 10770, name: 'TV Movie' },
+  { id: 53, name: 'Thriller' },
+  { id: 10752, name: 'War' },
+  { id: 37, name: 'Western' }
+];
+
 function Streaming() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
-  const [filter, setFilter] = useState('all');
+  const [selectedGenre, setSelectedGenre] = useState('all');
   const [sortBy, setSortBy] = useState('popularity');
   const [showFilters, setShowFilters] = useState(false);
-  const [selectedPlatform, setSelectedPlatform] = useState('all');
+  const [selectedType, setSelectedType] = useState('all');
   const [selectedRating, setSelectedRating] = useState('all');
   const [viewMode, setViewMode] = useState('grid');
   const [trending, setTrending] = useState([]);
@@ -47,6 +70,8 @@ function Streaming() {
   const [topRatedShows, setTopRatedShows] = useState([]);
   const [topRatedMovies, setTopRatedMovies] = useState([]);
   const [popularShows, setPopularShows] = useState([]);
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
   const TMDB_TOKEN = 'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI3MmJhMTBjNDI5OTE0MTU3MzgwOGQyNzEwNGVkMThmYSIsInN1YiI6IjY0ZjVhNTUwMTIxOTdlMDBmZWE5MzdmMSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.84b7vWpVEilAbly4RpS01E9tyirHdhSXjcpfmTczI3Q';
 
   useEffect(() => {
@@ -76,12 +101,12 @@ function Streaming() {
           })
         ]);
 
-        setTrending(trendingRes.data.results.filter(item => item.backdrop_path && item.poster_path).slice(0, 6));
-        setTrendingMovies(trendingRes.data.results.filter(item => item.media_type === 'movie').slice(0, 6));
-        setPopularMovies(popularMoviesRes.data.results.slice(0, 6));
-        setTopRatedShows(topShowsRes.data.results.slice(0, 6));
-        setTopRatedMovies(topMoviesRes.data.results.slice(0, 6));
-        setPopularShows(popularShowsRes.data.results.slice(0, 6));
+        setTrending(trendingRes.data.results.filter(item => item.backdrop_path && item.poster_path));
+        setTrendingMovies(trendingRes.data.results.filter(item => item.media_type === 'movie'));
+        setPopularMovies(popularMoviesRes.data.results);
+        setTopRatedShows(topShowsRes.data.results);
+        setTopRatedMovies(topMoviesRes.data.results);
+        setPopularShows(popularShowsRes.data.results);
       } catch (error) {
         console.error('Error fetching content:', error);
       }
@@ -102,28 +127,83 @@ function Streaming() {
     }
   }, [trending]);
 
-  const filteredContent = trending.filter(item => {
-    const matchesSearch = (item.title || item.name).toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         item.overview.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesType = filter === 'all' || item.media_type === filter;
-    const matchesRating = selectedRating === 'all' || 
-                         (item.adult ? selectedRating === 'R' : selectedRating === 'PG-13');
-    
-    return matchesSearch && matchesType && matchesRating;
-  }).sort((a, b) => {
-    switch (sortBy) {
-      case 'name':
-        return (a.title || a.name).localeCompare(b.title || b.name);
-      case 'rating':
-        return b.vote_average - a.vote_average;
-      case 'release':
-        const dateA = new Date(a.release_date || a.first_air_date || '0');
-        const dateB = new Date(b.release_date || b.first_air_date || '0');
-        return dateB - dateA;
-      default: // popularity
-        return b.popularity - a.popularity;
-    }
-  });
+  useEffect(() => {
+    const searchContent = async () => {
+      if (!searchQuery.trim()) {
+        setIsSearching(false);
+        setSearchResults([]);
+        return;
+      }
+
+      setIsSearching(true);
+      try {
+        const [movieRes, tvRes] = await Promise.all([
+          axios.get('https://api.themoviedb.org/3/search/movie', {
+            params: {
+              query: searchQuery,
+              include_adult: false,
+              language: 'en-US',
+              page: 1,
+              with_genres: selectedGenre !== 'all' ? selectedGenre : undefined
+            },
+            headers: { 'Authorization': `Bearer ${TMDB_TOKEN}` }
+          }),
+          axios.get('https://api.themoviedb.org/3/search/tv', {
+            params: {
+              query: searchQuery,
+              include_adult: false,
+              language: 'en-US',
+              page: 1,
+              with_genres: selectedGenre !== 'all' ? selectedGenre : undefined
+            },
+            headers: { 'Authorization': `Bearer ${TMDB_TOKEN}` }
+          })
+        ]);
+
+        let combinedResults = [
+          ...movieRes.data.results.map(item => ({ ...item, media_type: 'movie' })),
+          ...tvRes.data.results.map(item => ({ ...item, media_type: 'tv' }))
+        ].filter(item => item.poster_path);
+
+        // Apply type filter
+        if (selectedType !== 'all') {
+          combinedResults = combinedResults.filter(item => item.media_type === selectedType);
+        }
+
+        // Apply rating filter
+        if (selectedRating !== 'all') {
+          combinedResults = combinedResults.filter(item => {
+            if (selectedRating === 'high') return item.vote_average >= 7;
+            if (selectedRating === 'medium') return item.vote_average >= 5 && item.vote_average < 7;
+            return item.vote_average < 5;
+          });
+        }
+
+        // Apply sorting
+        combinedResults.sort((a, b) => {
+          switch (sortBy) {
+            case 'name':
+              return (a.title || a.name).localeCompare(b.title || b.name);
+            case 'rating':
+              return b.vote_average - a.vote_average;
+            case 'release':
+              const dateA = new Date(a.release_date || a.first_air_date || '0');
+              const dateB = new Date(b.release_date || b.first_air_date || '0');
+              return dateB - dateA;
+            default: // popularity
+              return b.popularity - a.popularity;
+          }
+        });
+
+        setSearchResults(combinedResults);
+      } catch (error) {
+        console.error('Error searching content:', error);
+      }
+    };
+
+    const debounceTimeout = setTimeout(searchContent, 500);
+    return () => clearTimeout(debounceTimeout);
+  }, [searchQuery, selectedGenre, selectedType, selectedRating, sortBy]);
 
   const featuredContent = trending[currentFeaturedIndex];
 
@@ -271,6 +351,17 @@ function Streaming() {
               </button>
             </div>
 
+            <div className="relative">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search movies and TV shows..."
+                className="w-full bg-black/50 text-white border border-white/20 rounded-lg px-4 py-2 pl-10 focus:outline-none focus:border-white/40"
+              />
+              <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            </div>
+
             <AnimatePresence>
               {showFilters && (
                 <motion.div
@@ -280,26 +371,25 @@ function Streaming() {
                   transition={{ duration: 0.3 }}
                   className="overflow-hidden"
                 >
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 pt-4 border-t border-white/10">
+                  <div className="grid grid-cols-4 gap-4 pt-4 border-t border-white/10 mt-4">
                     <div className="space-y-2">
-                      <label className="text-gray-400 text-sm">Search Content</label>
-                      <div className="relative">
-                        <input
-                          type="text"
-                          value={searchQuery}
-                          onChange={(e) => setSearchQuery(e.target.value)}
-                          placeholder="Search by title or description..."
-                          className="w-full bg-black/50 text-white border border-white/20 rounded-lg px-4 py-2 pl-10 focus:outline-none focus:border-white/40"
-                        />
-                        <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                      </div>
+                      <label className="text-gray-400 text-sm">Genre</label>
+                      <select
+                        value={selectedGenre}
+                        onChange={(e) => setSelectedGenre(e.target.value)}
+                        className="w-full bg-black/50 text-white border border-white/20 rounded-lg px-4 py-2 focus:outline-none focus:border-white/40"
+                      >
+                        {genres.map(genre => (
+                          <option key={genre.id} value={genre.id}>{genre.name}</option>
+                        ))}
+                      </select>
                     </div>
 
                     <div className="space-y-2">
-                      <label className="text-gray-400 text-sm">Content Type</label>
+                      <label className="text-gray-400 text-sm">Type</label>
                       <select
-                        value={filter}
-                        onChange={(e) => setFilter(e.target.value)}
+                        value={selectedType}
+                        onChange={(e) => setSelectedType(e.target.value)}
                         className="w-full bg-black/50 text-white border border-white/20 rounded-lg px-4 py-2 focus:outline-none focus:border-white/40"
                       >
                         <option value="all">All Types</option>
@@ -316,8 +406,9 @@ function Streaming() {
                         className="w-full bg-black/50 text-white border border-white/20 rounded-lg px-4 py-2 focus:outline-none focus:border-white/40"
                       >
                         <option value="all">All Ratings</option>
-                        <option value="PG-13">PG-13</option>
-                        <option value="R">R</option>
+                        <option value="high">High (7+)</option>
+                        <option value="medium">Medium (5-7)</option>
+                        <option value="low">Low (&lt;5)</option>
                       </select>
                     </div>
 
@@ -340,28 +431,82 @@ function Streaming() {
             </AnimatePresence>
           </div>
 
-          {/* Categories */}
-          <div className="space-y-12">
-            <CategorySection title="Trending Now" items={trending} type="movie" />
-            <CategorySection title="Popular Movies" items={popularMovies} type="movie" />
-            <CategorySection title="Top Rated Movies" items={topRatedMovies} type="movie" />
-            <CategorySection title="Popular TV Shows" items={popularShows} type="tv" />
-            <CategorySection title="Top Rated TV Shows" items={topRatedShows} type="tv" />
-          </div>
-
-          {/* No Results Message */}
-          {filteredContent.length === 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-center py-16"
-            >
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white/10 mb-4">
-                <FaSearch className="w-8 h-8 text-gray-400" />
+          {/* Search Results */}
+          {isSearching ? (
+            <div className="space-y-8">
+              <h2 className="text-2xl font-bold text-white">
+                Search Results ({searchResults.length})
+              </h2>
+              <div className="grid grid-cols-6 gap-6">
+                {searchResults.map((item) => (
+                  <Link 
+                    key={item.id}
+                    to={`/${item.media_type}/${item.id}`}
+                    className="transform transition-all duration-300 group"
+                  >
+                    <div className="relative rounded-xl overflow-hidden bg-gradient-to-br from-white/10 to-white/5 border border-white/10 hover:border-white/30 transition-all duration-300 shadow-lg hover:shadow-white/20">
+                      <div className="aspect-[2/3] relative">
+                        <img
+                          src={`https://image.tmdb.org/t/p/w500${item.poster_path}`}
+                          alt={item.title || item.name}
+                          className="absolute inset-0 w-full h-full object-cover"
+                          loading="lazy"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300">
+                          <div className="absolute bottom-0 left-0 right-0 p-4">
+                            <p className="text-white/90 text-sm line-clamp-3">
+                              {item.overview}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="p-4 space-y-3 bg-gradient-to-b from-transparent to-black/50">
+                        <h3 className="text-white font-semibold text-lg line-clamp-1">
+                          {item.title || item.name}
+                        </h3>
+                        <div className="flex items-center gap-4 text-sm">
+                          <div className="flex items-center text-yellow-500">
+                            <FaStar className="w-4 h-4 mr-1" />
+                            <span>{item.vote_average?.toFixed(1)}</span>
+                          </div>
+                          <div className="flex items-center text-gray-400">
+                            <FaCalendar className="w-4 h-4 mr-1" />
+                            <span>{(item.release_date || item.first_air_date)?.split('-')[0]}</span>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between text-sm pt-2 border-t border-white/10">
+                          <div className="flex items-center text-gray-400">
+                            <FaLanguage className="w-4 h-4 mr-1" />
+                            <span>{item.original_language?.toUpperCase()}</span>
+                          </div>
+                          <span className="text-white px-3 py-1.5 bg-white/10 rounded-lg font-medium group-hover:bg-white/20 transition-colors">
+                            Watch Now
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
               </div>
-              <h3 className="text-xl font-semibold text-white mb-2">No content found</h3>
-              <p className="text-gray-400">Try adjusting your filters or search query</p>
-            </motion.div>
+              {searchResults.length === 0 && (
+                <div className="text-center py-16">
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white/10 mb-4">
+                    <FaSearch className="w-8 h-8 text-gray-400" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-white mb-2">No results found</h3>
+                  <p className="text-gray-400">Try adjusting your search terms or filters</p>
+                </div>
+              )}
+            </div>
+          ) : (
+            /* Categories */
+            <div className="space-y-12">
+              <CategorySection title="Trending Now" items={trending} type="movie" />
+              <CategorySection title="Popular Movies" items={popularMovies} type="movie" />
+              <CategorySection title="Top Rated Movies" items={topRatedMovies} type="movie" />
+              <CategorySection title="Popular TV Shows" items={popularShows} type="tv" />
+              <CategorySection title="Top Rated TV Shows" items={topRatedShows} type="tv" />
+            </div>
           )}
         </motion.section>
       </div>
