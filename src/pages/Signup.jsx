@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FaDiscord, FaEnvelope, FaLock, FaUser, FaExclamationTriangle } from 'react-icons/fa';
+import { FaEnvelope, FaLock, FaUser, FaExclamationTriangle } from 'react-icons/fa';
 import { auth, db } from '../firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc, collection, query, where, getDocs, getDoc } from 'firebase/firestore';
@@ -9,7 +9,6 @@ import { doc, setDoc, collection, query, where, getDocs, getDoc } from 'firebase
 function Signup() {
   const navigate = useNavigate();
   const [username, setUsername] = useState('');
-  const [discordId, setDiscordId] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -62,47 +61,6 @@ function Signup() {
     return allowedDomains.includes(domain);
   };
 
-  const validateDiscordId = async (id) => {
-    try {
-      const options = {
-        method: 'GET',
-        headers: {
-          'x-rapidapi-key': 'bf35cf1718msh1c6292a61e1a78cp138de3jsnb78afd54c5d0',
-          'x-rapidapi-host': 'discord-lookup.p.rapidapi.com'
-        }
-      };
-
-      const response = await fetch(`https://discord-lookup.p.rapidapi.com/user/${id}`, options);
-      
-      if (!response.ok) {
-        console.error('Discord API Error:', response.status);
-        throw new Error('Failed to validate Discord ID');
-      }
-
-      const data = await response.json();
-      console.log('Discord API Response:', data);
-      
-      if (data.error || !data.username) {
-        console.error('Invalid Discord data:', data);
-        throw new Error('Invalid Discord ID');
-      }
-      
-      return {
-        discordUsername: data.username || 'Unknown',
-        discordDiscriminator: data.discriminator || '0000',
-        discordAvatar: data.avatar || null,
-        discordBanner: data.banner || null,
-        discordBannerColor: data.banner_color || null,
-        discordCreatedAt: data.created_at || new Date().toISOString(),
-        discordPublicFlags: data.public_flags || 0,
-        discordBadges: data.badges || []
-      };
-    } catch (error) {
-      console.error('Discord validation error:', error);
-      throw new Error('Failed to validate Discord ID. Please try again.');
-    }
-  };
-
   const checkEmailExists = async (email) => {
     try {
       const usersRef = collection(db, 'users');
@@ -127,12 +85,8 @@ function Signup() {
       }
 
       // Basic validation
-      if (!username || !discordId || !email || !password) {
+      if (!username || !email || !password) {
         throw new Error('All fields are required');
-      }
-
-      if (discordId.length !== 18 || !/^\d+$/.test(discordId)) {
-        throw new Error('Discord ID must be exactly 18 numbers');
       }
 
       // Validate email domain
@@ -146,15 +100,8 @@ function Signup() {
         throw new Error('This email is already registered');
       }
 
-      // Validate Discord ID and get user details
-      console.log('Starting Discord validation...');
-      const discordDetails = await validateDiscordId(discordId);
-      console.log('Discord details:', discordDetails);
-
       // Create Firebase auth user
-      console.log('Creating Firebase user...');
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      console.log('Firebase user created:', userCredential.user.uid);
 
       // Update signup counter
       const statsRef = doc(db, 'system', 'signupStats');
@@ -167,22 +114,17 @@ function Signup() {
         });
       }
 
-      // Store additional user data in Firestore
+      // Store user data in Firestore
       const userData = {
         username,
-        discordId,
         email,
         createdAt: new Date().toISOString(),
         lastLogin: new Date().toISOString(),
         loginCount: 0,
-        banned: false,
-        ...discordDetails
+        banned: false
       };
 
-      console.log('Storing user data:', userData);
       await setDoc(doc(db, 'users', userCredential.user.uid), userData);
-      console.log('User data stored successfully');
-
       navigate('/');
     } catch (error) {
       console.error('Signup error:', error);
@@ -236,9 +178,8 @@ function Signup() {
               Important Notice
             </h3>
             <p className="text-red-400 text-sm">
-              Providing incorrect or fake information will result in an immediate permanent ban.
-              Make sure your Discord ID is exactly 18 numbers and you're using either Gmail,
-              Proton, or Outlook email.
+              Make sure you're using either Gmail, Proton, or Outlook email.
+              Providing incorrect information will result in an immediate permanent ban.
             </p>
           </div>
 
@@ -256,24 +197,6 @@ function Signup() {
                   required
                 />
               </div>
-            </div>
-
-            <div>
-              <label className="text-white text-sm font-medium block mb-2">Discord ID</label>
-              <div className="relative">
-                <FaDiscord className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                <input
-                  type="text"
-                  value={discordId}
-                  onChange={(e) => setDiscordId(e.target.value.replace(/\D/g, '').slice(0, 18))}
-                  className="w-full bg-black/50 text-white border border-white/20 rounded-lg px-4 py-2 pl-10 focus:outline-none focus:border-white/40"
-                  placeholder="Enter your 18-digit Discord ID"
-                  required
-                  pattern="\d{18}"
-                  title="Discord ID must be exactly 18 numbers"
-                />
-              </div>
-              <p className="mt-1 text-gray-400 text-xs">Must be exactly 18 numbers</p>
             </div>
 
             <div>
