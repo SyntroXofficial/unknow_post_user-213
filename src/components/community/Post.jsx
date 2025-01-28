@@ -1,12 +1,35 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { 
   FaUserCircle, FaArrowUp, FaArrowDown, FaRegCommentAlt,
   FaFlag, FaThumbtack, FaTrash
 } from 'react-icons/fa';
-import { auth, db } from '../../firebase';
-import { doc, getDoc } from 'firebase/firestore';
+import { auth } from '../../firebase';
 import Comment from './Comment';
+
+// Helper function to get tag color
+const getTagColor = (tag) => {
+  const colors = {
+    'Gaming': 'bg-blue-500',
+    'Movies': 'bg-purple-500',
+    'Important': 'bg-red-500',
+    'Information': 'bg-green-500',
+    'News': 'bg-yellow-500',
+    'Problems': 'bg-orange-500',
+    'Suggestions': 'bg-indigo-500',
+    'Talk': 'bg-pink-500'
+  };
+  return colors[tag] || 'bg-gray-500';
+};
+
+// Helper function to process content
+const processContent = (text) => {
+  if (!text) return '';
+  
+  // Convert URLs to links
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  return text.replace(urlRegex, (url) => `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:underline">${url}</a>`);
+};
 
 function Post({ 
   message, 
@@ -26,91 +49,8 @@ function Post({
   setShowReportModal,
   setSelectedPostId
 }) {
-  const [postUser, setPostUser] = useState(null);
+  const [error, setError] = useState('');
   const isAdmin = auth.currentUser?.email === 'andres_rios_xyz@outlook.com';
-
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        if (message.userId) {
-          const userDoc = await getDoc(doc(db, 'users', message.userId));
-          if (userDoc.exists()) {
-            setPostUser(userDoc.data());
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching user data:', error);
-      }
-    };
-
-    fetchUserData();
-  }, [message.userId]);
-
-  const getTagColor = (tag) => {
-    const colors = {
-      'Gaming': 'bg-blue-500',
-      'Movies': 'bg-purple-500',
-      'Important': 'bg-red-500',
-      'Information': 'bg-green-500',
-      'News': 'bg-yellow-500',
-      'Problems': 'bg-orange-500',
-      'Suggestions': 'bg-indigo-500',
-      'Talk': 'bg-pink-500'
-    };
-    return colors[tag] || 'bg-gray-500';
-  };
-
-  const isImageUrl = (url) => {
-    if (!url) return false;
-    return url.match(/\.(jpeg|jpg|gif|png)$/) != null || 
-           url.includes('imgur.com') ||
-           url.includes('ibb.co') ||
-           url.includes('postimg.cc') ||
-           url.includes('piximg.com');
-  };
-
-  const processContent = (text) => {
-    if (!text) return '';
-    
-    const lines = text.split('\n');
-    return lines.map((line, lineIndex) => {
-      const words = line.split(' ');
-      const elements = [];
-      let currentText = '';
-
-      words.forEach((word, index) => {
-        if (isImageUrl(word)) {
-          if (currentText) {
-            elements.push(<span key={`text-${lineIndex}-${index}`}>{currentText}</span>);
-            currentText = '';
-          }
-          elements.push(
-            <div key={`img-${lineIndex}-${index}`} className="my-4">
-              <img 
-                src={word} 
-                alt="User shared content" 
-                className="max-w-full rounded-lg max-h-96 object-contain"
-                onError={(e) => e.target.style.display = 'none'}
-              />
-            </div>
-          );
-        } else {
-          currentText += (index === 0 ? '' : ' ') + word;
-        }
-      });
-
-      if (currentText) {
-        elements.push(<span key={`text-${lineIndex}-final`}>{currentText}</span>);
-      }
-
-      return (
-        <React.Fragment key={`line-${lineIndex}`}>
-          {elements}
-          {lineIndex < lines.length - 1 && <br />}
-        </React.Fragment>
-      );
-    });
-  };
 
   const handleReportClick = () => {
     setSelectedPostId(message.id);
@@ -118,19 +58,12 @@ function Post({
   };
 
   const handleCommentSubmit = () => {
-    if (newComments[message.id]?.trim()) {
-      handleComment(message.id, newComments[message.id]);
-      setNewComments(prev => ({
-        ...prev,
-        [message.id]: ''
-      }));
-    }
-  };
-
-  const handleReplySubmit = (commentId, replyText) => {
-    if (replyText.trim()) {
-      onReply(message.id, commentId, replyText);
-    }
+    if (!newComments[message.id]?.trim()) return;
+    handleComment(message.id, newComments[message.id]);
+    setNewComments(prev => ({
+      ...prev,
+      [message.id]: ''
+    }));
   };
 
   return (
@@ -147,9 +80,9 @@ function Post({
             )}
             <span className="text-gray-400">Posted by</span>
             <div className="flex items-center space-x-2">
-              {postUser?.profilePicUrl ? (
+              {message.userData?.profilePicUrl ? (
                 <img 
-                  src={postUser.profilePicUrl}
+                  src={message.userData.profilePicUrl}
                   alt="Profile"
                   className="w-6 h-6 rounded-full object-cover"
                   onError={(e) => {
@@ -193,9 +126,10 @@ function Post({
               ))}
             </div>
           )}
-          <div className="text-white mb-4 whitespace-pre-wrap max-h-96 overflow-y-auto">
-            {processContent(message.text)}
-          </div>
+          <div 
+            className="text-white mb-4 whitespace-pre-wrap max-h-96 overflow-y-auto"
+            dangerouslySetInnerHTML={{ __html: processContent(message.text) }}
+          />
         </div>
 
         <div className="flex items-center space-x-4 text-gray-400">
@@ -309,7 +243,7 @@ function Post({
                   key={comment.id} 
                   comment={comment}
                   user={user}
-                  onReply={handleReplySubmit}
+                  onReply={onReply}
                   onVote={(commentId, direction) => onCommentVote(message.id, commentId, direction)}
                   onDelete={(commentId) => onCommentDelete(message.id, commentId)}
                   onReport={(messageId, commentId, type) => handleReport(messageId, commentId, type)}

@@ -158,7 +158,8 @@ function Community() {
     try {
       const userRef = doc(db, 'users', auth.currentUser.uid);
       await updateDoc(userRef, {
-        profilePicUrl: profilePicUrl
+        profilePicUrl: profilePicUrl,
+        lastUpdated: serverTimestamp()
       });
       setShowProfileEdit(false);
     } catch (error) {
@@ -317,6 +318,10 @@ function Community() {
                           src={member.profilePicUrl}
                           alt={member.username}
                           className="w-8 h-8 rounded-full object-cover"
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src = 'https://via.placeholder.com/40?text=?';
+                          }}
                         />
                       ) : (
                         <FaUserCircle className="w-8 h-8 text-gray-400" />

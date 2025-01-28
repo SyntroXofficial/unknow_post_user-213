@@ -3,7 +3,7 @@ import { auth, db } from '../firebase';
 import { 
   collection, 
   getDocs, 
-  doc, 
+  doc,
   getDoc,
   updateDoc, 
   onSnapshot, 
@@ -12,7 +12,6 @@ import {
   orderBy,
   where,
   serverTimestamp,
-  arrayUnion,
   addDoc,
   deleteDoc,
   increment
@@ -32,10 +31,20 @@ export function useCommunityData() {
   useEffect(() => {
     const fetchUserData = async () => {
       if (auth.currentUser) {
-        const userDoc = await getDoc(doc(db, 'users', auth.currentUser.uid));
+        const userDocRef = doc(db, 'users', auth.currentUser.uid);
+        const userDoc = await getDoc(userDocRef);
         if (userDoc.exists()) {
           setUser({ ...userDoc.data(), id: auth.currentUser.uid });
         }
+
+        // Set up real-time listener for the current user's data
+        const unsubscribeUser = onSnapshot(userDocRef, (doc) => {
+          if (doc.exists()) {
+            setUser({ ...doc.data(), id: auth.currentUser.uid });
+          }
+        });
+
+        return () => unsubscribeUser();
       }
     };
 
@@ -44,13 +53,49 @@ export function useCommunityData() {
     const messagesQuery = query(collection(db, 'community_messages'), orderBy('timestamp', 'desc'));
     const reportsQuery = query(collection(db, 'reports'), orderBy('timestamp', 'desc'));
 
-    const unsubscribeMessages = onSnapshot(messagesQuery, (snapshot) => {
-      const newMessages = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        comments: doc.data().comments || []
-      }));
-      setMessages(newMessages);
+    const unsubscribeMessages = onSnapshot(messagesQuery, async (snapshot) => {
+      const messagesData = [];
+      for (const docSnapshot of snapshot.docs) {
+        const messageData = { id: docSnapshot.id, ...docSnapshot.data() };
+        
+        // Fetch user data for the message author
+        if (messageData.userId) {
+          const userDocRef = doc(db, 'users', messageData.userId);
+          const userDoc = await getDoc(userDocRef);
+          if (userDoc.exists()) {
+            messageData.userData = userDoc.data();
+          }
+        }
+
+        // Fetch user data for comments
+        if (messageData.comments) {
+          for (const comment of messageData.comments) {
+            if (comment.userId) {
+              const userDocRef = doc(db, 'users', comment.userId);
+              const userDoc = await getDoc(userDocRef);
+              if (userDoc.exists()) {
+                comment.userData = userDoc.data();
+              }
+            }
+
+            // Fetch user data for replies
+            if (comment.replies) {
+              for (const reply of comment.replies) {
+                if (reply.userId) {
+                  const userDocRef = doc(db, 'users', reply.userId);
+                  const userDoc = await getDoc(userDocRef);
+                  if (userDoc.exists()) {
+                    reply.userData = userDoc.data();
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        messagesData.push(messageData);
+      }
+      setMessages(messagesData);
     });
 
     const unsubscribeReports = onSnapshot(reportsQuery, (snapshot) => {
@@ -188,7 +233,8 @@ export function useCommunityData() {
     
     try {
       const reportRef = collection(db, 'reports');
-      const messageDoc = await getDoc(doc(db, 'community_messages', messageId));
+      const messageRef = doc(db, 'community_messages', messageId);
+      const messageDoc = await getDoc(messageRef);
       
       if (!messageDoc.exists()) {
         console.error('Message not found');
@@ -254,7 +300,8 @@ export function useCommunityData() {
     if (!auth.currentUser || auth.currentUser.email !== 'andres_rios_xyz@outlook.com') return;
     
     try {
-      await deleteDoc(doc(db, 'community_messages', messageId));
+      const messageRef = doc(db, 'community_messages', messageId);
+      await deleteDoc(messageRef);
     } catch (error) {
       console.error('Error deleting message:', error);
     }
@@ -434,7 +481,8 @@ export function useCommunityData() {
     if (!auth.currentUser || auth.currentUser.email !== 'andres_rios_xyz@outlook.com') return;
     
     try {
-      await deleteDoc(doc(db, 'reports', reportId));
+      const reportRef = doc(db, 'reports', reportId);
+      await deleteDoc(reportRef);
     } catch (error) {
       console.error('Error deleting report:', error);
     }

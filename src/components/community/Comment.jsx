@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { FaUserCircle, FaArrowUp, FaArrowDown, FaReply, FaTrash, FaArrowRight, FaFlag } from 'react-icons/fa';
 import { auth, db } from '../../firebase';
 import { doc, getDoc } from 'firebase/firestore';
@@ -6,7 +6,7 @@ import { moderateContent } from '../../utils/contentModeration';
 
 function Comment({ 
   comment, 
-  user, 
+  user,
   onReply, 
   onVote, 
   onDelete,
@@ -17,40 +17,8 @@ function Comment({
 }) {
   const [showReplyInput, setShowReplyInput] = useState(false);
   const [replyText, setReplyText] = useState('');
-  const [commentUser, setCommentUser] = useState(null);
-  const [replyUsers, setReplyUsers] = useState({});
   const [error, setError] = useState('');
   const isAdmin = auth.currentUser?.email === 'andres_rios_xyz@outlook.com';
-
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        if (comment.userId) {
-          const userDoc = await getDoc(doc(db, 'users', comment.userId));
-          if (userDoc.exists()) {
-            setCommentUser(userDoc.data());
-          }
-        }
-
-        if (comment.replies) {
-          const replyUserData = {};
-          for (const reply of comment.replies) {
-            if (reply.userId) {
-              const replyUserDoc = await getDoc(doc(db, 'users', reply.userId));
-              if (replyUserDoc.exists()) {
-                replyUserData[reply.userId] = replyUserDoc.data();
-              }
-            }
-          }
-          setReplyUsers(replyUserData);
-        }
-      } catch (error) {
-        console.error('Error fetching user data:', error);
-      }
-    };
-
-    fetchUserData();
-  }, [comment.userId, comment.replies]);
 
   const handleReplySubmit = () => {
     setError('');
@@ -79,9 +47,9 @@ function Comment({
   return (
     <div className="flex items-start space-x-4">
       <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0">
-        {commentUser?.profilePicUrl ? (
+        {comment.userData?.profilePicUrl ? (
           <img 
-            src={commentUser.profilePicUrl}
+            src={comment.userData.profilePicUrl}
             alt="Profile"
             className="w-8 h-8 rounded-full object-cover"
             onError={(e) => {
@@ -212,9 +180,9 @@ function Comment({
             <div key={reply.id} className="mt-4 ml-8">
               <div className="flex items-start space-x-4">
                 <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0">
-                  {replyUsers[reply.userId]?.profilePicUrl ? (
+                  {reply.userData?.profilePicUrl ? (
                     <img 
-                      src={replyUsers[reply.userId].profilePicUrl}
+                      src={reply.userData.profilePicUrl}
                       alt="Profile"
                       className="w-8 h-8 rounded-full object-cover"
                       onError={(e) => {
