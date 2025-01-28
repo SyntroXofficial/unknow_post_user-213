@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import CommunityBanner from '../components/community/CommunityBanner';
 import CommunityHeader from '../components/community/CommunityHeader';
@@ -12,8 +12,9 @@ import Pagination from '../components/community/Pagination';
 import { useCommunityData } from '../hooks/useCommunityData';
 import { usePagination } from '../hooks/usePagination';
 import { moderateContent } from '../utils/contentModeration';
-import { doc, updateDoc } from 'firebase/firestore';
-import { db } from '../firebase';
+import { doc, updateDoc, collection, addDoc, serverTimestamp, query, orderBy, onSnapshot } from 'firebase/firestore';
+import { db, auth } from '../firebase';
+import { FaSearch, FaUserCircle, FaCircle } from 'react-icons/fa';
 
 function Community() {
   const [showPostOptions, setShowPostOptions] = useState(false);
@@ -34,6 +35,11 @@ function Community() {
   const [showReports, setShowReports] = useState(false);
   const [sortBy, setSortBy] = useState('hot');
   const [selectedTimeframe, setSelectedTimeframe] = useState('today');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showUserList, setShowUserList] = useState(false);
+  const [users, setUsers] = useState([]);
+
+  const isAdmin = auth.currentUser?.email === 'andres_rios_xyz@outlook.com';
 
   const {
     messages,
@@ -52,7 +58,51 @@ function Community() {
     handleDeleteReport
   } = useCommunityData();
 
-  const { currentPage, setCurrentPage, currentItems, totalPages } = usePagination(messages, 5);
+  // Fetch users
+  useEffect(() => {
+    const usersRef = collection(db, 'users');
+    const q = query(usersRef, orderBy('lastActive', 'desc'));
+    
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const userData = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      setUsers(userData);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  // Filter and sort messages
+  const filteredMessages = messages
+    .filter(message => {
+      const searchLower = searchQuery.toLowerCase();
+      return (
+        message.title?.toLowerCase().includes(searchLower) ||
+        message.text?.toLowerCase().includes(searchLower) ||
+        message.username?.toLowerCase().includes(searchLower)
+      );
+    })
+    .sort((a, b) => {
+      // Always show pinned posts first
+      if (a.isPinned && !b.isPinned) return -1;
+      if (!a.isPinned && b.isPinned) return 1;
+
+      // Then sort by selected criteria
+      switch (sortBy) {
+        case 'hot':
+          return b.votes - a.votes;
+        case 'new':
+          return b.timestamp - a.timestamp;
+        case 'top':
+          return b.votes - a.votes;
+        default:
+          return 0;
+      }
+    });
+
+  const { currentPage, setCurrentPage, currentItems, totalPages } = usePagination(filteredMessages, 5);
 
   const handleUpdateProfilePic = async () => {
     if (!user) return;
@@ -129,6 +179,13 @@ function Community() {
     setReportDetails('');
   };
 
+  const isUserOnline = (lastActive) => {
+    if (!lastActive) return false;
+    const lastActiveTime = lastActive.toDate();
+    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+    return lastActiveTime > fiveMinutesAgo;
+  };
+
   const communityRules = [
     'Be respectful and civil',
     'No spam or self-promotion',
@@ -144,6 +201,20 @@ function Community() {
       
       <div className="max-w-7xl mx-auto px-4 py-8">
         <CommunityHeader />
+
+        {/* Search Bar */}
+        <div className="mb-6">
+          <div className="relative">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search posts, titles, or usernames..."
+              className="w-full bg-[#1A1A1B] text-white px-4 py-3 pl-12 rounded-lg border border-[#343536] focus:outline-none focus:border-[#D7DADC]"
+            />
+            <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
+          </div>
+        </div>
 
         <div className="flex gap-8">
           {/* Main Content */}
@@ -211,10 +282,71 @@ function Community() {
           </div>
 
           {/* Sidebar */}
-          <Sidebar
-            communityStats={communityStats}
-            communityRules={communityRules}
-          />
+          <div className="w-80 space-y-4">
+            <Sidebar
+              communityStats={communityStats}
+              communityRules={communityRules}
+            />
+
+            {/* Members List */}
+            <div className="bg-[#1A1A1B] border border-[#343536] rounded-md p-4">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-white font-bold">Members</h2>
+                <button
+                  onClick={() => setShowUserList(!showUserList)}
+                  className="text-gray-400 hover:text-white"
+                >
+                  {showUserList ? 'Show Less' : 'Show More'}
+                </button>
+              </div>
+              <div className="space-y-3">
+                {users.slice(0, showUserList ? undefined : 5).map(member => (
+                  <div key={member.id} className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      {member.profilePicUrl ? (
+                        <img 
+                          src={member.profilePicUrl}
+                          alt={member.username}
+                          className="w-8 h-8 rounded-full object-cover"
+                        />
+                      ) : (
+                        <FaUserCircle className="w-8 h-8 text-gray-400" />
+                      )}
+                      <div>
+                        <p className="text-white text-sm font-medium">
+                          {member.username}
+                          {member.email === 'andres_rios_xyz@outlook.com' && (
+                            <span className="ml-2 px-1.5 py-0.5 bg-purple-500/20 text-purple-400 text-xs rounded-full">
+                              Admin
+                            </span>
+                          )}
+                        </p>
+                        <p className="text-gray-400 text-xs">#{member.id}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center">
+                      <FaCircle className={`w-2 h-2 ${
+                        isUserOnline(member.lastActive) 
+                          ? 'text-green-500' 
+                          : 'text-gray-500'
+                      }`} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Reports List (Admin Only) */}
+            {isAdmin && (
+              <ReportsList
+                showReports={true}
+                setShowReports={setShowReports}
+                reports={reports}
+                handleMarkReportAsDone={handleMarkReportAsDone}
+                handleDeleteReport={handleDeleteReport}
+              />
+            )}
+          </div>
         </div>
       </div>
 
@@ -228,15 +360,6 @@ function Community() {
         setReportDetails={setReportDetails}
         selectedPostId={selectedPostId}
         onSubmit={handleReportSubmit}
-      />
-
-      {/* Reports List (Admin Only) */}
-      <ReportsList
-        showReports={showReports}
-        setShowReports={setShowReports}
-        reports={reports}
-        handleMarkReportAsDone={handleMarkReportAsDone}
-        handleDeleteReport={handleDeleteReport}
       />
     </div>
   );
