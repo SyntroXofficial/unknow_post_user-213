@@ -266,7 +266,7 @@ export function useCommunityData() {
   };
 
   const handleCommentDelete = async (messageId, commentId) => {
-    if (!auth.currentUser || auth.currentUser.email !== 'andres_rios_xyz@outlook.com') return;
+    if (!auth.currentUser) return;
     
     try {
       const messageRef = doc(db, 'community_messages', messageId);
@@ -275,7 +275,24 @@ export function useCommunityData() {
       if (!messageDoc.exists()) return;
       
       const comments = messageDoc.data().comments || [];
-      const updatedComments = comments.filter(comment => comment.id !== commentId);
+      const updatedComments = comments.map(comment => {
+        if (comment.id === commentId) {
+          // If it's a reply, filter it out from the parent comment's replies
+          if (comment.replies) {
+            return {
+              ...comment,
+              replies: comment.replies.filter(reply => 
+                auth.currentUser.email === 'andres_rios_xyz@outlook.com' || 
+                reply.userId === auth.currentUser.uid
+              )
+            };
+          }
+          // For main comments, only allow deletion if admin or comment owner
+          return auth.currentUser.email === 'andres_rios_xyz@outlook.com' || 
+                 comment.userId === auth.currentUser.uid ? null : comment;
+        }
+        return comment;
+      }).filter(Boolean); // Remove null entries
       
       await updateDoc(messageRef, { comments: updatedComments });
     } catch (error) {
