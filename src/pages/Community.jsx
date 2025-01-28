@@ -27,7 +27,7 @@ import ReportsList from '../components/community/ReportsList';
 import { moderateContent } from '../utils/contentModeration';
 import { useCommunityData } from '../hooks/useCommunityData';
 import { usePagination } from '../hooks/usePagination';
-import { FaUserCircle, FaCircle, FaExclamationTriangle, FaCheck, FaTrash, FaUsers } from 'react-icons/fa';
+import { FaUserCircle, FaCircle, FaExclamationTriangle, FaCheck, FaTrash, FaUsers, FaSearch } from 'react-icons/fa';
 
 const communityRules = [
   "Be respectful and civil to other members",
@@ -81,6 +81,24 @@ function Community() {
   const [users, setUsers] = useState([]);
   const [showUserList, setShowUserList] = useState(false);
 
+  const filteredMessages = messages.filter(message => {
+    const searchLower = searchQuery.toLowerCase();
+    return (
+      message.title?.toLowerCase().includes(searchLower) ||
+      message.text?.toLowerCase().includes(searchLower) ||
+      message.username?.toLowerCase().includes(searchLower) ||
+      message.id?.toLowerCase().includes(searchLower) ||
+      message.userId?.toLowerCase().includes(searchLower)
+    );
+  });
+
+  const {
+    currentPage,
+    setCurrentPage,
+    currentItems: currentPosts,
+    totalPages
+  } = usePagination(filteredMessages, 10);
+
   useEffect(() => {
     const fetchUsers = async () => {
       const usersRef = collection(db, 'users');
@@ -99,13 +117,6 @@ function Community() {
 
     fetchUsers();
   }, []);
-
-  const {
-    currentPage,
-    setCurrentPage,
-    currentItems: currentPosts,
-    totalPages
-  } = usePagination(messages, 10);
 
   useEffect(() => {
     if (cooldown) {
@@ -193,6 +204,19 @@ function Community() {
       
       <div className="max-w-6xl mx-auto px-4 -mt-20 relative z-10">
         <CommunityHeader />
+
+        <div className="mb-4">
+          <div className="relative">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search posts, titles, or usernames..."
+              className="w-full bg-[#1A1A1B] text-white px-4 py-3 pl-12 rounded-lg border border-[#343536] focus:outline-none focus:border-[#D7DADC]"
+            />
+            <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
+          </div>
+        </div>
 
         <div className="flex gap-4">
           <div className="flex-1 space-y-4">
@@ -366,6 +390,8 @@ function Community() {
                   onReply={handleReply}
                   onCommentVote={handleCommentVote}
                   onCommentDelete={handleCommentDelete}
+                  setShowReportModal={setShowReportModal}
+                  setSelectedPostId={setSelectedPostId}
                 />
               ))}
             </div>
@@ -387,7 +413,12 @@ function Community() {
         reportDetails={reportDetails}
         setReportDetails={setReportDetails}
         selectedPostId={selectedPostId}
-        onSubmit={handleReport}
+        onSubmit={(postId, reason, details) => {
+          handleReport(postId, reason, details);
+          setShowReportModal(false);
+          setReportReason('');
+          setReportDetails('');
+        }}
       />
     </div>
   );

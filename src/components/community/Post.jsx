@@ -21,7 +21,9 @@ function Post({
   setNewComments,
   onReply,
   onCommentVote,
-  onCommentDelete
+  onCommentDelete,
+  setShowReportModal,
+  setSelectedPostId
 }) {
   const isAdmin = auth.currentUser?.email === 'andres_rios_xyz@outlook.com';
 
@@ -37,7 +39,6 @@ function Post({
   const processContent = (text) => {
     if (!text) return '';
     
-    // Split by newlines first to preserve line breaks
     const lines = text.split('\n');
     return lines.map((line, lineIndex) => {
       const words = line.split(' ');
@@ -69,7 +70,6 @@ function Post({
         elements.push(<span key={`text-${lineIndex}-final`}>{currentText}</span>);
       }
 
-      // Add a line break after each line except the last one
       return (
         <React.Fragment key={`line-${lineIndex}`}>
           {elements}
@@ -89,6 +89,11 @@ function Post({
       default: 'bg-gray-500'
     };
     return colors[tag.toLowerCase()] || colors.default;
+  };
+
+  const handleReportClick = () => {
+    setSelectedPostId(message.id);
+    setShowReportModal(true);
   };
 
   return (
@@ -205,7 +210,7 @@ function Post({
           )}
 
           <button 
-            onClick={() => handleReport(message.id)}
+            onClick={handleReportClick}
             className="flex items-center space-x-2 hover:bg-[#1f1f1f] px-2 py-1 rounded text-red-500"
           >
             <FaFlag />
