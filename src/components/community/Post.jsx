@@ -27,6 +27,20 @@ function Post({
 }) {
   const isAdmin = auth.currentUser?.email === 'andres_rios_xyz@outlook.com';
 
+  const getTagColor = (tag) => {
+    const colors = {
+      'Gaming': 'bg-blue-500',
+      'Movies': 'bg-purple-500',
+      'Important': 'bg-red-500',
+      'Information': 'bg-green-500',
+      'News': 'bg-yellow-500',
+      'Problems': 'bg-orange-500',
+      'Suggestions': 'bg-indigo-500',
+      'Talk': 'bg-pink-500'
+    };
+    return colors[tag] || 'bg-gray-500';
+  };
+
   const isImageUrl = (url) => {
     if (!url) return false;
     return url.match(/\.(jpeg|jpg|gif|png)$/) != null || 
@@ -79,21 +93,25 @@ function Post({
     });
   };
 
-  const getTagColor = (tag) => {
-    const colors = {
-      gaming: 'bg-blue-500',
-      movies: 'bg-purple-500',
-      important: 'bg-red-500',
-      information: 'bg-green-500',
-      news: 'bg-yellow-500',
-      default: 'bg-gray-500'
-    };
-    return colors[tag.toLowerCase()] || colors.default;
-  };
-
   const handleReportClick = () => {
     setSelectedPostId(message.id);
     setShowReportModal(true);
+  };
+
+  const handleCommentSubmit = () => {
+    if (newComments[message.id]?.trim()) {
+      handleComment(message.id, newComments[message.id]);
+      setNewComments(prev => ({
+        ...prev,
+        [message.id]: ''
+      }));
+    }
+  };
+
+  const handleReplySubmit = (commentId, replyText) => {
+    if (replyText.trim()) {
+      onReply(message.id, commentId, replyText);
+    }
   };
 
   return (
@@ -120,6 +138,11 @@ function Post({
                 <FaUserCircle className="w-6 h-6 text-gray-400" />
               )}
               <span className="text-white font-medium">{message.username}</span>
+              {message.userId === 'andres_rios_xyz@outlook.com' && (
+                <span className="px-2 py-0.5 bg-purple-500/20 text-purple-400 text-xs rounded-full">
+                  Admin
+                </span>
+              )}
             </div>
             <span className="text-gray-400">•</span>
             <span className="text-gray-400">
@@ -135,7 +158,7 @@ function Post({
 
         <div>
           <h2 className="text-xl font-bold text-white mb-2">{message.title}</h2>
-          {message.tags && (
+          {message.tags && message.tags.length > 0 && (
             <div className="flex flex-wrap gap-2 mb-2">
               {message.tags.map((tag, index) => (
                 <span 
@@ -188,7 +211,7 @@ function Post({
             <span>{message.comments?.length || 0} Comments</span>
           </button>
 
-          {user?.email === 'andres_rios_xyz@outlook.com' && (
+          {isAdmin && (
             <>
               <button 
                 onClick={() => handlePin(message.id)}
@@ -244,7 +267,7 @@ function Post({
                 />
                 <div className="flex justify-end mt-2">
                   <button
-                    onClick={() => handleComment(message.id)}
+                    onClick={handleCommentSubmit}
                     className="px-4 py-1 bg-white text-[#1A1A1B] rounded-full text-sm font-bold hover:bg-gray-200 transition-colors"
                   >
                     Comment
@@ -259,7 +282,7 @@ function Post({
                   key={comment.id} 
                   comment={comment}
                   user={user}
-                  onReply={onReply}
+                  onReply={handleReplySubmit}
                   onVote={(commentId, direction) => onCommentVote(message.id, commentId, direction)}
                   onDelete={(commentId) => onCommentDelete(message.id, commentId)}
                 />

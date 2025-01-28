@@ -20,7 +20,6 @@ import {
 export function useCommunityData() {
   const [messages, setMessages] = useState([]);
   const [user, setUser] = useState(null);
-  const [announcement, setAnnouncement] = useState('Welcome to our community!');
   const [communityStats, setCommunityStats] = useState({
     totalMembers: 0,
     onlineMembers: 0,
@@ -104,18 +103,6 @@ export function useCommunityData() {
       }
     };
 
-    const fetchAnnouncement = async () => {
-      try {
-        const announcementDoc = await getDoc(doc(db, 'system', 'announcement'));
-        if (announcementDoc.exists()) {
-          setAnnouncement(announcementDoc.data().text);
-        }
-      } catch (error) {
-        console.error('Error fetching announcement:', error);
-      }
-    };
-
-    fetchAnnouncement();
     fetchCommunityStats();
     const statsInterval = setInterval(fetchCommunityStats, 60000);
 
@@ -163,7 +150,8 @@ export function useCommunityData() {
         username: user.username,
         timestamp: new Date().toISOString(),
         votes: 0,
-        userVotes: {}
+        userVotes: {},
+        replies: []
       })
     });
   };
@@ -275,7 +263,7 @@ export function useCommunityData() {
   };
 
   const handleReply = async (messageId, commentId, replyText) => {
-    if (!auth.currentUser) return;
+    if (!auth.currentUser || !replyText?.trim()) return;
 
     try {
       const messageRef = doc(db, 'community_messages', messageId);
@@ -284,25 +272,27 @@ export function useCommunityData() {
 
       const updatedComments = comments.map(comment => {
         if (comment.id === commentId) {
+          const replies = comment.replies || [];
           return {
             ...comment,
-            replies: [...(comment.replies || []), {
-              id: Date.now().toString(),
-              text: replyText,
-              userId: auth.currentUser.uid,
-              username: user.username,
-              timestamp: new Date().toISOString(),
-              votes: 0,
-              userVotes: {}
-            }]
+            replies: [
+              ...replies,
+              {
+                id: Date.now().toString(),
+                text: replyText,
+                userId: auth.currentUser.uid,
+                username: user.username,
+                timestamp: new Date().toISOString(),
+                votes: 0,
+                userVotes: {}
+              }
+            ]
           };
         }
         return comment;
       });
 
-      await updateDoc(messageRef, {
-        comments: updatedComments
-      });
+      await updateDoc(messageRef, { comments: updatedComments });
     } catch (error) {
       console.error('Error adding reply:', error);
     }
@@ -336,7 +326,6 @@ export function useCommunityData() {
   return {
     messages,
     user,
-    announcement,
     communityStats,
     reports,
     handleVote,

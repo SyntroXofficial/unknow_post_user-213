@@ -44,7 +44,6 @@ function Community() {
   const {
     messages,
     user,
-    announcement,
     communityStats,
     reports,
     handleVote,
@@ -81,16 +80,36 @@ function Community() {
   const [users, setUsers] = useState([]);
   const [showUserList, setShowUserList] = useState(false);
 
-  const filteredMessages = messages.filter(message => {
-    const searchLower = searchQuery.toLowerCase();
-    return (
-      message.title?.toLowerCase().includes(searchLower) ||
-      message.text?.toLowerCase().includes(searchLower) ||
-      message.username?.toLowerCase().includes(searchLower) ||
-      message.id?.toLowerCase().includes(searchLower) ||
-      message.userId?.toLowerCase().includes(searchLower)
-    );
-  });
+  const filteredMessages = messages
+    .filter(message => {
+      const searchLower = searchQuery.toLowerCase();
+      return (
+        message.title?.toLowerCase().includes(searchLower) ||
+        message.text?.toLowerCase().includes(searchLower) ||
+        message.username?.toLowerCase().includes(searchLower) ||
+        message.id?.toLowerCase().includes(searchLower) ||
+        message.userId?.toLowerCase().includes(searchLower)
+      );
+    })
+    .sort((a, b) => {
+      // First sort by pinned status
+      if (a.isPinned && !b.isPinned) return -1;
+      if (!a.isPinned && b.isPinned) return 1;
+      
+      // Then sort by the selected criteria
+      switch (sortBy) {
+        case 'hot':
+          return b.votes - a.votes;
+        case 'new':
+          return b.timestamp - a.timestamp;
+        case 'top':
+          const aTime = a.timestamp?.toDate?.() || a.timestamp;
+          const bTime = b.timestamp?.toDate?.() || b.timestamp;
+          return bTime - aTime;
+        default:
+          return 0;
+      }
+    });
 
   const {
     currentPage,
@@ -400,7 +419,6 @@ function Community() {
           <Sidebar 
             communityStats={communityStats}
             communityRules={communityRules}
-            announcement={announcement}
           />
         </div>
       </div>

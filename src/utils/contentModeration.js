@@ -1,37 +1,43 @@
 const BANNED_WORDS = [
-  'gay', 'scam', 'hack', 'cheat', 'crack', 'leak', 'steal', 'fraud',
+  'hack', 'cheat', 'crack', 'leak', 'steal', 'fraud',
   'nsfw', 'xxx', 'porn', 'sex', 'nude', 'naked', 'adult',
-  'fuck', 'shit', 'ass', 'bitch', 'dick', 'pussy', 'cunt',
-  'nigger', 'nigga', 'faggot', 'retard', 'kill', 'die', 'suicide',
-  'discord.gg', 'telegram', 'whatsapp' , '70Games' , 'cracked.io'
+  'discord.gg', 'telegram', 'whatsapp', '70Games', 'cracked.io'
 ];
 
 export function moderateContent(text) {
+  if (!text) return { isValid: false, reason: 'Content cannot be empty' };
+  
   const lowerText = text.toLowerCase();
   
-  const containsBannedWords = BANNED_WORDS.some(word => lowerText.includes(word));
-  if (containsBannedWords) {
+  // Check for banned words
+  const bannedWord = BANNED_WORDS.find(word => lowerText.includes(word));
+  if (bannedWord) {
     return {
       isValid: false,
       reason: 'Content contains prohibited words or links'
     };
   }
 
-  const capsPercentage = (text.match(/[A-Z]/g) || []).length / text.length;
-  if (capsPercentage > 0.7) {
+  // Check for excessive caps (now only if text is longer than 20 characters)
+  if (text.length > 20) {
+    const capsPercentage = (text.match(/[A-Z]/g) || []).length / text.length;
+    if (capsPercentage > 0.8) {
+      return {
+        isValid: false,
+        reason: 'Too many capital letters'
+      };
+    }
+  }
+
+  // Check for character repetition (now allows up to 5 repeated characters)
+  if (/(.)\1{15,}/.test(text)) {
     return {
       isValid: false,
-      reason: 'Too many capital letters'
+      reason: 'Too many repeated characters'
     };
   }
 
-  if (/(.)\1{4,}/.test(text)) {
-    return {
-      isValid: false,
-      reason: 'Repeated characters detected'
-    };
-  }
-
+  // Minimum length check
   if (text.trim().length < 2) {
     return {
       isValid: false,
@@ -39,22 +45,25 @@ export function moderateContent(text) {
     };
   }
 
-  if (text.length > 2000) {
+  // Maximum length check
+  if (text.length > 5000) {
     return {
       isValid: false,
-      reason: 'Content is too long (maximum 2000 characters)'
+      reason: 'Content is too long (maximum 5000 characters)'
     };
   }
 
-  if (/[!?]{3,}/.test(text)) {
+  // Check for excessive punctuation (now allows up to 4 repeated punctuation marks)
+  if (/[!?]{5,}/.test(text)) {
     return {
       isValid: false,
       reason: 'Excessive punctuation detected'
     };
   }
 
+  // Check for emoji spam (now allows up to 15 emojis)
   const emojiCount = (text.match(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g) || []).length;
-  if (emojiCount > 10) {
+  if (emojiCount > 15) {
     return {
       isValid: false,
       reason: 'Too many emojis'
