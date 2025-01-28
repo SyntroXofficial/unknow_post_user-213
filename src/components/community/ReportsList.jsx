@@ -1,3 +1,5 @@
+{/* Update the ReportsList component to handle long messages better */}
+
 import React from 'react';
 import { FaCheck, FaTimes, FaFlag, FaUser, FaCalendar, FaExclamationTriangle } from 'react-icons/fa';
 
@@ -31,47 +33,47 @@ function ReportsList({
           <p className="text-gray-400">No reports found</p>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-4 max-h-[600px] overflow-y-auto">
           {reports.map(report => (
             <div
               key={report.id}
               className="bg-black/30 p-4 rounded-lg border border-white/10"
             >
               <div className="flex justify-between items-start">
-                <div className="space-y-2">
+                <div className="space-y-2 flex-1 min-w-0">
                   <div className="flex items-center space-x-3">
-                    <FaUser className="text-gray-400" />
-                    <div>
-                      <p className="text-white">
+                    <FaUser className="text-gray-400 flex-shrink-0" />
+                    <div className="min-w-0">
+                      <p className="text-white truncate">
                         <span className="text-gray-400">Reporter:</span> {report.reportedBy}
                       </p>
-                      <p className="text-white">
+                      <p className="text-white truncate">
                         <span className="text-gray-400">Reported User:</span> {report.reportedUserId}
                       </p>
                     </div>
                   </div>
 
                   <div className="flex items-center space-x-3">
-                    <FaCalendar className="text-gray-400" />
-                    <p className="text-white">
+                    <FaCalendar className="text-gray-400 flex-shrink-0" />
+                    <p className="text-white truncate">
                       <span className="text-gray-400">Date:</span>{' '}
                       {report.timestamp?.toDate().toLocaleString()}
                     </p>
                   </div>
 
-                  <div>
-                    <p className="text-white mb-1">
+                  <div className="space-y-1">
+                    <p className="text-white break-words">
                       <span className="text-gray-400">Post ID:</span> {report.messageId}
                     </p>
-                    <p className="text-white mb-1">
+                    <p className="text-white break-words">
                       <span className="text-gray-400">Reason:</span> {report.reason}
                     </p>
-                    <p className="text-white">
+                    <p className="text-white break-words">
                       <span className="text-gray-400">Details:</span> {report.details}
                     </p>
                   </div>
 
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-2 mt-2">
                     <span className={`px-2 py-1 rounded-full text-sm ${
                       report.status === 'resolved' 
                         ? 'bg-green-500/20 text-green-400' 
@@ -82,7 +84,7 @@ function ReportsList({
                   </div>
                 </div>
 
-                <div className="flex space-x-2">
+                <div className="flex space-x-2 ml-4">
                   {report.status === 'pending' && (
                     <button
                       onClick={() => handleMarkReportAsDone(report.id)}

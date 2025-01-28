@@ -77,12 +77,18 @@ function Community() {
   // Filter and sort messages
   const filteredMessages = messages
     .filter(message => {
-      const searchLower = searchQuery.toLowerCase();
-      return (
-        message.title?.toLowerCase().includes(searchLower) ||
-        message.text?.toLowerCase().includes(searchLower) ||
-        message.username?.toLowerCase().includes(searchLower)
-      );
+      // Only filter if there's a search query
+      if (searchQuery) {
+        const searchLower = searchQuery.toLowerCase();
+        return (
+          message.title?.toLowerCase().includes(searchLower) ||
+          message.text?.toLowerCase().includes(searchLower) ||
+          message.username?.toLowerCase().includes(searchLower) ||
+          message.id?.toLowerCase().includes(searchLower) || // Search by message ID
+          message.userId?.toLowerCase().includes(searchLower) // Search by user ID
+        );
+      }
+      return true;
     })
     .sort((a, b) => {
       // Always show pinned posts first
@@ -209,7 +215,7 @@ function Community() {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search posts, titles, or usernames..."
+              placeholder="Search by title, content, username, user ID, or message ID..."
               className="w-full bg-[#1A1A1B] text-white px-4 py-3 pl-12 rounded-lg border border-[#343536] focus:outline-none focus:border-[#D7DADC]"
             />
             <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />

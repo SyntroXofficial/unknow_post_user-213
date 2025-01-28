@@ -27,141 +27,177 @@ export function useCommunityData() {
     dailyComments: 0
   });
   const [reports, setReports] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchUserData = async () => {
-      if (auth.currentUser) {
-        const userDocRef = doc(db, 'users', auth.currentUser.uid);
-        const userDoc = await getDoc(userDocRef);
-        if (userDoc.exists()) {
-          setUser({ ...userDoc.data(), id: auth.currentUser.uid });
-        }
-
-        // Set up real-time listener for the current user's data
-        const unsubscribeUser = onSnapshot(userDocRef, (doc) => {
-          if (doc.exists()) {
-            setUser({ ...doc.data(), id: auth.currentUser.uid });
-          }
-        });
-
-        return () => unsubscribeUser();
-      }
-    };
-
-    fetchUserData();
-
-    const messagesQuery = query(collection(db, 'community_messages'), orderBy('timestamp', 'desc'));
-    const reportsQuery = query(collection(db, 'reports'), orderBy('timestamp', 'desc'));
-
-    const unsubscribeMessages = onSnapshot(messagesQuery, async (snapshot) => {
-      const messagesData = [];
-      for (const docSnapshot of snapshot.docs) {
-        const messageData = { id: docSnapshot.id, ...docSnapshot.data() };
-        
-        // Fetch user data for the message author
-        if (messageData.userId) {
-          const userDocRef = doc(db, 'users', messageData.userId);
+    // Set up auth state listener first
+    const unsubscribeAuth = auth.onAuthStateChanged(async (currentUser) => {
+      if (currentUser) {
+        const userDocRef = doc(db, 'users', currentUser.uid);
+        try {
           const userDoc = await getDoc(userDocRef);
           if (userDoc.exists()) {
-            messageData.userData = userDoc.data();
+            setUser({ ...userDoc.data(), id: currentUser.uid });
           }
+        } catch (error) {
+          console.error('Error fetching user data:', error);
         }
+      } else {
+        setUser(null);
+      }
+      setLoading(false);
+    });
 
-        // Fetch user data for comments
-        if (messageData.comments) {
-          for (const comment of messageData.comments) {
-            if (comment.userId) {
-              const userDocRef = doc(db, 'users', comment.userId);
+    return () => unsubscribeAuth();
+  }, []);
+
+  useEffect(() => {
+    let unsubscribeMessages = () => {};
+    let unsubscribeReports = () => {};
+
+    // Only set up listeners if user is authenticated
+    if (user) {
+      // Query messages with no restrictions - all authenticated users can see messages
+      const messagesQuery = query(
+        collection(db, 'community_messages'),
+        orderBy('timestamp', 'desc')
+      );
+
+      unsubscribeMessages = onSnapshot(messagesQuery, async (snapshot) => {
+        const messagesData = [];
+        for (const docSnapshot of snapshot.docs) {
+          const messageData = { id: docSnapshot.id, ...docSnapshot.data() };
+          
+          // Fetch user data for the message author
+          if (messageData.userId) {
+            const userDocRef = doc(db, 'users', messageData.userId);
+            try {
               const userDoc = await getDoc(userDocRef);
               if (userDoc.exists()) {
-                comment.userData = userDoc.data();
+                messageData.userData = userDoc.data();
               }
+            } catch (error) {
+              console.error('Error fetching user data:', error);
             }
+          }
 
-            // Fetch user data for replies
-            if (comment.replies) {
-              for (const reply of comment.replies) {
-                if (reply.userId) {
-                  const userDocRef = doc(db, 'users', reply.userId);
+          // Fetch user data for comments
+          if (messageData.comments) {
+            for (const comment of messageData.comments) {
+              if (comment.userId) {
+                const userDocRef = doc(db, 'users', comment.userId);
+                try {
                   const userDoc = await getDoc(userDocRef);
                   if (userDoc.exists()) {
-                    reply.userData = userDoc.data();
+                    comment.userData = userDoc.data();
+                  }
+                } catch (error) {
+                  console.error('Error fetching comment user data:', error);
+                }
+              }
+
+              // Fetch user data for replies
+              if (comment.replies) {
+                for (const reply of comment.replies) {
+                  if (reply.userId) {
+                    const userDocRef = doc(db, 'users', reply.userId);
+                    try {
+                      const userDoc = await getDoc(userDocRef);
+                      if (userDoc.exists()) {
+                        reply.userData = userDoc.data();
+                      }
+                    } catch (error) {
+                      console.error('Error fetching reply user data:', error);
+                    }
                   }
                 }
               }
             }
           }
+
+          messagesData.push(messageData);
         }
+        setMessages(messagesData);
+      }, error => {
+        console.error('Error fetching messages:', error);
+      });
 
-        messagesData.push(messageData);
-      }
-      setMessages(messagesData);
-    });
-
-    const unsubscribeReports = onSnapshot(reportsQuery, (snapshot) => {
-      const newReports = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      setReports(newReports);
-    });
-
-    const fetchCommunityStats = async () => {
-      try {
-        const usersQuery = query(collection(db, 'users'));
-        const usersSnapshot = await getDocs(usersQuery);
-        const totalMembers = usersSnapshot.size;
-
-        const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
-        const onlineUsersQuery = query(
-          collection(db, 'users'),
-          where('lastActive', '>=', Timestamp.fromDate(fiveMinutesAgo))
+      // Only fetch reports if user is admin
+      if (user.email === 'andres_rios_xyz@outlook.com') {
+        const reportsQuery = query(
+          collection(db, 'reports'),
+          orderBy('timestamp', 'desc')
         );
-        const onlineUsersSnapshot = await getDocs(onlineUsersQuery);
-        const onlineMembers = onlineUsersSnapshot.size;
 
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const postsQuery = query(
-          collection(db, 'community_messages'),
-          where('timestamp', '>=', Timestamp.fromDate(today))
-        );
-        const postsSnapshot = await getDocs(postsQuery);
-        const dailyPosts = postsSnapshot.size;
-
-        let dailyComments = 0;
-        postsSnapshot.forEach(doc => {
-          const data = doc.data();
-          if (data.comments) {
-            dailyComments += data.comments.filter(comment => 
-              new Date(comment.timestamp) >= today
-            ).length;
-          }
+        unsubscribeReports = onSnapshot(reportsQuery, (snapshot) => {
+          const newReports = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+          }));
+          setReports(newReports);
+        }, error => {
+          console.error('Error fetching reports:', error);
         });
-
-        setCommunityStats({
-          totalMembers,
-          onlineMembers,
-          dailyPosts,
-          dailyComments
-        });
-      } catch (error) {
-        console.error('Error fetching community stats:', error);
       }
-    };
 
-    fetchCommunityStats();
-    const statsInterval = setInterval(fetchCommunityStats, 60000);
+      // Fetch community stats
+      const fetchCommunityStats = async () => {
+        try {
+          const usersQuery = query(collection(db, 'users'));
+          const usersSnapshot = await getDocs(usersQuery);
+          const totalMembers = usersSnapshot.size;
 
-    return () => {
-      unsubscribeMessages();
-      unsubscribeReports();
-      clearInterval(statsInterval);
-    };
-  }, []);
+          const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+          const onlineUsersQuery = query(
+            collection(db, 'users'),
+            where('lastActive', '>=', Timestamp.fromDate(fiveMinutesAgo))
+          );
+          const onlineUsersSnapshot = await getDocs(onlineUsersQuery);
+          const onlineMembers = onlineUsersSnapshot.size;
+
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          const postsQuery = query(
+            collection(db, 'community_messages'),
+            where('timestamp', '>=', Timestamp.fromDate(today))
+          );
+          const postsSnapshot = await getDocs(postsQuery);
+          const dailyPosts = postsSnapshot.size;
+
+          let dailyComments = 0;
+          postsSnapshot.forEach(doc => {
+            const data = doc.data();
+            if (data.comments) {
+              dailyComments += data.comments.filter(comment => 
+                new Date(comment.timestamp) >= today
+              ).length;
+            }
+          });
+
+          setCommunityStats({
+            totalMembers,
+            onlineMembers,
+            dailyPosts,
+            dailyComments
+          });
+        } catch (error) {
+          console.error('Error fetching community stats:', error);
+        }
+      };
+
+      fetchCommunityStats();
+      const statsInterval = setInterval(fetchCommunityStats, 60000);
+
+      return () => {
+        unsubscribeMessages();
+        unsubscribeReports();
+        clearInterval(statsInterval);
+      };
+    }
+  }, [user]);
 
   const handleVote = async (messageId, direction) => {
-    if (!auth.currentUser) return;
+    if (!user) return;
 
     try {
       const messageRef = doc(db, 'community_messages', messageId);
@@ -171,27 +207,24 @@ export function useCommunityData() {
       
       const currentVotes = messageDoc.data().votes || 0;
       const userVotes = messageDoc.data().userVotes || {};
-      const currentUserVote = userVotes[auth.currentUser.uid] || 0;
+      const currentUserVote = userVotes[user.id] || 0;
 
       let newVoteCount = currentVotes;
       let newUserVote = direction;
 
-      // If user is clicking the same vote button again, remove their vote
       if (currentUserVote === direction) {
         newVoteCount -= direction;
         newUserVote = 0;
       } else {
-        // Remove previous vote if it exists
         if (currentUserVote !== 0) {
           newVoteCount -= currentUserVote;
         }
-        // Add new vote
         newVoteCount += direction;
       }
 
       await updateDoc(messageRef, {
         votes: newVoteCount,
-        [`userVotes.${auth.currentUser.uid}`]: newUserVote
+        [`userVotes.${user.id}`]: newUserVote
       });
     } catch (error) {
       console.error('Error updating vote:', error);
@@ -199,7 +232,7 @@ export function useCommunityData() {
   };
 
   const handleComment = async (messageId, commentText) => {
-    if (!commentText?.trim() || !auth.currentUser) return;
+    if (!commentText?.trim() || !user) return;
 
     try {
       const messageRef = doc(db, 'community_messages', messageId);
@@ -212,7 +245,7 @@ export function useCommunityData() {
       const newComment = {
         id: Date.now().toString(),
         text: commentText,
-        userId: auth.currentUser.uid,
+        userId: user.id,
         username: user.username,
         timestamp: new Date().toISOString(),
         votes: 0,
@@ -229,7 +262,7 @@ export function useCommunityData() {
   };
 
   const handleReport = async (messageId, contentId, type, reason, details) => {
-    if (!auth.currentUser) return;
+    if (!user) return;
     
     try {
       const reportRef = collection(db, 'reports');
@@ -244,7 +277,6 @@ export function useCommunityData() {
       const messageData = messageDoc.data();
       let reportedUserId = messageData.userId;
 
-      // If reporting a comment or reply, find the correct user ID
       if (type === 'comment' || type === 'reply') {
         const comment = messageData.comments?.find(c => 
           c.id === contentId || c.replies?.some(r => r.id === contentId)
@@ -265,7 +297,7 @@ export function useCommunityData() {
         messageId,
         contentId,
         contentType: type,
-        reportedBy: auth.currentUser.uid,
+        reportedBy: user.id,
         reportedUserId,
         timestamp: serverTimestamp(),
         status: 'pending',
@@ -278,7 +310,7 @@ export function useCommunityData() {
   };
 
   const handlePin = async (messageId) => {
-    if (!auth.currentUser || auth.currentUser.email !== 'andres_rios_xyz@outlook.com') return;
+    if (!user || user.email !== 'andres_rios_xyz@outlook.com') return;
     
     try {
       const messageRef = doc(db, 'community_messages', messageId);
@@ -297,7 +329,7 @@ export function useCommunityData() {
   };
 
   const handleDelete = async (messageId) => {
-    if (!auth.currentUser || auth.currentUser.email !== 'andres_rios_xyz@outlook.com') return;
+    if (!user || user.email !== 'andres_rios_xyz@outlook.com') return;
     
     try {
       const messageRef = doc(db, 'community_messages', messageId);
@@ -308,7 +340,7 @@ export function useCommunityData() {
   };
 
   const handleCommentVote = async (messageId, commentId, direction) => {
-    if (!auth.currentUser) return;
+    if (!user) return;
 
     try {
       const messageRef = doc(db, 'community_messages', messageId);
@@ -321,7 +353,7 @@ export function useCommunityData() {
         if (comment.id === commentId) {
           const currentVotes = comment.votes || 0;
           const userVotes = comment.userVotes || {};
-          const currentUserVote = userVotes[auth.currentUser.uid] || 0;
+          const currentUserVote = userVotes[user.id] || 0;
 
           let newVoteCount = currentVotes;
           let newUserVote = direction;
@@ -341,18 +373,17 @@ export function useCommunityData() {
             votes: newVoteCount,
             userVotes: {
               ...userVotes,
-              [auth.currentUser.uid]: newUserVote
+              [user.id]: newUserVote
             }
           };
         }
         
-        // Check for votes in replies
         if (comment.replies) {
           const updatedReplies = comment.replies.map(reply => {
             if (reply.id === commentId) {
               const currentVotes = reply.votes || 0;
               const userVotes = reply.userVotes || {};
-              const currentUserVote = userVotes[auth.currentUser.uid] || 0;
+              const currentUserVote = userVotes[user.id] || 0;
 
               let newVoteCount = currentVotes;
               let newUserVote = direction;
@@ -372,7 +403,7 @@ export function useCommunityData() {
                 votes: newVoteCount,
                 userVotes: {
                   ...userVotes,
-                  [auth.currentUser.uid]: newUserVote
+                  [user.id]: newUserVote
                 }
               };
             }
@@ -395,7 +426,7 @@ export function useCommunityData() {
   };
 
   const handleCommentDelete = async (messageId, commentId) => {
-    if (!auth.currentUser) return;
+    if (!user) return;
     
     try {
       const messageRef = doc(db, 'community_messages', messageId);
@@ -406,14 +437,14 @@ export function useCommunityData() {
       const comments = messageDoc.data().comments || [];
       const updatedComments = comments.filter(comment => {
         if (comment.id === commentId) {
-          return !(auth.currentUser.email === 'andres_rios_xyz@outlook.com' || 
-                  comment.userId === auth.currentUser.uid);
+          return !(user.email === 'andres_rios_xyz@outlook.com' || 
+                  comment.userId === user.id);
         }
         if (comment.replies) {
           comment.replies = comment.replies.filter(reply => 
             reply.id !== commentId || 
-            !(auth.currentUser.email === 'andres_rios_xyz@outlook.com' || 
-              reply.userId === auth.currentUser.uid)
+            !(user.email === 'andres_rios_xyz@outlook.com' || 
+              reply.userId === user.id)
           );
         }
         return true;
@@ -426,7 +457,7 @@ export function useCommunityData() {
   };
 
   const handleReply = async (messageId, commentId, replyText) => {
-    if (!auth.currentUser || !replyText?.trim()) return;
+    if (!user || !replyText?.trim()) return;
 
     try {
       const messageRef = doc(db, 'community_messages', messageId);
@@ -441,7 +472,7 @@ export function useCommunityData() {
           const newReply = {
             id: Date.now().toString(),
             text: replyText,
-            userId: auth.currentUser.uid,
+            userId: user.id,
             username: user.username,
             timestamp: new Date().toISOString(),
             votes: 0,
@@ -463,14 +494,14 @@ export function useCommunityData() {
   };
 
   const handleMarkReportAsDone = async (reportId) => {
-    if (!auth.currentUser || auth.currentUser.email !== 'andres_rios_xyz@outlook.com') return;
+    if (!user || user.email !== 'andres_rios_xyz@outlook.com') return;
     
     try {
       const reportRef = doc(db, 'reports', reportId);
       await updateDoc(reportRef, {
         status: 'resolved',
         resolvedAt: serverTimestamp(),
-        resolvedBy: auth.currentUser.uid
+        resolvedBy: user.id
       });
     } catch (error) {
       console.error('Error marking report as done:', error);
@@ -478,7 +509,7 @@ export function useCommunityData() {
   };
 
   const handleDeleteReport = async (reportId) => {
-    if (!auth.currentUser || auth.currentUser.email !== 'andres_rios_xyz@outlook.com') return;
+    if (!user || user.email !== 'andres_rios_xyz@outlook.com') return;
     
     try {
       const reportRef = doc(db, 'reports', reportId);
@@ -493,6 +524,7 @@ export function useCommunityData() {
     user,
     communityStats,
     reports,
+    loading,
     handleVote,
     handleComment,
     handleReport,
