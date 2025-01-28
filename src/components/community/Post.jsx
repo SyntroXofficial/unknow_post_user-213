@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
   FaUserCircle, FaArrowUp, FaArrowDown, FaRegCommentAlt,
   FaFlag, FaThumbtack, FaTrash
 } from 'react-icons/fa';
-import { auth } from '../../firebase';
+import { auth, db } from '../../firebase';
+import { doc, getDoc } from 'firebase/firestore';
 import Comment from './Comment';
 
 function Post({ 
@@ -25,7 +26,26 @@ function Post({
   setShowReportModal,
   setSelectedPostId
 }) {
+  const [postUser, setPostUser] = useState(null);
   const isAdmin = auth.currentUser?.email === 'andres_rios_xyz@outlook.com';
+
+  // Fetch post user data when component mounts
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        if (message.userId) {
+          const userDoc = await getDoc(doc(db, 'users', message.userId));
+          if (userDoc.exists()) {
+            setPostUser(userDoc.data());
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
+    };
+
+    fetchUserData();
+  }, [message.userId]);
 
   const getTagColor = (tag) => {
     const colors = {
@@ -128,11 +148,15 @@ function Post({
             )}
             <span className="text-gray-400">Posted by</span>
             <div className="flex items-center space-x-2">
-              {message.userId === user?.id && user?.profilePicUrl ? (
+              {postUser?.profilePicUrl ? (
                 <img 
-                  src={user.profilePicUrl}
+                  src={postUser.profilePicUrl}
                   alt="Profile"
                   className="w-6 h-6 rounded-full object-cover"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = 'https://via.placeholder.com/40?text=?';
+                  }}
                 />
               ) : (
                 <FaUserCircle className="w-6 h-6 text-gray-400" />
@@ -250,6 +274,10 @@ function Post({
                     src={user.profilePicUrl}
                     alt="Profile"
                     className="w-8 h-8 rounded-full object-cover"
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = 'https://via.placeholder.com/40?text=?';
+                    }}
                   />
                 ) : (
                   <FaUserCircle className="w-5 h-5 text-white" />
@@ -285,6 +313,8 @@ function Post({
                   onReply={handleReplySubmit}
                   onVote={(commentId, direction) => onCommentVote(message.id, commentId, direction)}
                   onDelete={(commentId) => onCommentDelete(message.id, commentId)}
+                  onReport={(messageId, commentId, type) => handleReport(messageId, commentId, type)}
+                  messageId={message.id}
                 />
               ))}
             </div>

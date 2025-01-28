@@ -47,7 +47,7 @@ export function useCommunityData() {
       const newMessages = snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data(),
-        comments: doc.data().comments || [] // Ensure comments array always exists
+        comments: doc.data().comments || []
       }));
       setMessages(newMessages);
     });
@@ -208,8 +208,7 @@ export function useCommunityData() {
       const currentData = messageDoc.data();
       
       await updateDoc(messageRef, {
-        isPinned: !currentData.isPinned,
-        comments: currentData.comments || [] // Preserve existing comments
+        isPinned: !currentData.isPinned
       });
     } catch (error) {
       console.error('Error pinning message:', error);
@@ -297,20 +296,19 @@ export function useCommunityData() {
       const updatedComments = comments.map(comment => {
         if (comment.id === commentId) {
           const replies = comment.replies || [];
+          const newReply = {
+            id: Date.now().toString(),
+            text: replyText,
+            userId: auth.currentUser.uid,
+            username: user.username,
+            timestamp: new Date().toISOString(),
+            votes: 0,
+            userVotes: {}
+          };
+          
           return {
             ...comment,
-            replies: [
-              ...replies,
-              {
-                id: Date.now().toString(),
-                text: replyText,
-                userId: auth.currentUser.uid,
-                username: user.username,
-                timestamp: new Date().toISOString(),
-                votes: 0,
-                userVotes: {}
-              }
-            ]
+            replies: [...replies, newReply]
           };
         }
         return comment;

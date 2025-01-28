@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaUserCircle, FaArrowUp, FaArrowDown, FaReply, FaTrash, FaArrowRight, FaFlag } from 'react-icons/fa';
 import { auth, db } from '../../firebase';
 import { doc, getDoc } from 'firebase/firestore';
@@ -19,12 +19,15 @@ function Comment({
   const [error, setError] = useState('');
   const isAdmin = auth.currentUser?.email === 'andres_rios_xyz@outlook.com';
 
-  React.useEffect(() => {
+  // Fetch comment user data when component mounts
+  useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const userDoc = await getDoc(doc(db, 'users', comment.userId));
-        if (userDoc.exists()) {
-          setCommentUser(userDoc.data());
+        if (comment.userId) {
+          const userDoc = await getDoc(doc(db, 'users', comment.userId));
+          if (userDoc.exists()) {
+            setCommentUser(userDoc.data());
+          }
         }
       } catch (error) {
         console.error('Error fetching user data:', error);
@@ -64,9 +67,11 @@ function Comment({
       React.useEffect(() => {
         const fetchReplyUserData = async () => {
           try {
-            const userDoc = await getDoc(doc(db, 'users', reply.userId));
-            if (userDoc.exists()) {
-              setReplyUser(userDoc.data());
+            if (reply.userId) {
+              const userDoc = await getDoc(doc(db, 'users', reply.userId));
+              if (userDoc.exists()) {
+                setReplyUser(userDoc.data());
+              }
             }
           } catch (error) {
             console.error('Error fetching reply user data:', error);
@@ -88,6 +93,10 @@ function Comment({
                   src={replyUser.profilePicUrl}
                   alt="Profile"
                   className="w-8 h-8 rounded-full object-cover"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = 'https://via.placeholder.com/40?text=?';
+                  }}
                 />
               ) : (
                 <FaUserCircle className="w-5 h-5 text-white" />
@@ -161,6 +170,10 @@ function Comment({
             src={commentUser.profilePicUrl}
             alt="Profile"
             className="w-8 h-8 rounded-full object-cover"
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = 'https://via.placeholder.com/40?text=?';
+            }}
           />
         ) : (
           <FaUserCircle className="w-5 h-5 text-white" />
@@ -229,6 +242,10 @@ function Comment({
                     src={user.profilePicUrl}
                     alt="Profile"
                     className="w-8 h-8 rounded-full object-cover"
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = 'https://via.placeholder.com/40?text=?';
+                    }}
                   />
                 ) : (
                   <FaUserCircle className="w-5 h-5 text-white" />
