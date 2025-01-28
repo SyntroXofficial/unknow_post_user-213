@@ -80,17 +80,6 @@ function Home() {
                   Experience unlimited access to premium games, streaming services, and exclusive content. 
                   Join our community and unlock a world of digital entertainment.
                 </p>
-
-                {/* Important Information */}
-                <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 space-y-2">
-                  <h3 className="text-red-500 font-semibold flex items-center">
-                    <FaExclamationTriangle className="mr-2" />
-                    Important Information
-                  </h3>
-                  <ul className="text-red-400 text-sm space-y-2">
-                    <li>• Community posts are limited to 4 images url per minute for security scanning and anti scam</li>
-                  </ul>
-                </div>
               </motion.div>
 
               {/* CTA Buttons */}

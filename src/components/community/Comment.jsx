@@ -1,11 +1,28 @@
 import React, { useState } from 'react';
 import { FaUserCircle, FaArrowUp, FaArrowDown, FaReply, FaTrash } from 'react-icons/fa';
-import { auth } from '../../firebase';
+import { auth, db } from '../../firebase';
+import { doc, getDoc } from 'firebase/firestore';
 
 function Comment({ comment, user, onReply, onVote, onDelete }) {
   const [showReplyInput, setShowReplyInput] = useState(false);
   const [replyText, setReplyText] = useState('');
+  const [commentUser, setCommentUser] = useState(null);
   const isAdmin = auth.currentUser?.email === 'andres_rios_xyz@outlook.com';
+
+  React.useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const userDoc = await getDoc(doc(db, 'users', comment.userId));
+        if (userDoc.exists()) {
+          setCommentUser(userDoc.data());
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
+    };
+
+    fetchUserData();
+  }, [comment.userId]);
 
   const handleReplySubmit = () => {
     if (replyText.trim()) {
@@ -18,9 +35,9 @@ function Comment({ comment, user, onReply, onVote, onDelete }) {
   return (
     <div className="flex items-start space-x-4">
       <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0">
-        {comment.userId === user?.id && user?.profilePicUrl ? (
+        {commentUser?.profilePicUrl ? (
           <img 
-            src={user.profilePicUrl}
+            src={commentUser.profilePicUrl}
             alt="Profile"
             className="w-8 h-8 rounded-full object-cover"
           />
