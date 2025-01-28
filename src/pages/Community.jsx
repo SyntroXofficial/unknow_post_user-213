@@ -23,7 +23,6 @@ import PostFilters from '../components/community/PostFilters';
 import Post from '../components/community/Post';
 import Sidebar from '../components/community/Sidebar';
 import ReportModal from '../components/community/ReportModal';
-import ReportsList from '../components/community/ReportsList';
 import { moderateContent } from '../utils/contentModeration';
 import { useCommunityData } from '../hooks/useCommunityData';
 import { usePagination } from '../hooks/usePagination';
@@ -70,7 +69,6 @@ function Community() {
   const [profilePicUrl, setProfilePicUrl] = useState('');
   const [selectedTags, setSelectedTags] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [showReports, setShowReports] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportReason, setReportReason] = useState('');
   const [reportDetails, setReportDetails] = useState('');
@@ -79,6 +77,8 @@ function Community() {
   const [newMessage, setNewMessage] = useState('');
   const [users, setUsers] = useState([]);
   const [showUserList, setShowUserList] = useState(false);
+
+  const isAdmin = auth.currentUser?.email === 'andres_rios_xyz@outlook.com';
 
   const filteredMessages = messages
     .filter(message => {
@@ -291,10 +291,104 @@ function Community() {
             </div>
           </div>
 
-          <Sidebar 
-            communityStats={communityStats}
-            communityRules={communityRules}
-          />
+          <div className="w-80 space-y-4">
+            <Sidebar 
+              communityStats={communityStats}
+              communityRules={communityRules}
+            />
+
+            {/* Members List */}
+            <div className="bg-[#1A1A1B] border border-[#343536] rounded-md p-4">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-white font-bold">Members</h2>
+                <button
+                  onClick={() => setShowUserList(!showUserList)}
+                  className="text-gray-400 hover:text-white"
+                >
+                  {showUserList ? 'Show Less' : 'Show More'}
+                </button>
+              </div>
+              <div className="space-y-3">
+                {users.slice(0, showUserList ? undefined : 5).map(member => (
+                  <div key={member.id} className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      {member.profilePicUrl ? (
+                        <img 
+                          src={member.profilePicUrl}
+                          alt={member.username}
+                          className="w-8 h-8 rounded-full object-cover"
+                        />
+                      ) : (
+                        <FaUserCircle className="w-8 h-8 text-gray-400" />
+                      )}
+                      <div>
+                        <p className="text-white text-sm font-medium">
+                          {member.username}
+                          {member.email === 'andres_rios_xyz@outlook.com' && (
+                            <span className="ml-2 px-1.5 py-0.5 bg-purple-500/20 text-purple-400 text-xs rounded-full">
+                              Admin
+                            </span>
+                          )}
+                        </p>
+                        <p className="text-gray-400 text-xs">#{member.id}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center">
+                      <FaCircle className={`w-2 h-2 ${
+                        isUserOnline(member.lastActive) 
+                          ? 'text-green-500' 
+                          : 'text-gray-500'
+                      }`} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Reports Section (Admin Only) */}
+            {isAdmin && (
+              <div className="bg-[#1A1A1B] border border-[#343536] rounded-md p-4">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-white font-bold">Reports</h2>
+                </div>
+                <div className="space-y-3">
+                  {reports.map(report => (
+                    <div key={report.id} className="bg-black/30 p-3 rounded-lg">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <p className={`text-sm ${report.status === 'resolved' ? 'text-green-400' : 'text-white'}`}>
+                            <span className="text-gray-400">Reporter:</span> {report.reportedBy}
+                          </p>
+                          <p className={`text-sm ${report.status === 'resolved' ? 'text-green-400' : 'text-white'}`}>
+                            <span className="text-gray-400">Reason:</span> {report.reason}
+                          </p>
+                          <p className="text-gray-400 text-xs mt-1">
+                            {report.timestamp?.toDate().toLocaleString()}
+                          </p>
+                        </div>
+                        <div className="flex space-x-2">
+                          <button
+                            onClick={() => handleMarkReportAsDone(report.id)}
+                            className={`p-1 ${report.status === 'resolved' ? 'text-green-400' : 'text-gray-400 hover:text-green-400'}`}
+                            title="Mark as Resolved"
+                          >
+                            <FaCheck className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteReport(report.id)}
+                            className="p-1 text-red-400 hover:text-red-300"
+                            title="Delete Report"
+                          >
+                            <FaTrash className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -312,14 +406,6 @@ function Community() {
           setReportReason('');
           setReportDetails('');
         }}
-      />
-
-      <ReportsList
-        showReports={showReports}
-        setShowReports={setShowReports}
-        reports={reports}
-        handleMarkReportAsDone={handleMarkReportAsDone}
-        handleDeleteReport={handleDeleteReport}
       />
     </div>
   );
