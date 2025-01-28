@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { FaExclamationTriangle, FaTimes } from 'react-icons/fa';
 
 function ReportModal({ 
@@ -11,11 +11,21 @@ function ReportModal({
   selectedPostId,
   onSubmit 
 }) {
+  useEffect(() => {
+    if (!show) {
+      // Clear stored content info when modal closes
+      localStorage.removeItem('reportContentType');
+      localStorage.removeItem('reportContentId');
+    }
+  }, [show]);
+
   if (!show) return null;
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit(selectedPostId, reportReason, reportDetails);
+    const contentType = localStorage.getItem('reportContentType') || 'post';
+    const contentId = localStorage.getItem('reportContentId') || selectedPostId;
+    onSubmit(selectedPostId, contentId, contentType, reportReason, reportDetails);
     onClose();
     setReportReason('');
     setReportDetails('');

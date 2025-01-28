@@ -92,11 +92,9 @@ function Community() {
       );
     })
     .sort((a, b) => {
-      // First sort by pinned status
       if (a.isPinned && !b.isPinned) return -1;
       if (!a.isPinned && b.isPinned) return 1;
       
-      // Then sort by the selected criteria
       switch (sortBy) {
         case 'hot':
           return b.votes - a.votes;
@@ -261,135 +259,12 @@ function Community() {
               handleSubmit={handleSubmit}
             />
 
-            <div className="bg-gradient-to-r from-white/10 to-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center space-x-3">
-                  <FaUsers className="text-white/80 w-5 h-5" />
-                  <h2 className="text-xl font-bold text-white">Community Members</h2>
-                </div>
-                <button
-                  onClick={() => setShowUserList(!showUserList)}
-                  className="text-white/70 hover:text-white transition-colors px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10"
-                >
-                  {showUserList ? 'Hide Members' : 'Show Members'}
-                </button>
-              </div>
-
-              {showUserList && (
-                <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {users.map((member) => (
-                    <div 
-                      key={member.id} 
-                      className="bg-black/30 rounded-lg p-4 border border-white/10 hover:border-white/20 transition-all"
-                    >
-                      <div className="flex items-center space-x-3">
-                        <div className="relative">
-                          {member.profilePicUrl ? (
-                            <img 
-                              src={member.profilePicUrl}
-                              alt={member.username}
-                              className="w-12 h-12 rounded-full object-cover"
-                            />
-                          ) : (
-                            <div className="w-12 h-12 rounded-full bg-purple-500/20 flex items-center justify-center">
-                              <FaUserCircle className="w-6 h-6 text-purple-400" />
-                            </div>
-                          )}
-                          <div className={`absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full border-2 border-[#1A1A1B] ${
-                            isUserOnline(member.lastActive) ? 'bg-green-500' : 'bg-gray-500'
-                          }`} />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center space-x-2">
-                            <p className="text-white font-medium truncate">{member.username}</p>
-                            {member.email === 'andres_rios_xyz@outlook.com' && (
-                              <span className="px-2 py-0.5 bg-purple-500/20 text-purple-400 text-xs rounded-full">
-                                Admin
-                              </span>
-                            )}
-                          </div>
-                          <p className="text-gray-400 text-sm truncate">ID: {member.id}</p>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {auth.currentUser?.email === 'andres_rios_xyz@outlook.com' && (
-              <div className="bg-gradient-to-r from-white/10 to-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center space-x-2">
-                    <FaExclamationTriangle className="text-red-500" />
-                    <h2 className="text-xl font-bold text-white">Reported Content</h2>
-                  </div>
-                  <button
-                    onClick={() => setShowReports(!showReports)}
-                    className="text-white/70 hover:text-white"
-                  >
-                    {showReports ? 'Hide' : 'Show'} Reports
-                  </button>
-                </div>
-
-                {showReports && (
-                  <div className="space-y-4">
-                    {reports.length === 0 ? (
-                      <p className="text-gray-400 text-center py-4">No reports to show</p>
-                    ) : (
-                      reports.map(report => (
-                        <div key={report.id} className="bg-black/30 rounded-lg p-4 border border-white/10">
-                          <div className="flex justify-between items-start">
-                            <div className="space-y-2">
-                              <p className="text-white">
-                                <span className="text-gray-400">Reporter:</span> {report.reportedBy}
-                              </p>
-                              <p className="text-white">
-                                <span className="text-gray-400">Reported User:</span> {report.reportedUserId}
-                              </p>
-                              <p className="text-white">
-                                <span className="text-gray-400">Reason:</span> {report.reason}
-                              </p>
-                              <p className="text-white">
-                                <span className="text-gray-400">Details:</span> {report.details}
-                              </p>
-                              <p className="text-white">
-                                <span className="text-gray-400">Status:</span>{' '}
-                                <span className={`px-2 py-1 rounded-full text-sm ${
-                                  report.status === 'resolved' 
-                                    ? 'bg-green-500/20 text-green-400' 
-                                    : 'bg-yellow-500/20 text-yellow-400'
-                                }`}>
-                                  {report.status}
-                                </span>
-                              </p>
-                            </div>
-                            <div className="flex space-x-2">
-                              {report.status === 'pending' && (
-                                <button
-                                  onClick={() => handleMarkReportAsDone(report.id)}
-                                  className="p-2 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30 transition-colors"
-                                  title="Mark as Resolved"
-                                >
-                                  <FaCheck className="w-4 h-4" />
-                                </button>
-                              )}
-                              <button
-                                onClick={() => handleDeleteReport(report.id)}
-                                className="p-2 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition-colors"
-                                title="Delete Report"
-                              >
-                                <FaTrash className="w-4 h-4" />
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                )}
-              </div>
-            )}
+            <PostFilters 
+              sortBy={sortBy}
+              setSortBy={setSortBy}
+              selectedTimeframe={selectedTimeframe}
+              setSelectedTimeframe={setSelectedTimeframe}
+            />
 
             <div className="space-y-4">
               {currentPosts.map((message) => (
@@ -437,6 +312,14 @@ function Community() {
           setReportReason('');
           setReportDetails('');
         }}
+      />
+
+      <ReportsList
+        showReports={showReports}
+        setShowReports={setShowReports}
+        reports={reports}
+        handleMarkReportAsDone={handleMarkReportAsDone}
+        handleDeleteReport={handleDeleteReport}
       />
     </div>
   );

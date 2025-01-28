@@ -29,7 +29,6 @@ function Post({
   const [postUser, setPostUser] = useState(null);
   const isAdmin = auth.currentUser?.email === 'andres_rios_xyz@outlook.com';
 
-  // Fetch post user data when component mounts
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -315,6 +314,8 @@ function Post({
                   onDelete={(commentId) => onCommentDelete(message.id, commentId)}
                   onReport={(messageId, commentId, type) => handleReport(messageId, commentId, type)}
                   messageId={message.id}
+                  setShowReportModal={setShowReportModal}
+                  setSelectedPostId={setSelectedPostId}
                 />
               ))}
             </div>

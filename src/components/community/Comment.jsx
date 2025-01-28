@@ -11,15 +11,17 @@ function Comment({
   onVote, 
   onDelete,
   onReport,
-  messageId 
+  messageId,
+  setShowReportModal,
+  setSelectedPostId 
 }) {
   const [showReplyInput, setShowReplyInput] = useState(false);
   const [replyText, setReplyText] = useState('');
   const [commentUser, setCommentUser] = useState(null);
+  const [replyUsers, setReplyUsers] = useState({});
   const [error, setError] = useState('');
   const isAdmin = auth.currentUser?.email === 'andres_rios_xyz@outlook.com';
 
-  // Fetch comment user data when component mounts
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -29,18 +31,30 @@ function Comment({
             setCommentUser(userDoc.data());
           }
         }
+
+        if (comment.replies) {
+          const replyUserData = {};
+          for (const reply of comment.replies) {
+            if (reply.userId) {
+              const replyUserDoc = await getDoc(doc(db, 'users', reply.userId));
+              if (replyUserDoc.exists()) {
+                replyUserData[reply.userId] = replyUserDoc.data();
+              }
+            }
+          }
+          setReplyUsers(replyUserData);
+        }
       } catch (error) {
         console.error('Error fetching user data:', error);
       }
     };
 
     fetchUserData();
-  }, [comment.userId]);
+  }, [comment.userId, comment.replies]);
 
   const handleReplySubmit = () => {
     setError('');
     
-    // Content moderation
     const moderationResult = moderateContent(replyText.trim());
     if (!moderationResult.isValid) {
       setError(moderationResult.reason);
@@ -54,112 +68,12 @@ function Comment({
     }
   };
 
-  const handleReport = () => {
-    onReport(messageId, comment.id, 'comment');
-  };
-
-  const renderReplies = (replies) => {
-    if (!replies || replies.length === 0) return null;
-    
-    return replies.map((reply) => {
-      const [replyUser, setReplyUser] = React.useState(null);
-
-      React.useEffect(() => {
-        const fetchReplyUserData = async () => {
-          try {
-            if (reply.userId) {
-              const userDoc = await getDoc(doc(db, 'users', reply.userId));
-              if (userDoc.exists()) {
-                setReplyUser(userDoc.data());
-              }
-            }
-          } catch (error) {
-            console.error('Error fetching reply user data:', error);
-          }
-        };
-
-        fetchReplyUserData();
-      }, [reply.userId]);
-
-      return (
-        <div key={reply.id} className="mt-4 ml-8">
-          <div className="flex items-start space-x-4">
-            {/* Reply Indicator Line */}
-            <div className="absolute -left-4 h-full w-px bg-white/10"></div>
-            
-            <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0">
-              {replyUser?.profilePicUrl ? (
-                <img 
-                  src={replyUser.profilePicUrl}
-                  alt="Profile"
-                  className="w-8 h-8 rounded-full object-cover"
-                  onError={(e) => {
-                    e.target.onerror = null;
-                    e.target.src = 'https://via.placeholder.com/40?text=?';
-                  }}
-                />
-              ) : (
-                <FaUserCircle className="w-5 h-5 text-white" />
-              )}
-            </div>
-            <div className="flex-1">
-              {/* Reply Indicator */}
-              <div className="flex items-center space-x-2 text-sm text-gray-400 mb-2">
-                <FaReply className="w-3 h-3" />
-                <span>Replying to</span>
-                <span className="text-purple-400 font-medium">{comment.username}</span>
-              </div>
-
-              <div className="flex items-center space-x-2 mb-1">
-                <span className="text-white font-medium">{reply.username}</span>
-                {reply.userId === 'andres_rios_xyz@outlook.com' && (
-                  <span className="px-2 py-0.5 bg-purple-500/20 text-purple-400 text-xs rounded-full">Admin</span>
-                )}
-                <span className="text-gray-400 text-sm">#{reply.userId}</span>
-                <span className="text-gray-400">•</span>
-                <span className="text-gray-400 text-sm">
-                  {new Date(reply.timestamp).toLocaleString()}
-                </span>
-              </div>
-              <p className="text-white">{reply.text}</p>
-              <div className="flex items-center space-x-4 mt-2 text-gray-400 text-sm">
-                <div className="flex items-center space-x-1">
-                  <button 
-                    onClick={() => onVote(reply.id, 1)}
-                    className={`hover:bg-[#272729] p-1 rounded ${reply.userVotes?.[user?.id] === 1 ? 'text-purple-500' : ''}`}
-                  >
-                    <FaArrowUp className="w-4 h-4" />
-                  </button>
-                  <span>{reply.votes || 0}</span>
-                  <button 
-                    onClick={() => onVote(reply.id, -1)}
-                    className={`hover:bg-[#272729] p-1 rounded ${reply.userVotes?.[user?.id] === -1 ? 'text-red-500' : ''}`}
-                  >
-                    <FaArrowDown className="w-4 h-4" />
-                  </button>
-                </div>
-                <button 
-                  onClick={() => onReport(messageId, reply.id, 'reply')}
-                  className="hover:bg-[#272729] px-2 py-1 rounded text-red-500 flex items-center space-x-1"
-                >
-                  <FaFlag className="w-4 h-4" />
-                  <span>Report</span>
-                </button>
-                {isAdmin && (
-                  <button 
-                    onClick={() => onDelete(reply.id)}
-                    className="hover:bg-[#272729] px-2 py-1 rounded text-red-500 flex items-center space-x-1"
-                  >
-                    <FaTrash className="w-4 h-4" />
-                    <span>Delete</span>
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      );
-    });
+  const handleReport = (type, contentId) => {
+    setSelectedPostId(messageId);
+    setShowReportModal(true);
+    // Store the content type and ID for the report modal
+    localStorage.setItem('reportContentType', type);
+    localStorage.setItem('reportContentId', contentId);
   };
 
   return (
@@ -210,22 +124,22 @@ function Comment({
           </div>
           <button 
             onClick={() => setShowReplyInput(!showReplyInput)} 
-            className="hover:bg-[#272729] px-2 py-1 rounded flex items-center space-x-1"
+            className="hover:bg-[#272729] px-2 py-1 rounded flex items-center space-x-1 text-white/70 hover:text-white transition-colors"
           >
             <FaReply className="w-4 h-4" />
             <span>Reply</span>
           </button>
           <button 
-            onClick={handleReport}
-            className="hover:bg-[#272729] px-2 py-1 rounded text-red-500 flex items-center space-x-1"
+            onClick={() => handleReport('comment', comment.id)}
+            className="hover:bg-[#272729] px-2 py-1 rounded text-red-500 flex items-center space-x-1 hover:bg-red-500/10 transition-colors"
           >
             <FaFlag className="w-4 h-4" />
             <span>Report</span>
           </button>
-          {isAdmin && (
+          {(isAdmin || comment.userId === auth.currentUser?.uid) && (
             <button 
               onClick={() => onDelete(comment.id)}
-              className="hover:bg-[#272729] px-2 py-1 rounded text-red-500 flex items-center space-x-1"
+              className="hover:bg-[#272729] px-2 py-1 rounded text-red-500 flex items-center space-x-1 hover:bg-red-500/10 transition-colors"
             >
               <FaTrash className="w-4 h-4" />
               <span>Delete</span>
@@ -252,7 +166,6 @@ function Comment({
                 )}
               </div>
               <div className="flex-1">
-                {/* Reply Indicator */}
                 <div className="flex items-center space-x-2 text-sm text-gray-400 mb-2">
                   <FaReply className="w-3 h-3" />
                   <span>Replying to</span>
@@ -275,14 +188,14 @@ function Comment({
                       setReplyText('');
                       setError('');
                     }}
-                    className="px-4 py-1 text-gray-400 hover:text-white"
+                    className="px-4 py-2 text-gray-400 hover:text-white transition-colors rounded-lg hover:bg-white/5"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={handleReplySubmit}
                     disabled={!replyText.trim()}
-                    className={`px-4 py-1 bg-white text-[#1A1A1B] rounded-full text-sm font-bold transition-colors ${
+                    className={`px-4 py-2 bg-white text-black rounded-lg text-sm font-bold transition-colors ${
                       replyText.trim() ? 'hover:bg-gray-200' : 'opacity-50 cursor-not-allowed'
                     }`}
                   >
@@ -294,9 +207,75 @@ function Comment({
           </div>
         )}
 
-        {/* Render replies with visual connection */}
-        <div className="relative">
-          {renderReplies(comment.replies)}
+        <div className="relative mt-4">
+          {comment.replies && comment.replies.map((reply) => (
+            <div key={reply.id} className="mt-4 ml-8">
+              <div className="flex items-start space-x-4">
+                <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0">
+                  {replyUsers[reply.userId]?.profilePicUrl ? (
+                    <img 
+                      src={replyUsers[reply.userId].profilePicUrl}
+                      alt="Profile"
+                      className="w-8 h-8 rounded-full object-cover"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = 'https://via.placeholder.com/40?text=?';
+                      }}
+                    />
+                  ) : (
+                    <FaUserCircle className="w-5 h-5 text-white" />
+                  )}
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center space-x-2 mb-1">
+                    <span className="text-white font-medium">{reply.username}</span>
+                    {reply.userId === 'andres_rios_xyz@outlook.com' && (
+                      <span className="px-2 py-0.5 bg-purple-500/20 text-purple-400 text-xs rounded-full">Admin</span>
+                    )}
+                    <span className="text-gray-400 text-sm">#{reply.userId}</span>
+                    <span className="text-gray-400">•</span>
+                    <span className="text-gray-400 text-sm">
+                      {new Date(reply.timestamp).toLocaleString()}
+                    </span>
+                  </div>
+                  <p className="text-white">{reply.text}</p>
+                  <div className="flex items-center space-x-4 mt-2 text-gray-400 text-sm">
+                    <div className="flex items-center space-x-1">
+                      <button 
+                        onClick={() => onVote(reply.id, 1)}
+                        className={`hover:bg-[#272729] p-1 rounded ${reply.userVotes?.[user?.id] === 1 ? 'text-purple-500' : ''}`}
+                      >
+                        <FaArrowUp className="w-4 h-4" />
+                      </button>
+                      <span>{reply.votes || 0}</span>
+                      <button 
+                        onClick={() => onVote(reply.id, -1)}
+                        className={`hover:bg-[#272729] p-1 rounded ${reply.userVotes?.[user?.id] === -1 ? 'text-red-500' : ''}`}
+                      >
+                        <FaArrowDown className="w-4 h-4" />
+                      </button>
+                    </div>
+                    <button 
+                      onClick={() => handleReport('reply', reply.id)}
+                      className="hover:bg-[#272729] px-2 py-1 rounded text-red-500 flex items-center space-x-1 hover:bg-red-500/10 transition-colors"
+                    >
+                      <FaFlag className="w-4 h-4" />
+                      <span>Report</span>
+                    </button>
+                    {(isAdmin || reply.userId === auth.currentUser?.uid) && (
+                      <button 
+                        onClick={() => onDelete(reply.id)}
+                        className="hover:bg-[#272729] px-2 py-1 rounded text-red-500 flex items-center space-x-1 hover:bg-red-500/10 transition-colors"
+                      >
+                        <FaTrash className="w-4 h-4" />
+                        <span>Delete</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>

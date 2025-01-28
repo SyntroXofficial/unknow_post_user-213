@@ -14,7 +14,8 @@ import {
   serverTimestamp,
   arrayUnion,
   addDoc,
-  deleteDoc
+  deleteDoc,
+  increment
 } from 'firebase/firestore';
 
 export function useCommunityData() {
@@ -117,58 +118,72 @@ export function useCommunityData() {
   const handleVote = async (messageId, direction) => {
     if (!auth.currentUser) return;
 
-    const messageRef = doc(db, 'community_messages', messageId);
-    const messageDoc = await getDoc(messageRef);
-    
-    if (!messageDoc.exists()) return;
-    
-    const currentVotes = messageDoc.data().votes || 0;
-    const userVotes = messageDoc.data().userVotes || {};
-    const currentUserVote = userVotes[auth.currentUser.uid] || 0;
+    try {
+      const messageRef = doc(db, 'community_messages', messageId);
+      const messageDoc = await getDoc(messageRef);
+      
+      if (!messageDoc.exists()) return;
+      
+      const currentVotes = messageDoc.data().votes || 0;
+      const userVotes = messageDoc.data().userVotes || {};
+      const currentUserVote = userVotes[auth.currentUser.uid] || 0;
 
-    let newVoteCount = currentVotes;
-    let newUserVote = direction;
+      let newVoteCount = currentVotes;
+      let newUserVote = direction;
 
-    if (currentUserVote === direction) {
-      newVoteCount -= direction;
-      newUserVote = 0;
-    } else {
-      newVoteCount = currentVotes - currentUserVote + direction;
+      // If user is clicking the same vote button again, remove their vote
+      if (currentUserVote === direction) {
+        newVoteCount -= direction;
+        newUserVote = 0;
+      } else {
+        // Remove previous vote if it exists
+        if (currentUserVote !== 0) {
+          newVoteCount -= currentUserVote;
+        }
+        // Add new vote
+        newVoteCount += direction;
+      }
+
+      await updateDoc(messageRef, {
+        votes: newVoteCount,
+        [`userVotes.${auth.currentUser.uid}`]: newUserVote
+      });
+    } catch (error) {
+      console.error('Error updating vote:', error);
     }
-
-    await updateDoc(messageRef, {
-      votes: newVoteCount,
-      [`userVotes.${auth.currentUser.uid}`]: newUserVote
-    });
   };
 
   const handleComment = async (messageId, commentText) => {
     if (!commentText?.trim() || !auth.currentUser) return;
 
-    const messageRef = doc(db, 'community_messages', messageId);
-    const messageDoc = await getDoc(messageRef);
-    
-    if (!messageDoc.exists()) return;
-    
-    const currentComments = messageDoc.data().comments || [];
-    
-    const newComment = {
-      id: Date.now().toString(),
-      text: commentText,
-      userId: auth.currentUser.uid,
-      username: user.username,
-      timestamp: new Date().toISOString(),
-      votes: 0,
-      userVotes: {},
-      replies: []
-    };
+    try {
+      const messageRef = doc(db, 'community_messages', messageId);
+      const messageDoc = await getDoc(messageRef);
+      
+      if (!messageDoc.exists()) return;
+      
+      const currentComments = messageDoc.data().comments || [];
+      
+      const newComment = {
+        id: Date.now().toString(),
+        text: commentText,
+        userId: auth.currentUser.uid,
+        username: user.username,
+        timestamp: new Date().toISOString(),
+        votes: 0,
+        userVotes: {},
+        replies: []
+      };
 
-    await updateDoc(messageRef, {
-      comments: [...currentComments, newComment]
-    });
+      await updateDoc(messageRef, {
+        comments: [...currentComments, newComment]
+      });
+    } catch (error) {
+      console.error('Error adding comment:', error);
+    }
   };
 
-  const handleReport = async (messageId, reason, details) => {
+  const handleReport = async (messageId, contentId, type, reason, details) => {
     if (!auth.currentUser) return;
     
     try {
@@ -181,18 +196,38 @@ export function useCommunityData() {
       }
 
       const messageData = messageDoc.data();
+      let reportedUserId = messageData.userId;
+
+      // If reporting a comment or reply, find the correct user ID
+      if (type === 'comment' || type === 'reply') {
+        const comment = messageData.comments?.find(c => 
+          c.id === contentId || c.replies?.some(r => r.id === contentId)
+        );
+        if (comment) {
+          if (type === 'comment') {
+            reportedUserId = comment.userId;
+          } else {
+            const reply = comment.replies?.find(r => r.id === contentId);
+            if (reply) {
+              reportedUserId = reply.userId;
+            }
+          }
+        }
+      }
       
       await addDoc(reportRef, {
         messageId,
+        contentId,
+        contentType: type,
         reportedBy: auth.currentUser.uid,
-        reportedUserId: messageData.userId,
+        reportedUserId,
         timestamp: serverTimestamp(),
         status: 'pending',
         reason: reason || 'No reason provided',
         details: details || 'No details provided'
       });
     } catch (error) {
-      console.error('Error reporting message:', error);
+      console.error('Error reporting content:', error);
     }
   };
 
@@ -228,41 +263,88 @@ export function useCommunityData() {
   const handleCommentVote = async (messageId, commentId, direction) => {
     if (!auth.currentUser) return;
 
-    const messageRef = doc(db, 'community_messages', messageId);
-    const messageDoc = await getDoc(messageRef);
-    
-    if (!messageDoc.exists()) return;
-    
-    const comments = messageDoc.data().comments || [];
-    const updatedComments = comments.map(comment => {
-      if (comment.id === commentId) {
-        const currentVotes = comment.votes || 0;
-        const userVotes = comment.userVotes || {};
-        const currentUserVote = userVotes[auth.currentUser.uid] || 0;
+    try {
+      const messageRef = doc(db, 'community_messages', messageId);
+      const messageDoc = await getDoc(messageRef);
+      
+      if (!messageDoc.exists()) return;
+      
+      const comments = messageDoc.data().comments || [];
+      const updatedComments = comments.map(comment => {
+        if (comment.id === commentId) {
+          const currentVotes = comment.votes || 0;
+          const userVotes = comment.userVotes || {};
+          const currentUserVote = userVotes[auth.currentUser.uid] || 0;
 
-        let newVoteCount = currentVotes;
-        let newUserVote = direction;
+          let newVoteCount = currentVotes;
+          let newUserVote = direction;
 
-        if (currentUserVote === direction) {
-          newVoteCount -= direction;
-          newUserVote = 0;
-        } else {
-          newVoteCount = currentVotes - currentUserVote + direction;
+          if (currentUserVote === direction) {
+            newVoteCount -= direction;
+            newUserVote = 0;
+          } else {
+            if (currentUserVote !== 0) {
+              newVoteCount -= currentUserVote;
+            }
+            newVoteCount += direction;
+          }
+
+          return {
+            ...comment,
+            votes: newVoteCount,
+            userVotes: {
+              ...userVotes,
+              [auth.currentUser.uid]: newUserVote
+            }
+          };
+        }
+        
+        // Check for votes in replies
+        if (comment.replies) {
+          const updatedReplies = comment.replies.map(reply => {
+            if (reply.id === commentId) {
+              const currentVotes = reply.votes || 0;
+              const userVotes = reply.userVotes || {};
+              const currentUserVote = userVotes[auth.currentUser.uid] || 0;
+
+              let newVoteCount = currentVotes;
+              let newUserVote = direction;
+
+              if (currentUserVote === direction) {
+                newVoteCount -= direction;
+                newUserVote = 0;
+              } else {
+                if (currentUserVote !== 0) {
+                  newVoteCount -= currentUserVote;
+                }
+                newVoteCount += direction;
+              }
+
+              return {
+                ...reply,
+                votes: newVoteCount,
+                userVotes: {
+                  ...userVotes,
+                  [auth.currentUser.uid]: newUserVote
+                }
+              };
+            }
+            return reply;
+          });
+
+          return {
+            ...comment,
+            replies: updatedReplies
+          };
         }
 
-        return {
-          ...comment,
-          votes: newVoteCount,
-          userVotes: {
-            ...userVotes,
-            [auth.currentUser.uid]: newUserVote
-          }
-        };
-      }
-      return comment;
-    });
+        return comment;
+      });
 
-    await updateDoc(messageRef, { comments: updatedComments });
+      await updateDoc(messageRef, { comments: updatedComments });
+    } catch (error) {
+      console.error('Error updating vote:', error);
+    }
   };
 
   const handleCommentDelete = async (messageId, commentId) => {
@@ -275,24 +357,20 @@ export function useCommunityData() {
       if (!messageDoc.exists()) return;
       
       const comments = messageDoc.data().comments || [];
-      const updatedComments = comments.map(comment => {
+      const updatedComments = comments.filter(comment => {
         if (comment.id === commentId) {
-          // If it's a reply, filter it out from the parent comment's replies
-          if (comment.replies) {
-            return {
-              ...comment,
-              replies: comment.replies.filter(reply => 
-                auth.currentUser.email === 'andres_rios_xyz@outlook.com' || 
-                reply.userId === auth.currentUser.uid
-              )
-            };
-          }
-          // For main comments, only allow deletion if admin or comment owner
-          return auth.currentUser.email === 'andres_rios_xyz@outlook.com' || 
-                 comment.userId === auth.currentUser.uid ? null : comment;
+          return !(auth.currentUser.email === 'andres_rios_xyz@outlook.com' || 
+                  comment.userId === auth.currentUser.uid);
         }
-        return comment;
-      }).filter(Boolean); // Remove null entries
+        if (comment.replies) {
+          comment.replies = comment.replies.filter(reply => 
+            reply.id !== commentId || 
+            !(auth.currentUser.email === 'andres_rios_xyz@outlook.com' || 
+              reply.userId === auth.currentUser.uid)
+          );
+        }
+        return true;
+      });
       
       await updateDoc(messageRef, { comments: updatedComments });
     } catch (error) {
