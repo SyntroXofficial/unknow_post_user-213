@@ -90,16 +90,16 @@ function Home() {
                 transition={{ delay: 0.6, duration: 0.6 }}
               >
                 {!user && (
-                  <>
-                    <Link to="/login" className="group flex items-center px-6 py-3 bg-white text-black rounded-lg hover:bg-gray-200 transition-all duration-300 text-sm font-semibold">
+                  <div className="flex gap-4 w-full">
+                    <Link to="/login" className="flex-1 group flex items-center justify-center px-6 py-3 bg-white text-black rounded-lg hover:bg-gray-200 transition-all duration-300 text-sm font-semibold">
                       Sign In
                       <FaSignInAlt className="ml-2 group-hover:translate-x-1 transition-transform duration-300" />
                     </Link>
-                    <Link to="/signup" className="group flex items-center px-6 py-3 bg-white/10 backdrop-blur-sm text-white rounded-lg hover:bg-white/20 transition-all duration-300 text-sm font-semibold border border-white/20">
+                    <Link to="/signup" className="flex-1 group flex items-center justify-center px-6 py-3 bg-white/10 backdrop-blur-sm text-white rounded-lg hover:bg-white/20 transition-all duration-300 text-sm font-semibold border border-white/20">
                       Create Account
                       <FaArrowRight className="ml-2 group-hover:translate-x-1 transition-transform duration-300" />
                     </Link>
-                  </>
+                  </div>
                 )}
               </motion.div>
             </div>
@@ -111,8 +111,8 @@ function Home() {
               initial="hidden"
               animate="show"
             >
-              <motion.div variants={item}>
-                <Link to={user ? "/games" : "/login"} className="block p-6 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 hover:border-white/20 transition-all duration-300 group">
+              <motion.div variants={item} className="h-full">
+                <Link to={user ? "/games" : "/login"} className="block h-full p-6 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 hover:border-white/20 transition-all duration-300 group">
                   <div className="flex items-start space-x-4">
                     <div className="p-3 bg-blue-500/10 rounded-lg group-hover:scale-110 transition-transform duration-300">
                       <FaGamepad className="w-6 h-6 text-blue-500" />
@@ -125,8 +125,8 @@ function Home() {
                 </Link>
               </motion.div>
 
-              <motion.div variants={item}>
-                <Link to={user ? "/streaming" : "/login"} className="block p-6 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 hover:border-white/20 transition-all duration-300 group">
+              <motion.div variants={item} className="h-full">
+                <Link to={user ? "/streaming" : "/login"} className="block h-full p-6 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 hover:border-white/20 transition-all duration-300 group">
                   <div className="flex items-start space-x-4">
                     <div className="p-3 bg-purple-500/10 rounded-lg group-hover:scale-110 transition-transform duration-300">
                       <FaPlay className="w-6 h-6 text-purple-500" />
@@ -139,8 +139,8 @@ function Home() {
                 </Link>
               </motion.div>
 
-              <motion.div variants={item}>
-                <Link to={user ? "/generator" : "/login"} className="block p-6 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 hover:border-white/20 transition-all duration-300 group">
+              <motion.div variants={item} className="h-full">
+                <Link to={user ? "/generator" : "/login"} className="block h-full p-6 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 hover:border-white/20 transition-all duration-300 group">
                   <div className="flex items-start space-x-4">
                     <div className="p-3 bg-green-500/10 rounded-lg group-hover:scale-110 transition-transform duration-300">
                       <FaRandom className="w-6 h-6 text-green-500" />
@@ -153,8 +153,8 @@ function Home() {
                 </Link>
               </motion.div>
 
-              <motion.div variants={item}>
-                <Link to={user ? "/community" : "/login"} className="block p-6 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 hover:border-white/20 transition-all duration-300 group">
+              <motion.div variants={item} className="h-full">
+                <Link to={user ? "/community" : "/login"} className="block h-full p-6 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 hover:border-white/20 transition-all duration-300 group">
                   <div className="flex items-start space-x-4">
                     <div className="p-3 bg-indigo-500/10 rounded-lg group-hover:scale-110 transition-transform duration-300">
                       <FaComments className="w-6 h-6 text-indigo-500" />
@@ -167,8 +167,8 @@ function Home() {
                 </Link>
               </motion.div>
 
-              <motion.div variants={item}>
-                <Link to="/important" className="block p-6 bg-red-500/5 backdrop-blur-sm rounded-xl border border-red-500/10 hover:border-red-500/20 transition-all duration-300 group">
+              <motion.div variants={item} className="col-span-2 h-full">
+                <Link to="/important" className="block h-full p-6 bg-red-500/5 backdrop-blur-sm rounded-xl border border-red-500/10 hover:border-red-500/20 transition-all duration-300 group">
                   <div className="flex items-start space-x-4">
                     <div className="p-3 bg-red-500/10 rounded-lg group-hover:scale-110 transition-transform duration-300">
                       <FaExclamationTriangle className="w-6 h-6 text-red-500" />
