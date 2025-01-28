@@ -92,18 +92,20 @@ function Community() {
       );
     })
     .sort((a, b) => {
+      // First sort by pinned status
       if (a.isPinned && !b.isPinned) return -1;
       if (!a.isPinned && b.isPinned) return 1;
       
+      // Then apply other sorting criteria
       switch (sortBy) {
         case 'hot':
-          return b.votes - a.votes;
+          return (b.votes || 0) - (a.votes || 0);
         case 'new':
-          return b.timestamp - a.timestamp;
+          const timeA = a.timestamp?.toDate?.() || a.timestamp;
+          const timeB = b.timestamp?.toDate?.() || b.timestamp;
+          return timeB - timeA;
         case 'top':
-          const aTime = a.timestamp?.toDate?.() || a.timestamp;
-          const bTime = b.timestamp?.toDate?.() || b.timestamp;
-          return bTime - aTime;
+          return (b.votes || 0) - (a.votes || 0);
         default:
           return 0;
       }
