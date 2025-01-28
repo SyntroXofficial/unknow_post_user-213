@@ -46,7 +46,8 @@ export function useCommunityData() {
     const unsubscribeMessages = onSnapshot(messagesQuery, (snapshot) => {
       const newMessages = snapshot.docs.map(doc => ({
         id: doc.id,
-        ...doc.data()
+        ...doc.data(),
+        comments: doc.data().comments || [] // Ensure comments array always exists
       }));
       setMessages(newMessages);
     });
@@ -118,6 +119,9 @@ export function useCommunityData() {
 
     const messageRef = doc(db, 'community_messages', messageId);
     const messageDoc = await getDoc(messageRef);
+    
+    if (!messageDoc.exists()) return;
+    
     const currentVotes = messageDoc.data().votes || 0;
     const userVotes = messageDoc.data().userVotes || {};
     const currentUserVote = userVotes[auth.currentUser.uid] || 0;
@@ -142,17 +146,25 @@ export function useCommunityData() {
     if (!commentText?.trim() || !auth.currentUser) return;
 
     const messageRef = doc(db, 'community_messages', messageId);
+    const messageDoc = await getDoc(messageRef);
+    
+    if (!messageDoc.exists()) return;
+    
+    const currentComments = messageDoc.data().comments || [];
+    
+    const newComment = {
+      id: Date.now().toString(),
+      text: commentText,
+      userId: auth.currentUser.uid,
+      username: user.username,
+      timestamp: new Date().toISOString(),
+      votes: 0,
+      userVotes: {},
+      replies: []
+    };
+
     await updateDoc(messageRef, {
-      comments: arrayUnion({
-        id: Date.now().toString(),
-        text: commentText,
-        userId: auth.currentUser.uid,
-        username: user.username,
-        timestamp: new Date().toISOString(),
-        votes: 0,
-        userVotes: {},
-        replies: []
-      })
+      comments: [...currentComments, newComment]
     });
   };
 
@@ -191,8 +203,13 @@ export function useCommunityData() {
       const messageRef = doc(db, 'community_messages', messageId);
       const messageDoc = await getDoc(messageRef);
       
+      if (!messageDoc.exists()) return;
+      
+      const currentData = messageDoc.data();
+      
       await updateDoc(messageRef, {
-        isPinned: !messageDoc.data().isPinned
+        isPinned: !currentData.isPinned,
+        comments: currentData.comments || [] // Preserve existing comments
       });
     } catch (error) {
       console.error('Error pinning message:', error);
@@ -214,8 +231,10 @@ export function useCommunityData() {
 
     const messageRef = doc(db, 'community_messages', messageId);
     const messageDoc = await getDoc(messageRef);
+    
+    if (!messageDoc.exists()) return;
+    
     const comments = messageDoc.data().comments || [];
-
     const updatedComments = comments.map(comment => {
       if (comment.id === commentId) {
         const currentVotes = comment.votes || 0;
@@ -253,9 +272,12 @@ export function useCommunityData() {
     try {
       const messageRef = doc(db, 'community_messages', messageId);
       const messageDoc = await getDoc(messageRef);
-      const comments = messageDoc.data().comments || [];
       
+      if (!messageDoc.exists()) return;
+      
+      const comments = messageDoc.data().comments || [];
       const updatedComments = comments.filter(comment => comment.id !== commentId);
+      
       await updateDoc(messageRef, { comments: updatedComments });
     } catch (error) {
       console.error('Error deleting comment:', error);
@@ -268,8 +290,10 @@ export function useCommunityData() {
     try {
       const messageRef = doc(db, 'community_messages', messageId);
       const messageDoc = await getDoc(messageRef);
+      
+      if (!messageDoc.exists()) return;
+      
       const comments = messageDoc.data().comments || [];
-
       const updatedComments = comments.map(comment => {
         if (comment.id === commentId) {
           const replies = comment.replies || [];
