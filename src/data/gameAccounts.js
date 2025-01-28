@@ -1,5 +1,26 @@
 // Game account arrays
 export const mythicAccounts = [
+{
+  game: 'Cities: Skylines II',
+  username: '93612408',
+  password: '07545306',
+  imageUrl: 'https://news.xbox.com/en-us/wp-content/uploads/sites/2/2023/09/CITIES_SKYLINESII_2023KEYART_1920x1080-d0dbecf50f0d9b02987f.jpg',
+  description: '• Full Game Access\n• Next-Generation City Builder\n• Realistic Simulation and Management\n• Dynamic Weather and Seasons\n• Advanced Infrastructure and Zoning Tools\n• Expansive Maps and Detailed Customization',
+  features: [
+    { label: 'Region', value: 'Global' },
+    { label: 'Platform', value: 'Steam' },
+    { label: 'Rating', value: 'E (Everyone)' },
+    { label: 'Genre', value: 'City-Building Simulation' },
+    { label: 'Release', value: '2023' },
+    { label: 'Playtime', value: 'Endless' }
+  ],
+  requirements: {
+    cpu: 'Intel Core i7-6700K or AMD Ryzen 5 2600X',
+    gpu: 'Nvidia GeForce GTX 970 (4 GB) or AMD Radeon RX 480 (8 GB)',
+    ram: '8 GB',
+    storage: '60 GB'
+  }
+},
   {
     game: 'Lords of the Fallen',
     username: 'vjtae27237',
