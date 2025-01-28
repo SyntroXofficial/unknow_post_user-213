@@ -6,6 +6,7 @@ import {
 } from 'react-icons/fa';
 import { auth } from '../../firebase';
 import Comment from './Comment';
+import { moderateContent } from '../../utils/contentModeration';
 
 // Helper function to get tag color
 const getTagColor = (tag) => {
@@ -59,11 +60,19 @@ function Post({
 
   const handleCommentSubmit = () => {
     if (!newComments[message.id]?.trim()) return;
+
+    const moderationResult = moderateContent(newComments[message.id].trim());
+    if (!moderationResult.isValid) {
+      setError(moderationResult.reason);
+      return;
+    }
+
     handleComment(message.id, newComments[message.id]);
     setNewComments(prev => ({
       ...prev,
       [message.id]: ''
     }));
+    setError('');
   };
 
   return (
@@ -226,6 +235,9 @@ function Post({
                   placeholder="What are your thoughts?"
                   className="w-full bg-[#1f1f1f] text-white p-3 rounded-md border border-[#2a2a2a] focus:outline-none focus:border-[#3a3a3a] min-h-[80px]"
                 />
+                {error && (
+                  <p className="text-red-500 text-sm mt-1">{error}</p>
+                )}
                 <div className="flex justify-end mt-2">
                   <button
                     onClick={handleCommentSubmit}
@@ -243,7 +255,7 @@ function Post({
                   key={comment.id} 
                   comment={comment}
                   user={user}
-                  onReply={onReply}
+                  onReply={(commentId, replyText) => onReply(message.id, commentId, replyText)}
                   onVote={(commentId, direction) => onCommentVote(message.id, commentId, direction)}
                   onDelete={(commentId) => onCommentDelete(message.id, commentId)}
                   onReport={(messageId, commentId, type) => handleReport(messageId, commentId, type)}

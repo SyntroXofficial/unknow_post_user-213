@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { FaUserCircle, FaArrowUp, FaArrowDown, FaReply, FaTrash, FaArrowRight, FaFlag } from 'react-icons/fa';
-import { auth, db } from '../../firebase';
-import { doc, getDoc } from 'firebase/firestore';
+import { auth } from '../../firebase';
 import { moderateContent } from '../../utils/contentModeration';
 
 function Comment({ 
@@ -175,6 +174,7 @@ function Comment({
           </div>
         )}
 
+        {/* Display Replies */}
         <div className="relative mt-4">
           {comment.replies && comment.replies.map((reply) => (
             <div key={reply.id} className="mt-4 ml-8">

@@ -30,7 +30,6 @@ export function useCommunityData() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Set up auth state listener first
     const unsubscribeAuth = auth.onAuthStateChanged(async (currentUser) => {
       if (currentUser) {
         const userDocRef = doc(db, 'users', currentUser.uid);
@@ -55,9 +54,7 @@ export function useCommunityData() {
     let unsubscribeMessages = () => {};
     let unsubscribeReports = () => {};
 
-    // Only set up listeners if user is authenticated
     if (user) {
-      // Query messages with no restrictions - all authenticated users can see messages
       const messagesQuery = query(
         collection(db, 'community_messages'),
         orderBy('timestamp', 'desc')
@@ -68,7 +65,6 @@ export function useCommunityData() {
         for (const docSnapshot of snapshot.docs) {
           const messageData = { id: docSnapshot.id, ...docSnapshot.data() };
           
-          // Fetch user data for the message author
           if (messageData.userId) {
             const userDocRef = doc(db, 'users', messageData.userId);
             try {
@@ -81,7 +77,6 @@ export function useCommunityData() {
             }
           }
 
-          // Fetch user data for comments
           if (messageData.comments) {
             for (const comment of messageData.comments) {
               if (comment.userId) {
@@ -96,7 +91,6 @@ export function useCommunityData() {
                 }
               }
 
-              // Fetch user data for replies
               if (comment.replies) {
                 for (const reply of comment.replies) {
                   if (reply.userId) {
@@ -122,7 +116,6 @@ export function useCommunityData() {
         console.error('Error fetching messages:', error);
       });
 
-      // Only fetch reports if user is admin
       if (user.email === 'andres_rios_xyz@outlook.com') {
         const reportsQuery = query(
           collection(db, 'reports'),
@@ -140,7 +133,6 @@ export function useCommunityData() {
         });
       }
 
-      // Fetch community stats
       const fetchCommunityStats = async () => {
         try {
           const usersQuery = query(collection(db, 'users'));
