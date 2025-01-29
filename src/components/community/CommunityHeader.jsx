@@ -2,7 +2,7 @@ import React from 'react';
 
 function CommunityHeader() {
   return (
-    <div className="bg-[#1A1A1B] rounded-t-md border border-[#343536] p-4 mb-4">
+    <div className="bg-[#1A1A1B] rounded-t-md border border-[#343536] p-4 -mt-0">
       <div className="flex items-center space-x-4">
         <div className="w-20 h-20 bg-transparent rounded-full flex items-center justify-center -mt-12 border-4 border-[#1A1A1B] overflow-hidden">
           <img 
