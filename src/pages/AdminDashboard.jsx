@@ -3,23 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
   FaUserShield, FaBan, FaUndo, FaSignInAlt, FaSearch,
-  FaUsers, FaUserSlash, FaUserCheck, FaUserClock,
-  FaDownload, FaFlag, FaTrash, FaEdit
+  FaUsers, FaUserSlash, FaUserCheck, FaUserClock
 } from 'react-icons/fa';
 import { auth, db } from '../firebase';
-import { 
-  collection, 
-  getDocs, 
-  doc, 
-  updateDoc, 
-  onSnapshot, 
-  Timestamp,
-  query,
-  where,
-  deleteDoc,
-  orderBy,
-  limit 
-} from 'firebase/firestore';
+import { collection, getDocs, doc, updateDoc, onSnapshot, Timestamp } from 'firebase/firestore';
 
 function AdminDashboard() {
   const navigate = useNavigate();
@@ -30,16 +17,11 @@ function AdminDashboard() {
   const [adminPassword, setAdminPassword] = useState('');
   const [error, setError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedUser, setSelectedUser] = useState(null);
-  const [showUserModal, setShowUserModal] = useState(false);
-  const [reportedContent, setReportedContent] = useState([]);
   const [stats, setStats] = useState({
     totalUsers: 0,
     bannedUsers: 0,
     activeUsers: 0,
-    recentLogins: 0,
-    totalPosts: 0,
-    reportedContent: 0
+    recentLogins: 0
   });
 
   const handleAdminLogin = (e) => {
@@ -55,13 +37,13 @@ function AdminDashboard() {
   useEffect(() => {
     if (!isAuthenticated) return;
 
-    // Fetch users
-    const unsubscribeUsers = onSnapshot(collection(db, 'users'), (snapshot) => {
+    const unsubscribe = onSnapshot(collection(db, 'users'), (snapshot) => {
       const userData = snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
       }));
 
+      // Calculate stats
       const now = new Date();
       const oneDayAgo = new Date(now - 24 * 60 * 60 * 1000);
 
@@ -72,35 +54,14 @@ function AdminDashboard() {
         recentLogins: userData.filter(user => {
           const lastLogin = user.lastLogin?.toDate();
           return lastLogin && lastLogin > oneDayAgo;
-        }).length,
-        totalPosts: 0,
-        reportedContent: 0
+        }).length
       });
 
       setUsers(userData);
       setLoading(false);
     });
 
-    // Fetch reported content
-    const unsubscribeReports = onSnapshot(
-      query(collection(db, 'reports'), orderBy('timestamp', 'desc')),
-      (snapshot) => {
-        const reports = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }));
-        setReportedContent(reports);
-        setStats(prev => ({
-          ...prev,
-          reportedContent: reports.length
-        }));
-      }
-    );
-
-    return () => {
-      unsubscribeUsers();
-      unsubscribeReports();
-    };
+    return () => unsubscribe();
   }, [isAuthenticated]);
 
   const handleBanUser = async (userId, currentBanStatus) => {
@@ -113,37 +74,6 @@ function AdminDashboard() {
     } catch (error) {
       console.error('Error updating user ban status:', error);
     }
-  };
-
-  const handleDeleteUser = async (userId) => {
-    if (window.confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
-      try {
-        await deleteDoc(doc(db, 'users', userId));
-      } catch (error) {
-        console.error('Error deleting user:', error);
-      }
-    }
-  };
-
-  const handleExportData = () => {
-    const data = users.map(user => ({
-      id: user.id,
-      username: user.username,
-      email: user.email,
-      status: user.banned ? 'Banned' : 'Active',
-      createdAt: user.createdAt?.toDate().toISOString(),
-      lastLogin: user.lastLogin?.toDate().toISOString()
-    }));
-
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `users-export-${new Date().toISOString()}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
   };
 
   const filteredUsers = users.filter(user => {
@@ -218,20 +148,8 @@ function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-black pt-32 px-8 pb-16">
-      {/* Header with Export Button */}
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-white">Admin Dashboard</h1>
-        <button
-          onClick={handleExportData}
-          className="bg-white/10 text-white px-4 py-2 rounded-lg hover:bg-white/20 transition-colors flex items-center"
-        >
-          <FaDownload className="mr-2" />
-          Export Data
-        </button>
-      </div>
-
       {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 mb-8">
+      <div className="grid grid-cols-4 gap-6 mb-8">
         <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10">
           <div className="flex items-center justify-between">
             <div>
@@ -279,30 +197,6 @@ function AdminDashboard() {
             </div>
           </div>
         </div>
-
-        <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-400 text-sm">Total Posts</p>
-              <p className="text-3xl font-bold text-white">{stats.totalPosts}</p>
-            </div>
-            <div className="p-3 bg-white/10 rounded-lg">
-              <FaChartLine className="w-6 h-6 text-yellow-400" />
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-400 text-sm">Reported Content</p>
-              <p className="text-3xl font-bold text-white">{stats.reportedContent}</p>
-            </div>
-            <div className="p-3 bg-white/10 rounded-lg">
-              <FaFlag className="w-6 h-6 text-orange-400" />
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* Search Bar */}
@@ -320,7 +214,7 @@ function AdminDashboard() {
       </div>
 
       {/* Users Table */}
-      <div className="bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 overflow-hidden mb-8">
+      <div className="bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
@@ -328,7 +222,6 @@ function AdminDashboard() {
                 <th className="px-6 py-4 text-left text-sm font-semibold text-gray-400">User</th>
                 <th className="px-6 py-4 text-left text-sm font-semibold text-gray-400">Document ID</th>
                 <th className="px-6 py-4 text-left text-sm font-semibold text-gray-400">Status</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-400">Last Login</th>
                 <th className="px-6 py-4 text-right text-sm font-semibold text-gray-400">Actions</th>
               </tr>
             </thead>
@@ -355,74 +248,23 @@ function AdminDashboard() {
                       {user.banned ? 'Banned' : 'Active'}
                     </span>
                   </td>
-                  <td className="px-6 py-4">
-                    <div className="text-sm text-gray-400">
-                      {user.lastLogin?.toDate().toLocaleDateString()}
-                    </div>
-                  </td>
                   <td className="px-6 py-4 text-right">
-                    <div className="flex items-center justify-end space-x-3">
-                      <button
-                        onClick={() => handleBanUser(user.id, user.banned)}
-                        className={`transition-colors ${
-                          user.banned 
-                            ? 'text-green-400 hover:text-green-300' 
-                            : 'text-red-400 hover:text-red-300'
-                        }`}
-                        title={user.banned ? 'Unban User' : 'Ban User'}
-                      >
-                        {user.banned ? <FaUndo className="w-5 h-5" /> : <FaBan className="w-5 h-5" />}
-                      </button>
-                      <button
-                        onClick={() => setSelectedUser(user)}
-                        className="text-blue-400 hover:text-blue-300 transition-colors"
-                        title="Edit User"
-                      >
-                        <FaEdit className="w-5 h-5" />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteUser(user.id)}
-                        className="text-red-400 hover:text-red-300 transition-colors"
-                        title="Delete User"
-                      >
-                        <FaTrash className="w-5 h-5" />
-                      </button>
-                    </div>
+                    <button
+                      onClick={() => handleBanUser(user.id, user.banned)}
+                      className={`transition-colors ${
+                        user.banned 
+                          ? 'text-green-400 hover:text-green-300' 
+                          : 'text-red-400 hover:text-red-300'
+                      }`}
+                      title={user.banned ? 'Unban User' : 'Ban User'}
+                    >
+                      {user.banned ? <FaUndo className="w-5 h-5" /> : <FaBan className="w-5 h-5" />}
+                    </button>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
-        </div>
-      </div>
-
-      {/* Reported Content Section */}
-      <div className="bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 overflow-hidden">
-        <div className="p-6">
-          <h2 className="text-xl font-semibold text-white mb-4">Reported Content</h2>
-          <div className="space-y-4">
-            {reportedContent.map((report) => (
-              <div key={report.id} className="bg-black/50 rounded-lg p-4">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <p className="text-white font-medium">{report.contentType}</p>
-                    <p className="text-sm text-gray-400">{report.reason}</p>
-                    <p className="text-xs text-gray-500 mt-1">
-                      Reported by: {report.reportedBy}
-                    </p>
-                  </div>
-                  <div className="flex space-x-2">
-                    <button
-                      className="text-red-400 hover:text-red-300 transition-colors"
-                      title="Delete Content"
-                    >
-                      <FaTrash className="w-5 h-5" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
         </div>
       </div>
     </div>
