@@ -4,8 +4,7 @@ import { motion } from 'framer-motion';
 import { 
   FaUserShield, FaBan, FaUndo, FaSignInAlt, FaSearch,
   FaUsers, FaUserSlash, FaUserCheck, FaUserClock,
-  FaDownload, FaChartLine, FaFlag, FaTrash, FaEdit,
-  FaCalendarAlt, FaEnvelope
+  FaDownload, FaFlag, FaTrash, FaEdit
 } from 'react-icons/fa';
 import { auth, db } from '../firebase';
 import { 
@@ -21,27 +20,6 @@ import {
   orderBy,
   limit 
 } from 'firebase/firestore';
-import { Line } from 'react-chartjs-2';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-} from 'chart.js';
-
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend
-);
 
 function AdminDashboard() {
   const navigate = useNavigate();
@@ -55,10 +33,6 @@ function AdminDashboard() {
   const [selectedUser, setSelectedUser] = useState(null);
   const [showUserModal, setShowUserModal] = useState(false);
   const [reportedContent, setReportedContent] = useState([]);
-  const [userActivityData, setUserActivityData] = useState({
-    labels: [],
-    datasets: []
-  });
   const [stats, setStats] = useState({
     totalUsers: 0,
     bannedUsers: 0,
@@ -122,28 +96,6 @@ function AdminDashboard() {
         }));
       }
     );
-
-    // Fetch user activity data for chart
-    const fetchActivityData = async () => {
-      const last7Days = Array.from({length: 7}, (_, i) => {
-        const d = new Date();
-        d.setDate(d.getDate() - i);
-        return d.toISOString().split('T')[0];
-      }).reverse();
-
-      const activityData = {
-        labels: last7Days,
-        datasets: [{
-          label: 'Daily Active Users',
-          data: last7Days.map(() => Math.floor(Math.random() * 50) + 10),
-          borderColor: 'rgb(75, 192, 192)',
-          tension: 0.1
-        }]
-      };
-      setUserActivityData(activityData);
-    };
-
-    fetchActivityData();
 
     return () => {
       unsubscribeUsers();
@@ -350,46 +302,6 @@ function AdminDashboard() {
               <FaFlag className="w-6 h-6 text-orange-400" />
             </div>
           </div>
-        </div>
-      </div>
-
-      {/* Activity Chart */}
-      <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10 mb-8">
-        <h2 className="text-xl font-semibold text-white mb-4">User Activity</h2>
-        <div className="h-64">
-          <Line
-            data={userActivityData}
-            options={{
-              responsive: true,
-              maintainAspectRatio: false,
-              scales: {
-                y: {
-                  beginAtZero: true,
-                  grid: {
-                    color: 'rgba(255, 255, 255, 0.1)'
-                  },
-                  ticks: {
-                    color: 'rgba(255, 255, 255, 0.7)'
-                  }
-                },
-                x: {
-                  grid: {
-                    color: 'rgba(255, 255, 255, 0.1)'
-                  },
-                  ticks: {
-                    color: 'rgba(255, 255, 255, 0.7)'
-                  }
-                }
-              },
-              plugins: {
-                legend: {
-                  labels: {
-                    color: 'rgba(255, 255, 255, 0.7)'
-                  }
-                }
-              }
-            }}
-          />
         </div>
       </div>
 
