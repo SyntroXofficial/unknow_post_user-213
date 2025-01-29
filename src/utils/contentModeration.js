@@ -19,7 +19,7 @@ export function moderateContent(text) {
   }
 
   // Check for excessive caps (now only if text is longer than 20 characters)
-  if (text.length > 20) {
+  if (text.length > 50) {
     const capsPercentage = (text.match(/[A-Z]/g) || []).length / text.length;
     if (capsPercentage > 0.8) {
       return {
@@ -30,7 +30,7 @@ export function moderateContent(text) {
   }
 
   // Check for character repetition (now allows up to 5 repeated characters)
-  if (/(.)\1{15,}/.test(text)) {
+  if (/(.)\1{20,}/.test(text)) {
     return {
       isValid: false,
       reason: 'Too many repeated characters'
@@ -46,7 +46,7 @@ export function moderateContent(text) {
   }
 
   // Maximum length check
-  if (text.length > 5000) {
+  if (text.length > 7000) {
     return {
       isValid: false,
       reason: 'Content is too long (maximum 5000 characters)'
@@ -54,7 +54,7 @@ export function moderateContent(text) {
   }
 
   // Check for excessive punctuation (now allows up to 4 repeated punctuation marks)
-  if (/[!?]{5,}/.test(text)) {
+  if (/[!?]{10,}/.test(text)) {
     return {
       isValid: false,
       reason: 'Excessive punctuation detected'
@@ -63,7 +63,7 @@ export function moderateContent(text) {
 
   // Check for emoji spam (now allows up to 15 emojis)
   const emojiCount = (text.match(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g) || []).length;
-  if (emojiCount > 15) {
+  if (emojiCount > 20) {
     return {
       isValid: false,
       reason: 'Too many emojis'
