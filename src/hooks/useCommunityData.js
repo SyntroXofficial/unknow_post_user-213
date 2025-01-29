@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { auth, db } from '../firebase';
 import { 
   collection, 
@@ -14,7 +14,8 @@ import {
   serverTimestamp,
   addDoc,
   deleteDoc,
-  increment
+  increment,
+  writeBatch
 } from 'firebase/firestore';
 
 export function useCommunityData() {
@@ -28,19 +29,33 @@ export function useCommunityData() {
   });
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [userCache, setUserCache] = useState(new Map());
+
+  // Cache user data
+  const getUserData = useCallback(async (userId) => {
+    if (userCache.has(userId)) {
+      return userCache.get(userId);
+    }
+
+    const userDocRef = doc(db, 'users', userId);
+    try {
+      const userDoc = await getDoc(userDocRef);
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        setUserCache(prev => new Map(prev).set(userId, userData));
+        return userData;
+      }
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+    }
+    return null;
+  }, [userCache]);
 
   useEffect(() => {
     const unsubscribeAuth = auth.onAuthStateChanged(async (currentUser) => {
       if (currentUser) {
-        const userDocRef = doc(db, 'users', currentUser.uid);
-        try {
-          const userDoc = await getDoc(userDocRef);
-          if (userDoc.exists()) {
-            setUser({ ...userDoc.data(), id: currentUser.uid });
-          }
-        } catch (error) {
-          console.error('Error fetching user data:', error);
-        }
+        const userData = await getUserData(currentUser.uid);
+        setUser({ ...userData, id: currentUser.uid });
       } else {
         setUser(null);
       }
@@ -48,7 +63,7 @@ export function useCommunityData() {
     });
 
     return () => unsubscribeAuth();
-  }, []);
+  }, [getUserData]);
 
   useEffect(() => {
     let unsubscribeMessages = () => {};
@@ -60,61 +75,46 @@ export function useCommunityData() {
         orderBy('timestamp', 'desc')
       );
 
-      unsubscribeMessages = onSnapshot(messagesQuery, async (snapshot) => {
-        const messagesData = [];
-        for (const docSnapshot of snapshot.docs) {
-          const messageData = { id: docSnapshot.id, ...docSnapshot.data() };
-          
-          if (messageData.userId) {
-            const userDocRef = doc(db, 'users', messageData.userId);
-            try {
-              const userDoc = await getDoc(userDocRef);
-              if (userDoc.exists()) {
-                messageData.userData = userDoc.data();
-              }
-            } catch (error) {
-              console.error('Error fetching user data:', error);
-            }
-          }
-
-          if (messageData.comments) {
-            for (const comment of messageData.comments) {
-              if (comment.userId) {
-                const userDocRef = doc(db, 'users', comment.userId);
-                try {
-                  const userDoc = await getDoc(userDocRef);
-                  if (userDoc.exists()) {
-                    comment.userData = userDoc.data();
-                  }
-                } catch (error) {
-                  console.error('Error fetching comment user data:', error);
+      // Use a batch to update user data for messages
+      const updateMessageUserData = async (messages) => {
+        const userPromises = messages.map(async (message) => {
+          if (message.userId) {
+            message.userData = await getUserData(message.userId);
+            
+            if (message.comments) {
+              await Promise.all(message.comments.map(async (comment) => {
+                if (comment.userId) {
+                  comment.userData = await getUserData(comment.userId);
                 }
-              }
-
-              if (comment.replies) {
-                for (const reply of comment.replies) {
-                  if (reply.userId) {
-                    const userDocRef = doc(db, 'users', reply.userId);
-                    try {
-                      const userDoc = await getDoc(userDocRef);
-                      if (userDoc.exists()) {
-                        reply.userData = userDoc.data();
-                      }
-                    } catch (error) {
-                      console.error('Error fetching reply user data:', error);
+                if (comment.replies) {
+                  await Promise.all(comment.replies.map(async (reply) => {
+                    if (reply.userId) {
+                      reply.userData = await getUserData(reply.userId);
                     }
-                  }
+                  }));
                 }
-              }
+              }));
             }
           }
+          return message;
+        });
 
-          messagesData.push(messageData);
+        const updatedMessages = await Promise.all(userPromises);
+        setMessages(updatedMessages);
+      };
+
+      unsubscribeMessages = onSnapshot(messagesQuery, 
+        (snapshot) => {
+          const messagesData = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+          }));
+          updateMessageUserData(messagesData);
+        },
+        (error) => {
+          console.error('Error fetching messages:', error);
         }
-        setMessages(messagesData);
-      }, error => {
-        console.error('Error fetching messages:', error);
-      });
+      );
 
       if (user.email === 'andres_rios_xyz@outlook.com') {
         const reportsQuery = query(
@@ -128,11 +128,10 @@ export function useCommunityData() {
             ...doc.data()
           }));
           setReports(newReports);
-        }, error => {
-          console.error('Error fetching reports:', error);
         });
       }
 
+      // Update community stats every 30 seconds instead of every minute
       const fetchCommunityStats = async () => {
         try {
           const usersQuery = query(collection(db, 'users'));
@@ -178,7 +177,7 @@ export function useCommunityData() {
       };
 
       fetchCommunityStats();
-      const statsInterval = setInterval(fetchCommunityStats, 60000);
+      const statsInterval = setInterval(fetchCommunityStats, 30000);
 
       return () => {
         unsubscribeMessages();
@@ -186,15 +185,16 @@ export function useCommunityData() {
         clearInterval(statsInterval);
       };
     }
-  }, [user]);
+  }, [user, getUserData]);
 
   const handleVote = async (messageId, direction) => {
     if (!user) return;
 
     try {
       const messageRef = doc(db, 'community_messages', messageId);
-      const messageDoc = await getDoc(messageRef);
+      const batch = writeBatch(db);
       
+      const messageDoc = await getDoc(messageRef);
       if (!messageDoc.exists()) return;
       
       const currentVotes = messageDoc.data().votes || 0;
@@ -214,10 +214,12 @@ export function useCommunityData() {
         newVoteCount += direction;
       }
 
-      await updateDoc(messageRef, {
+      batch.update(messageRef, {
         votes: newVoteCount,
         [`userVotes.${user.id}`]: newUserVote
       });
+
+      await batch.commit();
     } catch (error) {
       console.error('Error updating vote:', error);
     }
@@ -228,8 +230,9 @@ export function useCommunityData() {
 
     try {
       const messageRef = doc(db, 'community_messages', messageId);
-      const messageDoc = await getDoc(messageRef);
+      const batch = writeBatch(db);
       
+      const messageDoc = await getDoc(messageRef);
       if (!messageDoc.exists()) return;
       
       const currentComments = messageDoc.data().comments || [];
@@ -245,9 +248,11 @@ export function useCommunityData() {
         replies: []
       };
 
-      await updateDoc(messageRef, {
+      batch.update(messageRef, {
         comments: [...currentComments, newComment]
       });
+
+      await batch.commit();
     } catch (error) {
       console.error('Error adding comment:', error);
     }
@@ -257,10 +262,11 @@ export function useCommunityData() {
     if (!user) return;
     
     try {
-      const reportRef = collection(db, 'reports');
+      const batch = writeBatch(db);
+      const reportRef = doc(collection(db, 'reports'));
       const messageRef = doc(db, 'community_messages', messageId);
-      const messageDoc = await getDoc(messageRef);
       
+      const messageDoc = await getDoc(messageRef);
       if (!messageDoc.exists()) {
         console.error('Message not found');
         return;
@@ -285,7 +291,7 @@ export function useCommunityData() {
         }
       }
       
-      await addDoc(reportRef, {
+      batch.set(reportRef, {
         messageId,
         contentId,
         contentType: type,
@@ -296,6 +302,8 @@ export function useCommunityData() {
         reason: reason || 'No reason provided',
         details: details || 'No details provided'
       });
+
+      await batch.commit();
     } catch (error) {
       console.error('Error reporting content:', error);
     }
@@ -306,15 +314,16 @@ export function useCommunityData() {
     
     try {
       const messageRef = doc(db, 'community_messages', messageId);
-      const messageDoc = await getDoc(messageRef);
+      const batch = writeBatch(db);
       
+      const messageDoc = await getDoc(messageRef);
       if (!messageDoc.exists()) return;
       
-      const currentData = messageDoc.data();
-      
-      await updateDoc(messageRef, {
-        isPinned: !currentData.isPinned
+      batch.update(messageRef, {
+        isPinned: !messageDoc.data().isPinned
       });
+
+      await batch.commit();
     } catch (error) {
       console.error('Error pinning message:', error);
     }
@@ -325,7 +334,9 @@ export function useCommunityData() {
     
     try {
       const messageRef = doc(db, 'community_messages', messageId);
-      await deleteDoc(messageRef);
+      const batch = writeBatch(db);
+      batch.delete(messageRef);
+      await batch.commit();
     } catch (error) {
       console.error('Error deleting message:', error);
     }
@@ -336,8 +347,9 @@ export function useCommunityData() {
 
     try {
       const messageRef = doc(db, 'community_messages', messageId);
-      const messageDoc = await getDoc(messageRef);
+      const batch = writeBatch(db);
       
+      const messageDoc = await getDoc(messageRef);
       if (!messageDoc.exists()) return;
       
       const comments = messageDoc.data().comments || [];
@@ -411,7 +423,8 @@ export function useCommunityData() {
         return comment;
       });
 
-      await updateDoc(messageRef, { comments: updatedComments });
+      batch.update(messageRef, { comments: updatedComments });
+      await batch.commit();
     } catch (error) {
       console.error('Error updating vote:', error);
     }
@@ -422,8 +435,9 @@ export function useCommunityData() {
     
     try {
       const messageRef = doc(db, 'community_messages', messageId);
-      const messageDoc = await getDoc(messageRef);
+      const batch = writeBatch(db);
       
+      const messageDoc = await getDoc(messageRef);
       if (!messageDoc.exists()) return;
       
       const comments = messageDoc.data().comments || [];
@@ -442,7 +456,8 @@ export function useCommunityData() {
         return true;
       });
       
-      await updateDoc(messageRef, { comments: updatedComments });
+      batch.update(messageRef, { comments: updatedComments });
+      await batch.commit();
     } catch (error) {
       console.error('Error deleting comment:', error);
     }
@@ -453,8 +468,9 @@ export function useCommunityData() {
 
     try {
       const messageRef = doc(db, 'community_messages', messageId);
-      const messageDoc = await getDoc(messageRef);
+      const batch = writeBatch(db);
       
+      const messageDoc = await getDoc(messageRef);
       if (!messageDoc.exists()) return;
       
       const comments = messageDoc.data().comments || [];
@@ -479,7 +495,8 @@ export function useCommunityData() {
         return comment;
       });
 
-      await updateDoc(messageRef, { comments: updatedComments });
+      batch.update(messageRef, { comments: updatedComments });
+      await batch.commit();
     } catch (error) {
       console.error('Error adding reply:', error);
     }
@@ -490,11 +507,15 @@ export function useCommunityData() {
     
     try {
       const reportRef = doc(db, 'reports', reportId);
-      await updateDoc(reportRef, {
+      const batch = writeBatch(db);
+      
+      batch.update(reportRef, {
         status: 'resolved',
         resolvedAt: serverTimestamp(),
         resolvedBy: user.id
       });
+
+      await batch.commit();
     } catch (error) {
       console.error('Error marking report as done:', error);
     }
@@ -505,7 +526,9 @@ export function useCommunityData() {
     
     try {
       const reportRef = doc(db, 'reports', reportId);
-      await deleteDoc(reportRef);
+      const batch = writeBatch(db);
+      batch.delete(reportRef);
+      await batch.commit();
     } catch (error) {
       console.error('Error deleting report:', error);
     }
