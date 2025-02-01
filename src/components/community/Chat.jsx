@@ -1,17 +1,20 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { FaUserCircle, FaPaperPlane, FaImage } from 'react-icons/fa';
+import { FaUserCircle, FaPaperPlane, FaEdit, FaTrash } from 'react-icons/fa';
 import { auth, db } from '../../firebase';
-import { collection, query, orderBy, limit, onSnapshot, addDoc, serverTimestamp, getDoc, doc } from 'firebase/firestore';
+import { collection, query, orderBy, limit, onSnapshot, addDoc, serverTimestamp, getDoc, doc, deleteDoc, updateDoc } from 'firebase/firestore';
 import { moderateContent, processContent } from '../../utils/contentModeration';
 
 function Chat() {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [error, setError] = useState('');
+  const [editingMessage, setEditingMessage] = useState(null);
+  const [editText, setEditText] = useState('');
   const messagesEndRef = useRef(null);
   const chatContainerRef = useRef(null);
   const [userData, setUserData] = useState({});
+  const isAdmin = auth.currentUser?.email === 'andres_rios_xyz@outlook.com';
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -75,6 +78,49 @@ function Chat() {
     }
   };
 
+  const handleDelete = async (messageId, userId) => {
+    if (!auth.currentUser) return;
+    
+    // Only allow deletion if user is admin or message owner
+    if (isAdmin || userId === auth.currentUser.uid) {
+      try {
+        await deleteDoc(doc(db, 'chat_messages', messageId));
+      } catch (error) {
+        console.error('Error deleting message:', error);
+        setError('Failed to delete message');
+      }
+    }
+  };
+
+  const handleEdit = async (messageId) => {
+    if (!editText.trim()) return;
+
+    const moderationResult = moderateContent(editText.trim());
+    if (!moderationResult.isValid) {
+      setError(moderationResult.reason);
+      return;
+    }
+
+    try {
+      await updateDoc(doc(db, 'chat_messages', messageId), {
+        text: editText.trim(),
+        edited: true,
+        editedAt: serverTimestamp()
+      });
+      setEditingMessage(null);
+      setEditText('');
+      setError('');
+    } catch (error) {
+      console.error('Error editing message:', error);
+      setError('Failed to edit message');
+    }
+  };
+
+  const startEdit = (message) => {
+    setEditingMessage(message.id);
+    setEditText(message.text);
+  };
+
   return (
     <div className="bg-[#1A1A1B] border border-[#343536] rounded-md overflow-hidden">
       {/* Messages */}
@@ -115,10 +161,62 @@ function Chat() {
                 <p className="text-xs text-white/70">{userData[message.userId]?.username || message.username || 'Anonymous'}</p>
                 <p className="text-[10px] text-white/50 font-mono">{message.userId}</p>
               </div>
-              <div 
-                className="text-sm break-words"
-                dangerouslySetInnerHTML={{ __html: processContent(message.text) }}
-              />
+              
+              {editingMessage === message.id ? (
+                <div className="space-y-2">
+                  <textarea
+                    value={editText}
+                    onChange={(e) => setEditText(e.target.value)}
+                    className="w-full bg-black/30 text-white p-2 rounded border border-white/20 focus:outline-none focus:border-white/40"
+                  />
+                  <div className="flex justify-end space-x-2">
+                    <button
+                      onClick={() => {
+                        setEditingMessage(null);
+                        setEditText('');
+                      }}
+                      className="px-2 py-1 text-sm text-white/70 hover:text-white"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={() => handleEdit(message.id)}
+                      className="px-2 py-1 text-sm bg-white/10 rounded hover:bg-white/20"
+                    >
+                      Save
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div 
+                    className="text-sm break-words"
+                    dangerouslySetInnerHTML={{ __html: processContent(message.text) }}
+                  />
+                  {message.edited && (
+                    <p className="text-[10px] text-white/50 mt-1">(edited)</p>
+                  )}
+                </>
+              )}
+
+              {auth.currentUser && (message.userId === auth.currentUser.uid || isAdmin) && (
+                <div className="flex justify-end space-x-2 mt-2">
+                  {message.userId === auth.currentUser.uid && (
+                    <button
+                      onClick={() => startEdit(message)}
+                      className="text-white/50 hover:text-white"
+                    >
+                      <FaEdit className="w-3 h-3" />
+                    </button>
+                  )}
+                  <button
+                    onClick={() => handleDelete(message.id, message.userId)}
+                    className="text-white/50 hover:text-white"
+                  >
+                    <FaTrash className="w-3 h-3" />
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         ))}
