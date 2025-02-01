@@ -32,8 +32,21 @@ function Post({
   const [error, setError] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [editedText, setEditedText] = useState(message.text);
+  const [editedTitle, setEditedTitle] = useState(message.title);
+  const [editedTags, setEditedTags] = useState(message.tags || []);
   const isAdmin = auth.currentUser?.email === 'andres_rios_xyz@outlook.com';
   const canEdit = isAdmin || message.userId === auth.currentUser?.uid;
+
+  const availableTags = [
+    { name: 'Gaming', color: 'bg-blue-500' },
+    { name: 'Movies', color: 'bg-purple-500' },
+    { name: 'Important', color: 'bg-red-500' },
+    { name: 'Information', color: 'bg-green-500' },
+    { name: 'News', color: 'bg-yellow-500' },
+    { name: 'Problems', color: 'bg-orange-500' },
+    { name: 'Suggestions', color: 'bg-indigo-500' },
+    { name: 'Talk', color: 'bg-pink-500' }
+  ];
 
   const handleReportClick = () => {
     setSelectedPostId(message.id);
@@ -58,7 +71,7 @@ function Post({
   };
 
   const handleEditSubmit = () => {
-    if (!editedText.trim()) return;
+    if (!editedText.trim() || !editedTitle.trim()) return;
 
     const moderationResult = moderateContent(editedText.trim());
     if (!moderationResult.isValid) {
@@ -66,9 +79,23 @@ function Post({
       return;
     }
 
-    onEditMessage(message.id, editedText.trim());
+    const titleModeration = moderateContent(editedTitle.trim());
+    if (!titleModeration.isValid) {
+      setError(titleModeration.reason);
+      return;
+    }
+
+    onEditMessage(message.id, editedText.trim(), editedTitle.trim(), editedTags);
     setIsEditing(false);
     setError('');
+  };
+
+  const toggleTag = (tag) => {
+    if (editedTags.includes(tag)) {
+      setEditedTags(editedTags.filter(t => t !== tag));
+    } else if (editedTags.length < 3) {
+      setEditedTags([...editedTags, tag]);
+    }
   };
 
   return (
@@ -118,21 +145,34 @@ function Post({
         </div>
 
         <div>
-          <h2 className="text-xl font-bold text-white mb-2">{message.title}</h2>
-          {message.tags && message.tags.length > 0 && (
-            <div className="flex flex-wrap gap-2 mb-2">
-              {message.tags.map((tag, index) => (
-                <span 
-                  key={index} 
-                  className={`px-2 py-1 rounded-full text-white text-sm ${getTagColor(tag)}`}
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-          )}
           {isEditing ? (
             <div className="space-y-4">
+              <input
+                type="text"
+                value={editedTitle}
+                onChange={(e) => setEditedTitle(e.target.value)}
+                className="w-full bg-[#1f1f1f] text-white p-3 rounded-md border border-[#2a2a2a] focus:outline-none focus:border-[#3a3a3a]"
+                placeholder="Post Title"
+              />
+
+              <div className="flex flex-wrap gap-2">
+                {availableTags.map((tag) => (
+                  <button
+                    key={tag.name}
+                    type="button"
+                    onClick={() => toggleTag(tag.name)}
+                    className={`px-3 py-1 rounded-full text-white text-sm ${
+                      editedTags.includes(tag.name) ? tag.color : 'bg-gray-600'
+                    }`}
+                  >
+                    {tag.name}
+                  </button>
+                ))}
+              </div>
+              {editedTags.length === 3 && (
+                <p className="text-yellow-500 text-sm">Maximum 3 tags allowed</p>
+              )}
+
               <textarea
                 value={editedText}
                 onChange={(e) => setEditedText(e.target.value)}
@@ -146,6 +186,8 @@ function Post({
                   onClick={() => {
                     setIsEditing(false);
                     setEditedText(message.text);
+                    setEditedTitle(message.title);
+                    setEditedTags(message.tags || []);
                     setError('');
                   }}
                   className="px-4 py-2 text-gray-400 hover:text-white transition-colors rounded-lg hover:bg-white/5"
@@ -161,10 +203,25 @@ function Post({
               </div>
             </div>
           ) : (
-            <div 
-              className="text-white mb-4 whitespace-pre-wrap max-h-96 overflow-y-auto"
-              dangerouslySetInnerHTML={{ __html: processContent(message.text) }}
-            />
+            <>
+              <h2 className="text-xl font-bold text-white mb-2">{message.title}</h2>
+              {message.tags && message.tags.length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {message.tags.map((tag, index) => (
+                    <span 
+                      key={index} 
+                      className={`px-2 py-1 rounded-full text-white text-sm ${getTagColor(tag)}`}
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              )}
+              <div 
+                className="text-white mb-4 whitespace-pre-wrap max-h-96 overflow-y-auto"
+                dangerouslySetInnerHTML={{ __html: processContent(message.text) }}
+              />
+            </>
           )}
         </div>
 
@@ -310,7 +367,6 @@ function Post({
   );
 }
 
-// Helper function to get tag color
 const getTagColor = (tag) => {
   const colors = {
     'Gaming': 'bg-blue-500',

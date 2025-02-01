@@ -61,7 +61,6 @@ function Community() {
     handleEditReply
   } = useCommunityData();
 
-  // Fetch users
   useEffect(() => {
     const usersRef = collection(db, 'users');
     const q = query(usersRef, orderBy('lastActive', 'desc'));
@@ -77,28 +76,24 @@ function Community() {
     return () => unsubscribe();
   }, []);
 
-  // Filter and sort messages
   const filteredMessages = messages
     .filter(message => {
-      // Only filter if there's a search query
       if (searchQuery) {
         const searchLower = searchQuery.toLowerCase();
         return (
           message.title?.toLowerCase().includes(searchLower) ||
           message.text?.toLowerCase().includes(searchLower) ||
           message.username?.toLowerCase().includes(searchLower) ||
-          message.id?.toLowerCase().includes(searchLower) || // Search by message ID
-          message.userId?.toLowerCase().includes(searchLower) // Search by user ID
+          message.id?.toLowerCase().includes(searchLower) ||
+          message.userId?.toLowerCase().includes(searchLower)
         );
       }
       return true;
     })
     .sort((a, b) => {
-      // Always show pinned posts first
       if (a.isPinned && !b.isPinned) return -1;
       if (!a.isPinned && b.isPinned) return 1;
 
-      // Then sort by selected criteria
       switch (sortBy) {
         case 'hot':
           return b.votes - a.votes;
@@ -131,7 +126,6 @@ function Community() {
     e.preventDefault();
     if (cooldown) return;
 
-    // Content moderation
     const titleModeration = moderateContent(postTitle);
     if (!titleModeration.isValid) {
       alert(`Title: ${titleModeration.reason}`);
@@ -211,7 +205,6 @@ function Community() {
       <div className="max-w-7xl mx-auto px-4 py-8">
         <CommunityHeader />
 
-        {/* Search Bar */}
         <div className="mb-6">
           <div className="relative">
             <input
@@ -226,7 +219,6 @@ function Community() {
         </div>
 
         <div className="flex gap-8">
-          {/* Main Content */}
           <div className="flex-1 space-y-4">
             <CreatePost
               user={user}
@@ -293,14 +285,12 @@ function Community() {
             )}
           </div>
 
-          {/* Sidebar */}
           <div className="w-80 space-y-4">
             <Sidebar
               communityStats={communityStats}
               communityRules={communityRules}
             />
 
-            {/* Members List */}
             <div className="bg-[#1A1A1B] border border-[#343536] rounded-md p-4">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-white font-bold">Members</h2>
@@ -348,7 +338,6 @@ function Community() {
               </div>
             </div>
 
-            {/* Reports List (Admin Only) */}
             {isAdmin && (
               <ReportsList
                 showReports={true}
@@ -362,7 +351,6 @@ function Community() {
         </div>
       </div>
 
-      {/* Report Modal */}
       <ReportModal
         show={showReportModal}
         onClose={() => setShowReportModal(false)}

@@ -330,13 +330,20 @@ export function useCommunityData() {
   };
 
   const handleDelete = async (messageId) => {
-    if (!user || user.email !== 'andres_rios_xyz@outlook.com') return;
+    if (!user) return;
     
     try {
       const messageRef = doc(db, 'community_messages', messageId);
-      const batch = writeBatch(db);
-      batch.delete(messageRef);
-      await batch.commit();
+      const messageDoc = await getDoc(messageRef);
+      
+      if (!messageDoc.exists()) return;
+      
+      // Allow deletion if user is admin or the message owner
+      if (user.email === 'andres_rios_xyz@outlook.com' || messageDoc.data().userId === user.id) {
+        const batch = writeBatch(db);
+        batch.delete(messageRef);
+        await batch.commit();
+      }
     } catch (error) {
       console.error('Error deleting message:', error);
     }
@@ -435,27 +442,29 @@ export function useCommunityData() {
     
     try {
       const messageRef = doc(db, 'community_messages', messageId);
-      const batch = writeBatch(db);
-      
       const messageDoc = await getDoc(messageRef);
+      
       if (!messageDoc.exists()) return;
       
       const comments = messageDoc.data().comments || [];
       const updatedComments = comments.filter(comment => {
+        // Keep comment if it's not the one to delete or if user doesn't have permission
         if (comment.id === commentId) {
-          return !(user.email === 'andres_rios_xyz@outlook.com' || 
-                  comment.userId === user.id);
+          return !(user.email === 'andres_rios_xyz@outlook.com' || comment.userId === user.id);
         }
+        
+        // Handle nested replies
         if (comment.replies) {
-          comment.replies = comment.replies.filter(reply => 
-            reply.id !== commentId || 
-            !(user.email === 'andres_rios_xyz@outlook.com' || 
-              reply.userId === user.id)
-          );
+          comment.replies = comment.replies.filter(reply => {
+            // Keep reply if it's not the one to delete or if user doesn't have permission
+            return reply.id !== commentId || 
+                   !(user.email === 'andres_rios_xyz@outlook.com' || reply.userId === user.id);
+          });
         }
         return true;
       });
       
+      const batch = writeBatch(db);
       batch.update(messageRef, { comments: updatedComments });
       await batch.commit();
     } catch (error) {
