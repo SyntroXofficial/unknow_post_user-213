@@ -29,9 +29,18 @@ function Chat() {
 
     const unsubscribe = onSnapshot(q, async (snapshot) => {
       const newMessages = [];
+      const changes = snapshot.docChanges();
+      let shouldScroll = false;
+
+      // Only scroll if a new message is added
+      changes.forEach(change => {
+        if (change.type === 'added' && change.doc.data().timestamp) {
+          shouldScroll = true;
+        }
+      });
+
       for (const docSnapshot of snapshot.docs) {
         const messageData = { id: docSnapshot.id, ...docSnapshot.data() };
-        // Fetch user data if not already cached
         if (!userData[messageData.userId]) {
           const userDoc = await getDoc(doc(db, 'users', messageData.userId));
           if (userDoc.exists()) {
@@ -44,7 +53,9 @@ function Chat() {
         newMessages.unshift(messageData);
       }
       setMessages(newMessages);
-      scrollToBottom();
+      if (shouldScroll) {
+        scrollToBottom();
+      }
     });
 
     return () => unsubscribe();

@@ -543,7 +543,7 @@ export function useCommunityData() {
     }
   };
 
-  const handleEditMessage = async (messageId, newText) => {
+  const handleEditMessage = async (messageId, newText, newTitle, newTags) => {
     if (!user) return;
 
     try {
@@ -558,10 +558,14 @@ export function useCommunityData() {
         return;
       }
 
-      await updateDoc(messageRef, {
+      const updates = {
         text: newText,
+        title: newTitle,
+        tags: newTags || [], // Ensure tags is always an array
         editedAt: serverTimestamp()
-      });
+      };
+
+      await updateDoc(messageRef, updates);
     } catch (error) {
       console.error('Error editing message:', error);
     }
