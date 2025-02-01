@@ -6,31 +6,7 @@ import {
 } from 'react-icons/fa';
 import { auth } from '../../firebase';
 import Comment from './Comment';
-import { moderateContent } from '../../utils/contentModeration';
-
-// Helper function to get tag color
-const getTagColor = (tag) => {
-  const colors = {
-    'Gaming': 'bg-blue-500',
-    'Movies': 'bg-purple-500',
-    'Important': 'bg-red-500',
-    'Information': 'bg-green-500',
-    'News': 'bg-yellow-500',
-    'Problems': 'bg-orange-500',
-    'Suggestions': 'bg-indigo-500',
-    'Talk': 'bg-pink-500'
-  };
-  return colors[tag] || 'bg-gray-500';
-};
-
-// Helper function to process content
-const processContent = (text) => {
-  if (!text) return '';
-  
-  // Convert URLs to links
-  const urlRegex = /(https?:\/\/[^\s]+)/g;
-  return text.replace(urlRegex, (url) => `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:underline">${url}</a>`);
-};
+import { moderateContent, processContent } from '../../utils/contentModeration';
 
 function Post({ 
   message, 
@@ -333,5 +309,20 @@ function Post({
     </motion.div>
   );
 }
+
+// Helper function to get tag color
+const getTagColor = (tag) => {
+  const colors = {
+    'Gaming': 'bg-blue-500',
+    'Movies': 'bg-purple-500',
+    'Important': 'bg-red-500',
+    'Information': 'bg-green-500',
+    'News': 'bg-yellow-500',
+    'Problems': 'bg-orange-500',
+    'Suggestions': 'bg-indigo-500',
+    'Talk': 'bg-pink-500'
+  };
+  return colors[tag] || 'bg-gray-500';
+};
 
 export default Post;

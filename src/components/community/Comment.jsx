@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { FaUserCircle, FaArrowUp, FaArrowDown, FaReply, FaTrash, FaArrowRight, FaFlag, FaEdit } from 'react-icons/fa';
 import { auth } from '../../firebase';
-import { moderateContent } from '../../utils/contentModeration';
+import { moderateContent, processContent } from '../../utils/contentModeration';
 
 function Comment({ 
   comment, 
@@ -57,7 +57,6 @@ function Comment({
   const handleReport = (type, contentId) => {
     setSelectedPostId(messageId);
     setShowReportModal(true);
-    // Store the content type and ID for the report modal
     localStorage.setItem('reportContentType', type);
     localStorage.setItem('reportContentId', contentId);
   };
@@ -122,7 +121,10 @@ function Comment({
             </div>
           </div>
         ) : (
-          <p className="text-white">{comment.text}</p>
+          <div 
+            className="text-white whitespace-pre-wrap"
+            dangerouslySetInnerHTML={{ __html: processContent(comment.text) }}
+          />
         )}
 
         <div className="flex items-center space-x-4 mt-2 text-gray-400 text-sm">
@@ -357,7 +359,10 @@ function ReplyComponent({
               </div>
             </div>
           ) : (
-            <p className="text-white">{reply.text}</p>
+            <div 
+              className="text-white whitespace-pre-wrap"
+              dangerouslySetInnerHTML={{ __html: processContent(reply.text) }}
+            />
           )}
 
           <div className="flex items-center space-x-4 mt-2 text-gray-400 text-sm">
@@ -397,7 +402,7 @@ function ReplyComponent({
             {(isAdmin || reply.userId === auth.currentUser?.uid) && (
               <button 
                 onClick={() => onDelete(reply.id)}
-                className="hover:bg-[#272729] px-2 py-1 rounded text-red-500 flex items-center space-x-1 hover:bg-red-500/10 transition-colors"
+                className="hover:bg-[#272729] px-2 py-1 rounded text-red-500 flex items-center space-x-1 hover:bg -red-500/10 transition-colors"
               >
                 <FaTrash className="w-4 h-4" />
                 <span>Delete</span>
