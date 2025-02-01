@@ -55,7 +55,10 @@ function Community() {
     handleCommentDelete,
     handleReply,
     handleMarkReportAsDone,
-    handleDeleteReport
+    handleDeleteReport,
+    handleEditMessage,
+    handleEditComment,
+    handleEditReply
   } = useCommunityData();
 
   // Fetch users
@@ -272,6 +275,9 @@ function Community() {
                   onReply={handleReply}
                   onCommentVote={handleCommentVote}
                   onCommentDelete={handleCommentDelete}
+                  onEditMessage={handleEditMessage}
+                  onEditComment={handleEditComment}
+                  onEditReply={handleEditReply}
                   setShowReportModal={setShowReportModal}
                   setSelectedPostId={setSelectedPostId}
                 />

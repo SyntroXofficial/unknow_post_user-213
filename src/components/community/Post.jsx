@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { 
   FaUserCircle, FaArrowUp, FaArrowDown, FaRegCommentAlt,
-  FaFlag, FaThumbtack, FaTrash
+  FaFlag, FaThumbtack, FaTrash, FaEdit
 } from 'react-icons/fa';
 import { auth } from '../../firebase';
 import Comment from './Comment';
@@ -47,11 +47,17 @@ function Post({
   onReply,
   onCommentVote,
   onCommentDelete,
+  onEditMessage,
+  onEditComment,
+  onEditReply,
   setShowReportModal,
   setSelectedPostId
 }) {
   const [error, setError] = useState('');
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedText, setEditedText] = useState(message.text);
   const isAdmin = auth.currentUser?.email === 'andres_rios_xyz@outlook.com';
+  const canEdit = isAdmin || message.userId === auth.currentUser?.uid;
 
   const handleReportClick = () => {
     setSelectedPostId(message.id);
@@ -72,6 +78,20 @@ function Post({
       ...prev,
       [message.id]: ''
     }));
+    setError('');
+  };
+
+  const handleEditSubmit = () => {
+    if (!editedText.trim()) return;
+
+    const moderationResult = moderateContent(editedText.trim());
+    if (!moderationResult.isValid) {
+      setError(moderationResult.reason);
+      return;
+    }
+
+    onEditMessage(message.id, editedText.trim());
+    setIsEditing(false);
     setError('');
   };
 
@@ -135,10 +155,41 @@ function Post({
               ))}
             </div>
           )}
-          <div 
-            className="text-white mb-4 whitespace-pre-wrap max-h-96 overflow-y-auto"
-            dangerouslySetInnerHTML={{ __html: processContent(message.text) }}
-          />
+          {isEditing ? (
+            <div className="space-y-4">
+              <textarea
+                value={editedText}
+                onChange={(e) => setEditedText(e.target.value)}
+                className="w-full bg-[#1f1f1f] text-white p-3 rounded-md border border-[#2a2a2a] focus:outline-none focus:border-[#3a3a3a] min-h-[120px]"
+              />
+              {error && (
+                <p className="text-red-500 text-sm">{error}</p>
+              )}
+              <div className="flex justify-end space-x-2">
+                <button
+                  onClick={() => {
+                    setIsEditing(false);
+                    setEditedText(message.text);
+                    setError('');
+                  }}
+                  className="px-4 py-2 text-gray-400 hover:text-white transition-colors rounded-lg hover:bg-white/5"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleEditSubmit}
+                  className="px-4 py-2 bg-white text-black rounded-lg text-sm font-bold hover:bg-gray-200"
+                >
+                  Save
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div 
+              className="text-white mb-4 whitespace-pre-wrap max-h-96 overflow-y-auto"
+              dangerouslySetInnerHTML={{ __html: processContent(message.text) }}
+            />
+          )}
         </div>
 
         <div className="flex items-center space-x-4 text-gray-400">
@@ -176,6 +227,16 @@ function Post({
             <FaRegCommentAlt />
             <span>{message.comments?.length || 0} Comments</span>
           </button>
+
+          {canEdit && (
+            <button
+              onClick={() => setIsEditing(true)}
+              className="flex items-center space-x-2 hover:bg-[#1f1f1f] px-2 py-1 rounded"
+            >
+              <FaEdit />
+              <span>Edit</span>
+            </button>
+          )}
 
           {isAdmin && (
             <>
@@ -255,10 +316,11 @@ function Post({
                   key={comment.id} 
                   comment={comment}
                   user={user}
-                  onReply={(commentId, replyText) => onReply(message.id, commentId, replyText)}
-                  onVote={(commentId, direction) => onCommentVote(message.id, commentId, direction)}
-                  onDelete={(commentId) => onCommentDelete(message.id, commentId)}
-                  onReport={(messageId, commentId, type) => handleReport(messageId, commentId, type)}
+                  onReply={onReply}
+                  onVote={onCommentVote}
+                  onDelete={onCommentDelete}
+                  onEdit={onEditComment}
+                  onEditReply={onEditReply}
                   messageId={message.id}
                   setShowReportModal={setShowReportModal}
                   setSelectedPostId={setSelectedPostId}

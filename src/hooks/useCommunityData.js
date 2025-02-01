@@ -534,6 +534,96 @@ export function useCommunityData() {
     }
   };
 
+  const handleEditMessage = async (messageId, newText) => {
+    if (!user) return;
+
+    try {
+      const messageRef = doc(db, 'community_messages', messageId);
+      const messageDoc = await getDoc(messageRef);
+      
+      if (!messageDoc.exists()) return;
+      const messageData = messageDoc.data();
+
+      // Only allow edit if user is author or admin
+      if (messageData.userId !== user.id && user.email !== 'andres_rios_xyz@outlook.com') {
+        return;
+      }
+
+      await updateDoc(messageRef, {
+        text: newText,
+        editedAt: serverTimestamp()
+      });
+    } catch (error) {
+      console.error('Error editing message:', error);
+    }
+  };
+
+  const handleEditComment = async (messageId, commentId, newText) => {
+    if (!user) return;
+
+    try {
+      const messageRef = doc(db, 'community_messages', messageId);
+      const messageDoc = await getDoc(messageRef);
+      
+      if (!messageDoc.exists()) return;
+      const comments = messageDoc.data().comments || [];
+      
+      const updatedComments = comments.map(comment => {
+        if (comment.id === commentId) {
+          // Only allow edit if user is author or admin
+          if (comment.userId === user.id || user.email === 'andres_rios_xyz@outlook.com') {
+            return {
+              ...comment,
+              text: newText,
+              editedAt: new Date().toISOString()
+            };
+          }
+        }
+        return comment;
+      });
+
+      await updateDoc(messageRef, { comments: updatedComments });
+    } catch (error) {
+      console.error('Error editing comment:', error);
+    }
+  };
+
+  const handleEditReply = async (messageId, commentId, replyId, newText) => {
+    if (!user) return;
+
+    try {
+      const messageRef = doc(db, 'community_messages', messageId);
+      const messageDoc = await getDoc(messageRef);
+      
+      if (!messageDoc.exists()) return;
+      const comments = messageDoc.data().comments || [];
+      
+      const updatedComments = comments.map(comment => {
+        if (comment.id === commentId) {
+          const updatedReplies = (comment.replies || []).map(reply => {
+            if (reply.id === replyId) {
+              // Only allow edit if user is author or admin
+              if (reply.userId === user.id || user.email === 'andres_rios_xyz@outlook.com') {
+                return {
+                  ...reply,
+                  text: newText,
+                  editedAt: new Date().toISOString()
+                };
+              }
+            }
+            return reply;
+          });
+          return { ...comment, replies: updatedReplies };
+        }
+        return comment;
+      });
+
+      await updateDoc(messageRef, { comments: updatedComments });
+    } catch (error) {
+      console.error('Error editing reply:', error);
+    }
+  };
+
   return {
     messages,
     user,
@@ -549,6 +639,9 @@ export function useCommunityData() {
     handleCommentDelete,
     handleReply,
     handleMarkReportAsDone,
-    handleDeleteReport
+    handleDeleteReport,
+    handleEditMessage,
+    handleEditComment,
+    handleEditReply
   };
 }
