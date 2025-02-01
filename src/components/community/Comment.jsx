@@ -23,6 +23,7 @@ function Comment({
   const [editedText, setEditedText] = useState(comment.text);
   const isAdmin = auth.currentUser?.email === 'andres_rios_xyz@outlook.com';
   const canEdit = isAdmin || comment.userId === auth.currentUser?.uid;
+  const canDelete = isAdmin || comment.userId === auth.currentUser?.uid;
 
   const handleEditSubmit = () => {
     if (!editedText.trim()) return;
@@ -168,7 +169,7 @@ function Comment({
             <FaFlag className="w-4 h-4" />
             <span>Report</span>
           </button>
-          {(isAdmin || comment.userId === auth.currentUser?.uid) && (
+          {canDelete && (
             <button 
               onClick={() => onDelete(comment.id)}
               className="hover:bg-[#272729] px-2 py-1 rounded text-red-500 flex items-center space-x-1 hover:bg-red-500/10 transition-colors"
@@ -276,6 +277,7 @@ function ReplyComponent({
   const [error, setError] = useState('');
   const isAdmin = auth.currentUser?.email === 'andres_rios_xyz@outlook.com';
   const canEdit = isAdmin || reply.userId === auth.currentUser?.uid;
+  const canDelete = isAdmin || reply.userId === auth.currentUser?.uid;
 
   const handleEditSubmit = () => {
     if (!editedText.trim()) return;
@@ -399,10 +401,10 @@ function ReplyComponent({
               <FaFlag className="w-4 h-4" />
               <span>Report</span>
             </button>
-            {(isAdmin || reply.userId === auth.currentUser?.uid) && (
+            {canDelete && (
               <button 
                 onClick={() => onDelete(reply.id)}
-                className="hover:bg-[#272729] px-2 py-1 rounded text-red-500 flex items-center space-x-1 hover:bg -red-500/10 transition-colors"
+                className="hover:bg-[#272729] px-2 py-1 rounded text-red-500 flex items-center space-x-1 hover:bg-red-500/10 transition-colors"
               >
                 <FaTrash className="w-4 h-4" />
                 <span>Delete</span>
