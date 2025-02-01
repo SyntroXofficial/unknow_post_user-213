@@ -36,6 +36,7 @@ function Post({
   const [editedTags, setEditedTags] = useState(message.tags || []);
   const isAdmin = auth.currentUser?.email === 'andres_rios_xyz@outlook.com';
   const canEdit = isAdmin || message.userId === auth.currentUser?.uid;
+  const canDelete = isAdmin || message.userId === auth.currentUser?.uid;
 
   const availableTags = [
     { name: 'Gaming', color: 'bg-blue-500' },
@@ -272,24 +273,25 @@ function Post({
           )}
 
           {isAdmin && (
-            <>
-              <button 
-                onClick={() => handlePin(message.id)}
-                className={`flex items-center space-x-2 hover:bg-[#1f1f1f] px-2 py-1 rounded ${
-                  message.isPinned ? 'text-green-500' : ''
-                }`}
-              >
-                <FaThumbtack />
-                <span>{message.isPinned ? 'Unpin' : 'Pin'}</span>
-              </button>
-              <button 
-                onClick={() => handleDelete(message.id)}
-                className="flex items-center space-x-2 hover:bg-[#1f1f1f] px-2 py-1 rounded text-red-500"
-              >
-                <FaTrash />
-                <span>Delete</span>
-              </button>
-            </>
+            <button 
+              onClick={() => handlePin(message.id)}
+              className={`flex items-center space-x-2 hover:bg-[#1f1f1f] px-2 py-1 rounded ${
+                message.isPinned ? 'text-green-500' : ''
+              }`}
+            >
+              <FaThumbtack />
+              <span>{message.isPinned ? 'Unpin' : 'Pin'}</span>
+            </button>
+          )}
+
+          {canDelete && (
+            <button 
+              onClick={() => handleDelete(message.id)}
+              className="flex items-center space-x-2 hover:bg-[#1f1f1f] px-2 py-1 rounded text-red-500"
+            >
+              <FaTrash />
+              <span>Delete</span>
+            </button>
           )}
 
           <button 
