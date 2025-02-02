@@ -1,6 +1,31 @@
 // Game account arrays
 export const mythicAccounts = [
 {
+  game: "Xbox Game Pass Ultimate",
+  username: "ucuzoyuncungame11@outlook.com",
+  password: "Ucuzoyuncun.gp6",
+  imageUrl: "https://images2.alphacoders.com/132/1325519.jpg",
+  description: "• Access to hundreds of high-quality games\n• New titles added frequently\n• EA Play membership included\n• Cloud gaming on supported devices\n• Exclusive member discounts and perks\n• Play on console, PC, and cloud",
+  features: [
+    { label: "Region", value: "Global" },
+    { label: "Platform", value: "Xbox / PC" },
+    { label: "Subscription Type", value: "Game Pass Ultimate" },
+    { label: "Game Library", value: "Hundreds of Games" },
+    { label: "Cloud Gaming", value: "Available" },
+    { label: 'Release', value: '2017' },
+    { label: "Rating", value: "E (Everyone) to M (Mature), varies by game" },
+    { label: "Genre", value: "Multiple Genres (Action, RPG, FPS, Strategy, etc.)" },
+    { label: "Playtime", value: "Unlimited (Subscription-based)" }
+  ],
+  requirements: {
+    cpu: "Intel Core i5-8300H / AMD Ryzen 5 3550H",
+    gpu: "Nvidia GTX 1050 / AMD Radeon RX 560",
+    ram: "8 GB",
+    storage: "Varies per game (50-150 GB recommended)",
+    internet: "Required for cloud gaming and online features"
+  }
+},
+{
   game: 'Cities: Skylines II',
   username: '93612408',
   password: '07545306',
