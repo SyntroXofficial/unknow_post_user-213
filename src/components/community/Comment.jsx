@@ -22,8 +22,8 @@ function Comment({
   const [isEditing, setIsEditing] = useState(false);
   const [editedText, setEditedText] = useState(comment.text);
   const isAdmin = auth.currentUser?.email === 'andres_rios_xyz@outlook.com';
-  const canEdit = isAdmin || comment.userId === auth.currentUser?.uid;
-  const canDelete = isAdmin || comment.userId === auth.currentUser?.uid;
+  const canEdit = isAdmin || (auth.currentUser && comment.userId === auth.currentUser.uid);
+  const canDelete = isAdmin || (auth.currentUser && comment.userId === auth.currentUser.uid);
 
   const handleEditSubmit = () => {
     if (!editedText.trim()) return;
@@ -60,6 +60,12 @@ function Comment({
     setShowReportModal(true);
     localStorage.setItem('reportContentType', type);
     localStorage.setItem('reportContentId', contentId);
+  };
+
+  const handleDelete = () => {
+    if (canDelete) {
+      onDelete(messageId, comment.id);
+    }
   };
 
   return (
@@ -171,7 +177,7 @@ function Comment({
           </button>
           {canDelete && (
             <button 
-              onClick={() => onDelete(comment.id)}
+              onClick={handleDelete}
               className="hover:bg-[#272729] px-2 py-1 rounded text-red-500 flex items-center space-x-1 hover:bg-red-500/10 transition-colors"
             >
               <FaTrash className="w-4 h-4" />
@@ -240,22 +246,25 @@ function Comment({
           </div>
         )}
 
-        <div className="relative mt-4">
-          {comment.replies && comment.replies.map((reply) => (
-            <ReplyComponent
-              key={reply.id}
-              reply={reply}
-              user={user}
-              messageId={messageId}
-              commentId={comment.id}
-              onVote={onVote}
-              onDelete={onDelete}
-              onEdit={onEditReply}
-              setShowReportModal={setShowReportModal}
-              setSelectedPostId={setSelectedPostId}
-            />
-          ))}
-        </div>
+        {/* Display Replies */}
+        {comment.replies && comment.replies.length > 0 && (
+          <div className="mt-4 space-y-4">
+            {comment.replies.map((reply) => (
+              <ReplyComponent
+                key={reply.id}
+                reply={reply}
+                user={user}
+                messageId={messageId}
+                commentId={comment.id}
+                onVote={onVote}
+                onDelete={onDelete}
+                onEdit={onEditReply}
+                setShowReportModal={setShowReportModal}
+                setSelectedPostId={setSelectedPostId}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -276,8 +285,8 @@ function ReplyComponent({
   const [editedText, setEditedText] = useState(reply.text);
   const [error, setError] = useState('');
   const isAdmin = auth.currentUser?.email === 'andres_rios_xyz@outlook.com';
-  const canEdit = isAdmin || reply.userId === auth.currentUser?.uid;
-  const canDelete = isAdmin || reply.userId === auth.currentUser?.uid;
+  const canEdit = isAdmin || (auth.currentUser && reply.userId === auth.currentUser.uid);
+  const canDelete = isAdmin || (auth.currentUser && reply.userId === auth.currentUser.uid);
 
   const handleEditSubmit = () => {
     if (!editedText.trim()) return;
@@ -300,8 +309,14 @@ function ReplyComponent({
     localStorage.setItem('reportContentId', contentId);
   };
 
+  const handleDelete = () => {
+    if (canDelete) {
+      onDelete(messageId, reply.id);
+    }
+  };
+
   return (
-    <div className="mt-4 ml-8">
+    <div className="ml-8">
       <div className="flex items-start space-x-4">
         <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0">
           {reply.userData?.profilePicUrl ? (
@@ -403,7 +418,7 @@ function ReplyComponent({
             </button>
             {canDelete && (
               <button 
-                onClick={() => onDelete(reply.id)}
+                onClick={handleDelete}
                 className="hover:bg-[#272729] px-2 py-1 rounded text-red-500 flex items-center space-x-1 hover:bg-red-500/10 transition-colors"
               >
                 <FaTrash className="w-4 h-4" />

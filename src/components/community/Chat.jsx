@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { FaUserCircle, FaPaperPlane, FaEdit, FaTrash } from 'react-icons/fa';
+import { FaUserCircle, FaPaperPlane, FaEdit, FaTrash, FaClock } from 'react-icons/fa';
 import { auth, db } from '../../firebase';
 import { collection, query, orderBy, limit, onSnapshot, addDoc, serverTimestamp, getDoc, doc, deleteDoc, updateDoc } from 'firebase/firestore';
 import { moderateContent, processContent } from '../../utils/contentModeration';
@@ -17,13 +17,15 @@ function Chat() {
   const isAdmin = auth.currentUser?.email === 'andres_rios_xyz@outlook.com';
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
   };
 
   useEffect(() => {
     const q = query(
       collection(db, 'chat_messages'),
-      orderBy('timestamp', 'desc'),
+      orderBy('timestamp', 'asc'), // Changed to ascending order
       limit(50)
     );
 
@@ -50,16 +52,34 @@ function Chat() {
             }));
           }
         }
-        newMessages.unshift(messageData);
+        newMessages.push(messageData); // Changed from unshift to push
       }
       setMessages(newMessages);
       if (shouldScroll) {
-        scrollToBottom();
+        setTimeout(scrollToBottom, 100);
       }
     });
 
     return () => unsubscribe();
   }, []);
+
+  // Auto-scroll when messages change
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  const formatTimestamp = (timestamp) => {
+    if (!timestamp) return '';
+    const date = timestamp.toDate();
+    const now = new Date();
+    const diffInMinutes = Math.floor((now - date) / (1000 * 60));
+    
+    if (diffInMinutes < 1) return 'Just now';
+    if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
+    if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}h ago`;
+    
+    return date.toLocaleString();
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -92,7 +112,6 @@ function Chat() {
   const handleDelete = async (messageId, userId) => {
     if (!auth.currentUser) return;
     
-    // Only allow deletion if user is admin or message owner
     if (isAdmin || userId === auth.currentUser.uid) {
       try {
         await deleteDoc(doc(db, 'chat_messages', messageId));
@@ -134,7 +153,6 @@ function Chat() {
 
   return (
     <div className="bg-[#1A1A1B] border border-[#343536] rounded-md overflow-hidden">
-      {/* Messages */}
       <div
         ref={chatContainerRef}
         className="h-[300px] overflow-y-auto p-4 space-y-4"
@@ -169,7 +187,13 @@ function Chat() {
               } rounded-lg p-3`}
             >
               <div className="flex flex-col gap-1 mb-2">
-                <p className="text-xs text-white/70">{userData[message.userId]?.username || message.username || 'Anonymous'}</p>
+                <div className="flex items-center justify-between">
+                  <p className="text-xs text-white/70">{userData[message.userId]?.username || message.username || 'Anonymous'}</p>
+                  <div className="flex items-center text-[10px] text-white/50">
+                    <FaClock className="w-3 h-3 mr-1" />
+                    {formatTimestamp(message.timestamp)}
+                  </div>
+                </div>
                 <p className="text-[10px] text-white/50 font-mono">{message.userId}</p>
               </div>
               
@@ -234,7 +258,6 @@ function Chat() {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input */}
       <form onSubmit={handleSubmit} className="p-4 border-t border-[#343536]">
         {error && (
           <p className="text-red-500 text-sm mb-2">{error}</p>

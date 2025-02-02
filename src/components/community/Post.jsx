@@ -99,6 +99,10 @@ function Post({
     }
   };
 
+  const handleReply = (commentId, replyText) => {
+    onReply(message.id, commentId, replyText);
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -351,7 +355,7 @@ function Post({
                   key={comment.id} 
                   comment={comment}
                   user={user}
-                  onReply={onReply}
+                  onReply={(commentId, replyText) => handleReply(commentId, replyText)}
                   onVote={onCommentVote}
                   onDelete={onCommentDelete}
                   onEdit={onEditComment}

@@ -134,8 +134,8 @@ export function useCommunityData() {
       // Update community stats every 30 seconds instead of every minute
       const fetchCommunityStats = async () => {
         try {
-          const usersQuery = query(collection(db, 'users'));
-          const usersSnapshot = await getDocs(usersQuery);
+          const usersRef = collection(db, 'users');
+          const usersSnapshot = await getDocs(usersRef);
           const totalMembers = usersSnapshot.size;
 
           const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
@@ -438,7 +438,7 @@ export function useCommunityData() {
   };
 
   const handleCommentDelete = async (messageId, commentId) => {
-    if (!user) return;
+    if (!auth.currentUser) return;
     
     try {
       const messageRef = doc(db, 'community_messages', messageId);
@@ -447,28 +447,48 @@ export function useCommunityData() {
       if (!messageDoc.exists()) return;
       
       const comments = messageDoc.data().comments || [];
-      const updatedComments = comments.filter(comment => {
-        // Keep comment if it's not the one to delete or if user doesn't have permission
-        if (comment.id === commentId) {
-          return !(user.email === 'andres_rios_xyz@outlook.com' || comment.userId === user.id);
-        }
-        
-        // Handle nested replies
+      let updatedComments = [...comments];
+      let commentFound = false;
+
+      // First try to find and delete a reply
+      updatedComments = updatedComments.map(comment => {
         if (comment.replies) {
+          const originalRepliesLength = comment.replies.length;
           comment.replies = comment.replies.filter(reply => {
-            // Keep reply if it's not the one to delete or if user doesn't have permission
-            return reply.id !== commentId || 
-                   !(user.email === 'andres_rios_xyz@outlook.com' || reply.userId === user.id);
+            if (reply.id === commentId) {
+              const canDelete = reply.userId === auth.currentUser.uid || 
+                              auth.currentUser.email === 'andres_rios_xyz@outlook.com';
+              if (canDelete) {
+                commentFound = true;
+                return false; // Remove this reply
+              }
+            }
+            return true;
           });
+          
+          if (comment.replies.length !== originalRepliesLength) {
+            return { ...comment };
+          }
         }
-        return true;
+        return comment;
       });
-      
-      const batch = writeBatch(db);
-      batch.update(messageRef, { comments: updatedComments });
-      await batch.commit();
+
+      // If no reply was found, try to delete the comment itself
+      if (!commentFound) {
+        updatedComments = updatedComments.filter(comment => {
+          if (comment.id === commentId) {
+            const canDelete = comment.userId === auth.currentUser.uid || 
+                            auth.currentUser.email === 'andres_rios_xyz@outlook.com';
+            return !canDelete; // Keep comment if we can't delete it
+          }
+          return true;
+        });
+      }
+
+      // Update the database
+      await updateDoc(messageRef, { comments: updatedComments });
     } catch (error) {
-      console.error('Error deleting comment:', error);
+      console.error('Error deleting comment/reply:', error);
     }
   };
 
