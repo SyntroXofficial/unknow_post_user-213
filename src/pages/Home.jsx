@@ -363,9 +363,7 @@ function Home() {
                     )}
                     <div>
                       <p className="text-white font-medium">{member.username}</p>
-                      <p className="text-sm text-gray-400">
-                        {member.lastPage || 'Home Page'}
-                      </p>
+                      <p className="text-sm text-gray-400">#{member.id}</p>
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">

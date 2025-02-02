@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FaDiscord, FaEnvelope, FaLock, FaUser, FaExclamationTriangle } from 'react-icons/fa';
+import { FaDiscord, FaEnvelope, FaLock, FaUser, FaExclamationTriangle, FaCheckCircle } from 'react-icons/fa';
 import { auth } from '../firebase';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
 
 function Login() {
   const navigate = useNavigate();
@@ -11,6 +11,8 @@ function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+  const [isResetting, setIsResetting] = useState(false);
   const sessionMessage = location.state?.message;
 
   useEffect(() => {
@@ -21,11 +23,31 @@ function Login() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setError('');
     try {
       await signInWithEmailAndPassword(auth, email, password);
       navigate(location.state?.from?.pathname || '/');
     } catch (error) {
       setError('Invalid credentials. Please try again.');
+    }
+  };
+
+  const handleForgotPassword = async (e) => {
+    e.preventDefault();
+    if (!email) {
+      setError('Please enter your email address');
+      return;
+    }
+
+    try {
+      setIsResetting(true);
+      setError('');
+      await sendPasswordResetEmail(auth, email);
+      setSuccessMessage('Password reset email sent! Please check your inbox.');
+    } catch (error) {
+      setError('Failed to send reset email. Please check if the email is correct.');
+    } finally {
+      setIsResetting(false);
     }
   };
 
@@ -81,11 +103,27 @@ function Login() {
               </div>
             )}
 
+            {successMessage && (
+              <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-4 flex items-start space-x-3">
+                <FaCheckCircle className="text-green-500 mt-0.5" />
+                <p className="text-green-500 text-sm">{successMessage}</p>
+              </div>
+            )}
+
             <button
               type="submit"
               className="w-full bg-white text-black rounded-lg py-3 font-semibold hover:bg-gray-200 transition-colors"
             >
               Sign In
+            </button>
+
+            <button
+              type="button"
+              onClick={handleForgotPassword}
+              disabled={isResetting}
+              className="w-full bg-transparent text-white/70 hover:text-white py-2 text-sm transition-colors"
+            >
+              {isResetting ? 'Sending reset email...' : 'Forgot Password?'}
             </button>
           </form>
 
