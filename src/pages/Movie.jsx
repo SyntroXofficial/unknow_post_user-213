@@ -47,6 +47,9 @@ function Movie() {
       case 'server4':
         streamingUrl = `https://vidsrc.cc/v3/embed/movie/${id}?autoPlay=false`;
         break;
+      case 'server5':
+        streamingUrl = `https://player.videasy.net/movie/${id}?color=8B5CF6`;
+        break;
       default:
         streamingUrl = `https://multiembed.mov/?video_id=${id}&tmdb=1`;
     }
@@ -83,7 +86,7 @@ function Movie() {
           <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent" />
         </div>
 
-        {/* Movie Info - Moved down */}
+        {/* Movie Info */}
         <motion.div 
           className="absolute inset-0 flex items-end pb-32"
           initial={{ x: -50, opacity: 0 }}
@@ -107,7 +110,7 @@ function Movie() {
 
             <p className="text-lg text-white/90">{movie.overview}</p>
 
-            {/* Streaming Buttons - Made smaller */}
+            {/* Streaming Buttons */}
             <div className="flex flex-col space-y-2">
               <button
                 onClick={() => handlePlay('server1')}
@@ -116,7 +119,7 @@ function Movie() {
                 <FaPlay className="mr-2 group-hover:translate-x-1 transition-transform duration-300" />
                 Watch Now
               </button>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-4 gap-2">
                 <button
                   onClick={() => handlePlay('server2')}
                   className="flex items-center justify-center px-3 py-2 bg-white/10 backdrop-blur-sm text-white rounded-lg hover:bg-white/20 transition-all duration-300 text-sm font-semibold border border-white/20 group"
@@ -137,6 +140,13 @@ function Movie() {
                 >
                   <FaServer className="mr-2 group-hover:rotate-12 transition-transform duration-300" />
                   Server 4
+                </button>
+                <button
+                  onClick={() => handlePlay('server5')}
+                  className="flex items-center justify-center px-3 py-2 bg-white/10 backdrop-blur-sm text-white rounded-lg hover:bg-white/20 transition-all duration-300 text-sm font-semibold border border-white/20 group"
+                >
+                  <FaServer className="mr-2 group-hover:rotate-12 transition-transform duration-300" />
+                  Server 5 4K
                 </button>
               </div>
             </div>

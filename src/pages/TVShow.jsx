@@ -73,6 +73,9 @@ function TVShow() {
       case 'server4':
         streamingUrl = `https://vidsrc.cc/v3/embed/tv/${id}/${season}/${episode}?autoPlay=false`;
         break;
+      case 'server5':
+        streamingUrl = `https://player.videasy.net/tv/${id}/${season}/${episode}?color=8B5CF6`;
+        break;
       default:
         streamingUrl = `https://multiembed.mov/?video_id=${id}&tmdb=1&s=${season}&e=${episode}`;
     }
@@ -109,7 +112,7 @@ function TVShow() {
           <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent" />
         </div>
 
-        {/* Show Info - Moved down */}
+        {/* Show Info */}
         <motion.div 
           className="absolute inset-0 flex items-end pb-32"
           initial={{ x: -50, opacity: 0 }}
@@ -131,7 +134,7 @@ function TVShow() {
 
             <p className="text-lg text-white/90">{show.overview}</p>
 
-            {/* Episode Selection - Made smaller */}
+            {/* Episode Selection */}
             <div className="flex flex-col space-y-2">
               <div className="flex gap-3">
                 <select 
@@ -159,7 +162,7 @@ function TVShow() {
                 </select>
               </div>
 
-              {/* Streaming Buttons - Made smaller */}
+              {/* Streaming Buttons */}
               <button
                 onClick={() => handlePlay('server1')}
                 className="flex items-center justify-center px-6 py-2.5 bg-white text-black rounded-lg hover:bg-gray-200 transition-all duration-300 text-base font-semibold group w-full"
@@ -167,7 +170,7 @@ function TVShow() {
                 <FaPlay className="mr-2 group-hover:translate-x-1 transition-transform duration-300" />
                 Watch Now
               </button>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-4 gap-2">
                 <button
                   onClick={() => handlePlay('server2')}
                   className="flex items-center justify-center px-3 py-2 bg-white/10 backdrop-blur-sm text-white rounded-lg hover:bg-white/20 transition-all duration-300 text-sm font-semibold border border-white/20 group"
@@ -188,6 +191,13 @@ function TVShow() {
                 >
                   <FaServer className="mr-2 group-hover:rotate-12 transition-transform duration-300" />
                   Server 4
+                </button>
+                <button
+                  onClick={() => handlePlay('server5')}
+                  className="flex items-center justify-center px-3 py-2 bg-white/10 backdrop-blur-sm text-white rounded-lg hover:bg-white/20 transition-all duration-300 text-sm font-semibold border border-white/20 group"
+                >
+                  <FaServer className="mr-2 group-hover:rotate-12 transition-transform duration-300" />
+                  Server 5 4K
                 </button>
               </div>
             </div>
@@ -303,7 +313,7 @@ function TVShow() {
           className="bg-white/5 rounded-xl p-6 border border-white/10"
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.9, duration: 0.8 }}
+           transition={{ delay: 0.9, duration: 0.8 }}
         >
           <h2 className="text-2xl font-bold text-white mb-4">Additional Information</h2>
           <div className="grid grid-cols-3 gap-6">
