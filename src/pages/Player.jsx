@@ -2,12 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { 
-  FaArrowLeft, FaServer, FaPlay, FaStar, FaCalendar, 
-  FaLanguage, FaFilm, FaTv, FaGlobe, FaUsers, FaClock,
-  FaTheaterMasks, FaGlobeAmericas, FaMoneyBill, FaUserFriends,
-  FaRegClock, FaRegCalendarAlt, FaTags, FaImdb, FaTicketAlt,
-  FaAward, FaVideo, FaClosedCaptioning, FaVolumeUp, FaUserTie,
-  FaRegEye, FaRegHeart, FaRegBookmark, FaRegCommentAlt
+  FaArrowLeft, FaServer, FaPlay, FaStar, FaCalendar, FaLanguage, FaFilm, FaTv, FaGlobe, FaUsers, FaClock,
+  FaTheaterMasks, FaGlobeAmericas, FaMoneyBill, FaUserFriends, FaRegClock, FaRegCalendarAlt, FaTags, FaImdb, FaTicketAlt,
+  FaAward, FaVideo, FaClosedCaptioning, FaVolumeUp, FaUserTie, FaRegEye, FaRegHeart, FaRegBookmark, FaRegCommentAlt
 } from 'react-icons/fa';
 
 function Player() {
@@ -86,12 +83,10 @@ function Player() {
       server5: 'https://player.videasy.net/4k-uhd'
     }[selectedServer];
 
-    const params = 'autoPlay=true&hideAds=true&disablePopups=true&blockPopups=true&removeAds=true&hideOverlay=true&hideBranding=true&sandbox=allow-scripts%20allow-same-origin%20allow-forms%20allow-presentation%20allow-orientation-lock%20allow-pointer-lock%20allow-popups%20allow-popups-to-escape-sandbox';
-
     if (type === 'tv') {
-      return `${baseUrl}/${type}/${id}/${season}/${episode}?${params}`;
+      return `${baseUrl}/${type}/${id}/${season}/${episode}`;
     }
-    return `${baseUrl}/${type}/${id}?${params}`;
+    return `${baseUrl}/${type}/${id}`;
   };
 
   const serverInfo = {
@@ -124,10 +119,9 @@ function Player() {
           className="player-iframe w-full h-full"
           allowFullScreen
           title="Content Player"
-          allow="encrypted-media; autoplay; fullscreen; picture-in-picture"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
           referrerPolicy="no-referrer"
           loading="lazy"
-          sandbox="allow-scripts allow-same-origin allow-forms allow-presentation allow-orientation-lock allow-pointer-lock allow-popups allow-popups-to-escape-sandbox"
           style={{
             border: 'none',
             margin: 0,
