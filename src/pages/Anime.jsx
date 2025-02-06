@@ -1,14 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import axios from 'axios';
-import { FaStar, FaCalendar, FaClock, FaGlobe, FaPlay, FaInfoCircle, FaUser, FaTv, FaLanguage } from 'react-icons/fa';
+import { FaStar, FaCalendar, FaClock, FaGlobe, FaPlay, FaInfoCircle, FaUser, FaTv, FaLanguage, FaServer } from 'react-icons/fa';
 
 function Anime() {
   const { id } = useParams();
-  const navigate = useNavigate();
   const [anime, setAnime] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [episode, setEpisode] = useState(1);
+
+  const serverInfo = {
+    server1: { name: 'Primary Server', quality: '1080p', url: 'https://multiembed.mov' },
+    server2: { name: 'Backup Server', quality: '1080p', url: 'https://multiembed.mov/directstream.php' },
+    server3: { name: 'Alternative Server', quality: '1080p', url: 'https://embed.su/embed' },
+    server4: { name: 'Premium Server', quality: '1080p/4K', url: 'https://vidsrc.cc/v3/embed' },
+    server5: { name: '4K UHD Server', quality: '4K UHD', url: 'https://player.videasy.net/4k-uhd' }
+  };
 
   useEffect(() => {
     const fetchAnimeData = async () => {
@@ -89,21 +96,19 @@ function Anime() {
 
         const data = await response.json();
         setAnime(data.data.Media);
-        setLoading(false);
       } catch (error) {
         console.error('Error fetching anime data:', error);
-        setLoading(false);
       }
     };
 
     fetchAnimeData();
   }, [id]);
 
-  const handlePlay = () => {
-    navigate(`/player/tv/${id}`);
+  const openServer = (serverUrl) => {
+    window.open(`${serverUrl}/anime/${id}/${episode}`, '_blank');
   };
 
-  if (loading || !anime) {
+  if (!anime) {
     return (
       <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
         <div className="text-white text-2xl">Loading anime details...</div>
@@ -158,15 +163,34 @@ function Anime() {
                dangerouslySetInnerHTML={{ __html: anime.description }}
             />
 
-            {/* Watch Button */}
-            <div className="flex flex-col space-y-2">
-              <button
-                onClick={handlePlay}
-                className="flex items-center justify-center px-6 py-2.5 bg-white text-black rounded-lg hover:bg-gray-200 transition-all duration-300 text-base font-semibold group w-full"
+            {/* Episode Selection */}
+            <div className="flex gap-4 mb-4">
+              <select
+                value={episode}
+                onChange={(e) => setEpisode(Number(e.target.value))}
+                className="bg-black text-white px-4 py-2 rounded-lg border border-white/20 focus:border-white focus:outline-none"
               >
-                <FaPlay className="mr-2 group-hover:translate-x-1 transition-transform duration-300" />
-                Watch Now
-              </button>
+                {Array.from({ length: anime.episodes || 0 }, (_, i) => (
+                  <option key={i + 1} value={i + 1}>Episode {i + 1}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Server Buttons */}
+            <div className="grid grid-cols-2 gap-4">
+              {Object.entries(serverInfo).map(([key, server]) => (
+                <button
+                  key={key}
+                  onClick={() => openServer(server.url)}
+                  className="flex items-center justify-center space-x-2 px-6 py-3 bg-white/10 backdrop-blur-sm text-white rounded-lg hover:bg-white/20 transition-all duration-300 border border-white/20 group"
+                >
+                  <FaServer className="w-4 h-4 group-hover:rotate-12 transition-transform duration-300" />
+                  <div className="text-left">
+                    <div className="font-semibold">{server.name}</div>
+                    <div className="text-xs text-white/70">{server.quality}</div>
+                  </div>
+                </button>
+              ))}
             </div>
           </div>
         </motion.div>
