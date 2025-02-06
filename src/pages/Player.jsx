@@ -7,8 +7,7 @@ import {
   FaTheaterMasks, FaGlobeAmericas, FaMoneyBill, FaUserFriends,
   FaRegClock, FaRegCalendarAlt, FaTags, FaImdb, FaTicketAlt,
   FaAward, FaVideo, FaClosedCaptioning, FaVolumeUp, FaUserTie,
-  FaRegEye, FaRegHeart, FaRegBookmark, FaRegCommentAlt,
-  FaExclamationTriangle
+  FaRegEye, FaRegHeart, FaRegBookmark, FaRegCommentAlt
 } from 'react-icons/fa';
 
 function Player() {
@@ -87,7 +86,7 @@ function Player() {
       server5: 'https://player.videasy.net/4k-uhd'
     }[selectedServer];
 
-    const params = 'autoPlay=false&hideAds=true&disablePopups=true&blockPopups=true&removeAds=true&hideOverlay=true&hideBranding=true';
+    const params = 'autoPlay=true&hideAds=true&disablePopups=true&blockPopups=true&removeAds=true&hideOverlay=true&hideBranding=true&sandbox=allow-scripts%20allow-same-origin%20allow-forms%20allow-presentation%20allow-orientation-lock%20allow-pointer-lock%20allow-popups%20allow-popups-to-escape-sandbox';
 
     if (type === 'tv') {
       return `${baseUrl}/${type}/${id}/${season}/${episode}?${params}`;
@@ -125,9 +124,10 @@ function Player() {
           className="player-iframe w-full h-full"
           allowFullScreen
           title="Content Player"
-          allow="encrypted-media"
+          allow="encrypted-media; autoplay; fullscreen; picture-in-picture"
           referrerPolicy="no-referrer"
           loading="lazy"
+          sandbox="allow-scripts allow-same-origin allow-forms allow-presentation allow-orientation-lock allow-pointer-lock allow-popups allow-popups-to-escape-sandbox"
           style={{
             border: 'none',
             margin: 0,
@@ -488,35 +488,6 @@ function Player() {
                 </div>
               </div>
             )}
-          </div>
-        </div>
-
-        {/* Move Legal Notice to bottom */}
-        <div className="mt-12">
-          <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4">
-            <div className="flex items-start space-x-3">
-              <FaExclamationTriangle className="text-red-500 w-5 h-5 flex-shrink-0 mt-1" />
-              <div className="text-sm">
-                <p className="text-red-400 font-semibold mb-2">Important Legal Notice:</p>
-                <div className="text-red-300 space-y-2">
-                  <p>
-                    This website does not host, store, or distribute any video content. All media content is provided by third-party services 
-                    and external streaming platforms. We are not responsible for the accuracy, compliance, copyright, legality, or decency of any content.
-                  </p>
-                  <p>By accessing this service, you acknowledge and agree that:</p>
-                  <ul className="list-disc list-inside space-y-1 ml-2">
-                    <li>You will comply with all applicable laws and regulations in your jurisdiction</li>
-                    <li>You have the legal right to access the content in your region</li>
-                    <li>You understand we are not liable for any third-party content or services</li>
-                    <li>You will not use this service for unauthorized or illegal purposes</li>
-                    <li>You accept full responsibility for your use of the service</li>
-                    <li>You will not attempt to circumvent any content protection systems</li>
-                    <li>You understand that content availability may vary by region</li>
-                    <li>You will report any technical issues or violations to the appropriate authorities</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </div>
