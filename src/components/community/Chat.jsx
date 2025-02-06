@@ -1,8 +1,21 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { FaUserCircle, FaPaperPlane, FaEdit, FaTrash, FaClock } from 'react-icons/fa';
 import { auth, db } from '../../firebase';
-import { collection, query, orderBy, limit, onSnapshot, addDoc, serverTimestamp, getDoc, doc, deleteDoc, updateDoc } from 'firebase/firestore';
+import { 
+  collection, 
+  query, 
+  orderBy, 
+  limit, 
+  onSnapshot,
+  addDoc, 
+  serverTimestamp, 
+  getDoc, 
+  doc, 
+  deleteDoc, 
+  updateDoc,
+  writeBatch
+} from 'firebase/firestore';
 import { moderateContent, processContent } from '../../utils/contentModeration';
 
 function Chat() {
@@ -15,60 +28,79 @@ function Chat() {
   const chatContainerRef = useRef(null);
   const [userData, setUserData] = useState({});
   const isAdmin = auth.currentUser?.email === 'andres_rios_xyz@outlook.com';
+  const userDataCache = useRef(new Map());
+  const lastMessageTimestamp = useRef(null);
+  const batchOperations = useRef(null);
 
-  const scrollToBottom = () => {
+  const scrollToBottom = useCallback(() => {
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
-  };
+  }, []);
+
+  const fetchUserData = useCallback(async (userId) => {
+    if (userDataCache.current.has(userId)) {
+      return userDataCache.current.get(userId);
+    }
+
+    try {
+      const userDoc = await getDoc(doc(db, 'users', userId));
+      if (userDoc.exists()) {
+        const data = userDoc.data();
+        userDataCache.current.set(userId, data);
+        return data;
+      }
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+    }
+    return null;
+  }, []);
+
+  const processBatchUserData = useCallback(async (messages) => {
+    const userPromises = messages.map(async (message) => {
+      if (!userDataCache.current.has(message.userId)) {
+        const userData = await fetchUserData(message.userId);
+        if (userData) {
+          setUserData(prev => ({ ...prev, [message.userId]: userData }));
+        }
+      }
+    });
+    await Promise.all(userPromises);
+  }, [fetchUserData]);
 
   useEffect(() => {
     const q = query(
       collection(db, 'chat_messages'),
-      orderBy('timestamp', 'asc'), // Changed to ascending order
+      orderBy('timestamp', 'desc'),
       limit(50)
     );
 
     const unsubscribe = onSnapshot(q, async (snapshot) => {
       const newMessages = [];
-      const changes = snapshot.docChanges();
       let shouldScroll = false;
 
-      // Only scroll if a new message is added
-      changes.forEach(change => {
+      snapshot.docChanges().forEach((change) => {
         if (change.type === 'added' && change.doc.data().timestamp) {
           shouldScroll = true;
         }
       });
 
-      for (const docSnapshot of snapshot.docs) {
-        const messageData = { id: docSnapshot.id, ...docSnapshot.data() };
-        if (!userData[messageData.userId]) {
-          const userDoc = await getDoc(doc(db, 'users', messageData.userId));
-          if (userDoc.exists()) {
-            setUserData(prev => ({
-              ...prev,
-              [messageData.userId]: userDoc.data()
-            }));
-          }
-        }
-        newMessages.push(messageData); // Changed from unshift to push
-      }
+      snapshot.docs.reverse().forEach(doc => {
+        newMessages.push({ id: doc.id, ...doc.data() });
+      });
+
       setMessages(newMessages);
+      await processBatchUserData(newMessages);
+
       if (shouldScroll) {
         setTimeout(scrollToBottom, 100);
       }
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [scrollToBottom, processBatchUserData]);
 
-  // Auto-scroll when messages change
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
-  const formatTimestamp = (timestamp) => {
+  const formatTimestamp = useMemo(() => (timestamp) => {
     if (!timestamp) return '';
     const date = timestamp.toDate();
     const now = new Date();
@@ -79,11 +111,17 @@ function Chat() {
     if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}h ago`;
     
     return date.toLocaleString();
-  };
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!newMessage.trim() || !auth.currentUser) return;
+
+    const now = Date.now();
+    if (lastMessageTimestamp.current && now - lastMessageTimestamp.current < 500) {
+      return;
+    }
+    lastMessageTimestamp.current = now;
 
     const moderationResult = moderateContent(newMessage.trim());
     if (!moderationResult.isValid) {
@@ -92,17 +130,22 @@ function Chat() {
     }
 
     try {
-      const userDoc = await getDoc(doc(db, 'users', auth.currentUser.uid));
-      const username = userDoc.data()?.username || 'Anonymous';
+      const batch = writeBatch(db);
+      const messageRef = doc(collection(db, 'chat_messages'));
 
-      await addDoc(collection(db, 'chat_messages'), {
+      const messageData = {
         text: newMessage.trim(),
         userId: auth.currentUser.uid,
-        username: username,
+        username: userData[auth.currentUser.uid]?.username || 'Anonymous',
         timestamp: serverTimestamp()
-      });
+      };
+
+      batch.set(messageRef, messageData);
+      await batch.commit();
+
       setNewMessage('');
       setError('');
+      scrollToBottom();
     } catch (error) {
       console.error('Error sending message:', error);
       setError('Failed to send message');
@@ -114,7 +157,9 @@ function Chat() {
     
     if (isAdmin || userId === auth.currentUser.uid) {
       try {
-        await deleteDoc(doc(db, 'chat_messages', messageId));
+        const batch = writeBatch(db);
+        batch.delete(doc(db, 'chat_messages', messageId));
+        await batch.commit();
       } catch (error) {
         console.error('Error deleting message:', error);
         setError('Failed to delete message');
@@ -132,11 +177,16 @@ function Chat() {
     }
 
     try {
-      await updateDoc(doc(db, 'chat_messages', messageId), {
+      const batch = writeBatch(db);
+      const messageRef = doc(db, 'chat_messages', messageId);
+      
+      batch.update(messageRef, {
         text: editText.trim(),
         edited: true,
         editedAt: serverTimestamp()
       });
+      
+      await batch.commit();
       setEditingMessage(null);
       setEditText('');
       setError('');
@@ -146,16 +196,11 @@ function Chat() {
     }
   };
 
-  const startEdit = (message) => {
-    setEditingMessage(message.id);
-    setEditText(message.text);
-  };
-
   return (
     <div className="bg-[#1A1A1B] border border-[#343536] rounded-md overflow-hidden">
       <div
         ref={chatContainerRef}
-        className="h-[300px] overflow-y-auto p-4 space-y-4"
+        className="h-[300px] overflow-y-auto p-4 space-y-4 scroll-smooth"
       >
         {messages.map((message) => (
           <div
@@ -238,7 +283,10 @@ function Chat() {
                 <div className="flex justify-end space-x-2 mt-2">
                   {message.userId === auth.currentUser.uid && (
                     <button
-                      onClick={() => startEdit(message)}
+                      onClick={() => {
+                        setEditingMessage(message.id);
+                        setEditText(message.text);
+                      }}
                       className="text-white/50 hover:text-white"
                     >
                       <FaEdit className="w-3 h-3" />
@@ -283,4 +331,4 @@ function Chat() {
   );
 }
 
-export default Chat;
+export default React.memo(Chat);
