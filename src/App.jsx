@@ -16,7 +16,6 @@ import Login from './pages/Login';
 import Signup from './pages/Signup';
 import AdminDashboard from './pages/AdminDashboard';
 import Community from './pages/Community';
-import Player from './pages/Player';
 import PageTransition from './components/PageTransition';
 import TransitionLayout from './components/TransitionLayout';
 import { auth, db } from './firebase';
@@ -330,13 +329,6 @@ function AnimatedRoutes() {
               <AdminRoute>
                 <AdminDashboard />
               </AdminRoute>
-            </PageTransition>
-          } />
-          <Route path="/player/:type/:id" element={
-            <PageTransition>
-              <PrivateRoute>
-                <Player />
-              </PrivateRoute>
             </PageTransition>
           } />
         </Routes>
