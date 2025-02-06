@@ -59,7 +59,7 @@ function Navbar() {
             {/* Logo */}
             <Link to="/" className="flex items-center space-x-2">
               <img 
-                src="https://w7.pngwing.com/pngs/176/593/png-transparent-hallmark-purple-crown-logo.png"
+                src="https://i.pinimg.com/1200x/1c/d4/31/1cd431f58c191c9eeb3bbc417ee1c53b.jpg"
                 alt="Logo"
                 className="w-8 h-8 rounded-full"
               />

@@ -119,14 +119,22 @@ function Player() {
   return (
     <div className="min-h-screen bg-[#0a0a0a]">
       {/* Player Section */}
-      <div className="player-container relative w-full aspect-video bg-black">
+      <div className="player-container relative w-full aspect-[16/9] max-h-[600px] bg-black">
         <iframe
           src={getEmbedUrl()}
           className="player-iframe w-full h-full"
           allowFullScreen
           title="Content Player"
-          sandbox="allow-same-origin allow-scripts allow-forms"
+          allow="encrypted-media"
+          referrerPolicy="no-referrer"
           loading="lazy"
+          style={{
+            border: 'none',
+            margin: 0,
+            padding: 0,
+            overflow: 'hidden',
+            zIndex: 999999
+          }}
         />
       </div>
 
