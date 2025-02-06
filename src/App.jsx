@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, useNavigate, Link } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
@@ -16,11 +16,13 @@ import Login from './pages/Login';
 import Signup from './pages/Signup';
 import AdminDashboard from './pages/AdminDashboard';
 import Community from './pages/Community';
+import Player from './pages/Player';
 import PageTransition from './components/PageTransition';
 import TransitionLayout from './components/TransitionLayout';
 import { auth, db } from './firebase';
 import { doc, updateDoc, serverTimestamp, increment, getDoc } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
+import { FaExclamationTriangle } from 'react-icons/fa';
 
 function PrivateRoute({ children }) {
   const location = useLocation();
@@ -92,6 +94,24 @@ function AdminRoute({ children }) {
   }
 
   return children;
+}
+
+// Critical Info Button Component
+function CriticalInfoButton() {
+  const location = useLocation();
+  const isImportantPage = location.pathname === '/important';
+
+  if (isImportantPage) return null;
+
+  return (
+    <Link
+      to="/important"
+      className="fixed bottom-8 right-8 z-50 flex items-center px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg shadow-lg transition-all duration-300 group animate-pulse hover:animate-none"
+    >
+      <FaExclamationTriangle className="mr-2 group-hover:rotate-12 transition-transform duration-300" />
+      <span className="font-semibold">CRITICAL INFO - MUST READ!</span>
+    </Link>
+  );
 }
 
 function App() {
@@ -207,6 +227,7 @@ function App() {
       <div className={`min-h-screen bg-black transition-all duration-300 ${isSidebarOpen ? 'pl-16' : ''}`}>
         <main className="relative">
           <AnimatedRoutes />
+          <CriticalInfoButton />
         </main>
         <Navbar isSidebarOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen} />
       </div>
@@ -309,6 +330,13 @@ function AnimatedRoutes() {
               <AdminRoute>
                 <AdminDashboard />
               </AdminRoute>
+            </PageTransition>
+          } />
+          <Route path="/player/:type/:id" element={
+            <PageTransition>
+              <PrivateRoute>
+                <Player />
+              </PrivateRoute>
             </PageTransition>
           } />
         </Routes>

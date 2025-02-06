@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import axios from 'axios';
 import { FaStar, FaCalendar, FaClock, FaGlobe, FaPlay, FaInfoCircle, FaUser, FaTv, FaLanguage } from 'react-icons/fa';
 
 function Anime() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [anime, setAnime] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -98,8 +100,7 @@ function Anime() {
   }, [id]);
 
   const handlePlay = () => {
-    const streamingUrl = `https://player.videasy.net/anime/${id}?color=8B5CF6`;
-    window.open(streamingUrl, '_blank');
+    navigate(`/player/tv/${id}`);
   };
 
   if (loading || !anime) {
@@ -157,14 +158,14 @@ function Anime() {
                dangerouslySetInnerHTML={{ __html: anime.description }}
             />
 
-            {/* Streaming Button */}
+            {/* Watch Button */}
             <div className="flex flex-col space-y-2">
               <button
                 onClick={handlePlay}
                 className="flex items-center justify-center px-6 py-2.5 bg-white text-black rounded-lg hover:bg-gray-200 transition-all duration-300 text-base font-semibold group w-full"
               >
                 <FaPlay className="mr-2 group-hover:translate-x-1 transition-transform duration-300" />
-                Watch Now in 4K
+                Watch Now
               </button>
             </div>
           </div>

@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import axios from 'axios';
-import { FaStar, FaCalendar, FaClock, FaGlobe, FaServer, FaPlay, FaInfoCircle, FaUser, FaTv, FaLanguage } from 'react-icons/fa';
+import { FaStar, FaCalendar, FaClock, FaGlobe, FaPlay, FaInfoCircle, FaUser, FaTv, FaLanguage } from 'react-icons/fa';
 
 function TVShow() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [show, setShow] = useState(null);
   const [season, setSeason] = useState(1);
-  const [episode, setEpisode] = useState(1);
   const [seasonDetails, setSeasonDetails] = useState(null);
   const [credits, setCredits] = useState(null);
   const TMDB_TOKEN = 'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI3MmJhMTBjNDI5OTE0MTU3MzgwOGQyNzEwNGVkMThmYSIsInN1YiI6IjY0ZjVhNTUwMTIxOTdlMDBmZWE5MzdmMSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.84b7vWpVEilAbly4RpS01E9tyirHdhSXjcpfmTczI3Q';
@@ -47,7 +47,6 @@ function TVShow() {
           { headers: { 'Authorization': `Bearer ${TMDB_TOKEN}` } }
         );
         setSeasonDetails(seasonResponse.data);
-        setEpisode(1);
       } catch (error) {
         console.error('Error fetching season details:', error);
       }
@@ -58,28 +57,8 @@ function TVShow() {
     }
   }, [season, id]);
 
-  const handlePlay = (provider) => {
-    let streamingUrl;
-    switch (provider) {
-      case 'server1':
-        streamingUrl = `https://multiembed.mov/?video_id=${id}&tmdb=1&s=${season}&e=${episode}`;
-        break;
-      case 'server2':
-        streamingUrl = `https://multiembed.mov/directstream.php?video_id=${id}&tmdb=1&s=${season}&e=${episode}`;
-        break;
-      case 'server3':
-        streamingUrl = `https://embed.su/embed/tv/${id}/${season}/${episode}`;
-        break;
-      case 'server4':
-        streamingUrl = `https://vidsrc.cc/v3/embed/tv/${id}/${season}/${episode}?autoPlay=false`;
-        break;
-      case 'server5':
-        streamingUrl = `https://player.videasy.net/tv/${id}/${season}/${episode}?color=8B5CF6`;
-        break;
-      default:
-        streamingUrl = `https://multiembed.mov/?video_id=${id}&tmdb=1&s=${season}&e=${episode}`;
-    }
-    window.open(streamingUrl, '_blank');
+  const handlePlay = () => {
+    navigate(`/player/tv/${id}`);
   };
 
   if (!show || !seasonDetails || !credits) {
@@ -134,72 +113,15 @@ function TVShow() {
 
             <p className="text-lg text-white/90">{show.overview}</p>
 
-            {/* Episode Selection */}
+            {/* Watch Button */}
             <div className="flex flex-col space-y-2">
-              <div className="flex gap-3">
-                <select 
-                  value={season}
-                  onChange={(e) => setSeason(Number(e.target.value))}
-                  className="bg-white/10 backdrop-blur-sm text-white px-3 py-2 rounded-lg border border-white/20 focus:border-white focus:outline-none appearance-none cursor-pointer flex-1"
-                >
-                  {Array.from({ length: show.number_of_seasons }, (_, i) => (
-                    <option key={i + 1} value={i + 1}>
-                      Season {i + 1}
-                    </option>
-                  ))}
-                </select>
-                
-                <select 
-                  value={episode}
-                  onChange={(e) => setEpisode(Number(e.target.value))}
-                  className="bg-white/10 backdrop-blur-sm text-white px-3 py-2 rounded-lg border border-white/20 focus:border-white focus:outline-none appearance-none cursor-pointer flex-1"
-                >
-                  {Array.from({ length: seasonDetails.episodes?.length || 0 }, (_, i) => (
-                    <option key={i + 1} value={i + 1}>
-                      Episode {i + 1}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Streaming Buttons */}
               <button
-                onClick={() => handlePlay('server1')}
+                onClick={handlePlay}
                 className="flex items-center justify-center px-6 py-2.5 bg-white text-black rounded-lg hover:bg-gray-200 transition-all duration-300 text-base font-semibold group w-full"
               >
                 <FaPlay className="mr-2 group-hover:translate-x-1 transition-transform duration-300" />
                 Watch Now
               </button>
-              <div className="grid grid-cols-4 gap-2">
-                <button
-                  onClick={() => handlePlay('server2')}
-                  className="flex items-center justify-center px-3 py-2 bg-white/10 backdrop-blur-sm text-white rounded-lg hover:bg-white/20 transition-all duration-300 text-sm font-semibold border border-white/20 group"
-                >
-                  <FaServer className="mr-2 group-hover:rotate-12 transition-transform duration-300" />
-                  Server 2
-                </button>
-                <button
-                  onClick={() => handlePlay('server3')}
-                  className="flex items-center justify-center px-3 py-2 bg-white/10 backdrop-blur-sm text-white rounded-lg hover:bg-white/20 transition-all duration-300 text-sm font-semibold border border-white/20 group"
-                >
-                  <FaServer className="mr-2 group-hover:rotate-12 transition-transform duration-300" />
-                  Server 3
-                </button>
-                <button
-                  onClick={() => handlePlay('server4')}
-                  className="flex items-center justify-center px-3 py-2 bg-white/10 backdrop-blur-sm text-white rounded-lg hover:bg-white/20 transition-all duration-300 text-sm font-semibold border border-white/20 group"
-                >
-                  <FaServer className="mr-2 group-hover:rotate-12 transition-transform duration-300" />
-                  Server 4
-                </button>
-                <button
-                  onClick={() => handlePlay('server5')}
-                  className="flex items-center justify-center px-3 py-2 bg-white/10 backdrop-blur-sm text-white rounded-lg hover:bg-white/20 transition-all duration-300 text-sm font-semibold border border-white/20 group"
-                >
-                  <FaServer className="mr-2 group-hover:rotate-12 transition-transform duration-300" />
-                  Server 5 4K
-                </button>
-              </div>
             </div>
           </div>
         </motion.div>
@@ -313,7 +235,7 @@ function TVShow() {
           className="bg-white/5 rounded-xl p-6 border border-white/10"
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-           transition={{ delay: 0.9, duration: 0.8 }}
+          transition={{ delay: 0.9, duration: 0.8 }}
         >
           <h2 className="text-2xl font-bold text-white mb-4">Additional Information</h2>
           <div className="grid grid-cols-3 gap-6">
