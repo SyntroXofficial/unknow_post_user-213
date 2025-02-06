@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 import { 
   FaPlay, FaInfoCircle, FaStar, FaCalendar, FaLanguage, FaFilm, FaTv, FaSearch,
-  FaFilter, FaSort, FaChevronDown, FaGlobe, FaClock
+  FaFilter, FaSort, FaChevronDown, FaGlobe, FaClock, FaFire, FaTheaterMasks
 } from 'react-icons/fa';
 
 const container = {
@@ -72,6 +72,12 @@ function Streaming() {
   const [popularShows, setPopularShows] = useState([]);
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [upcomingMovies, setUpcomingMovies] = useState([]);
+  const [nowPlayingMovies, setNowPlayingMovies] = useState([]);
+  const [airingTodayShows, setAiringTodayShows] = useState([]);
+  const [onTheAirShows, setOnTheAirShows] = useState([]);
+  const [trendingAnime, setTrendingAnime] = useState([]);
+  const [popularAnime, setPopularAnime] = useState([]);
   const TMDB_TOKEN = 'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI3MmJhMTBjNDI5OTE0MTU3MzgwOGQyNzEwNGVkMThmYSIsInN1YiI6IjY0ZjVhNTUwMTIxOTdlMDBmZWE5MzdmMSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.84b7vWpVEilAbly4RpS01E9tyirHdhSXjcpfmTczI3Q';
 
   useEffect(() => {
@@ -82,7 +88,11 @@ function Streaming() {
           popularMoviesRes, 
           topShowsRes, 
           topMoviesRes,
-          popularShowsRes
+          popularShowsRes,
+          upcomingRes,
+          nowPlayingRes,
+          airingTodayRes,
+          onTheAirRes
         ] = await Promise.all([
           axios.get('https://api.themoviedb.org/3/trending/all/day', {
             headers: { 'Authorization': `Bearer ${TMDB_TOKEN}` }
@@ -98,6 +108,18 @@ function Streaming() {
           }),
           axios.get('https://api.themoviedb.org/3/tv/popular', {
             headers: { 'Authorization': `Bearer ${TMDB_TOKEN}` }
+          }),
+          axios.get('https://api.themoviedb.org/3/movie/upcoming', {
+            headers: { 'Authorization': `Bearer ${TMDB_TOKEN}` }
+          }),
+          axios.get('https://api.themoviedb.org/3/movie/now_playing', {
+            headers: { 'Authorization': `Bearer ${TMDB_TOKEN}` }
+          }),
+          axios.get('https://api.themoviedb.org/3/tv/airing_today', {
+            headers: { 'Authorization': `Bearer ${TMDB_TOKEN}` }
+          }),
+          axios.get('https://api.themoviedb.org/3/tv/on_the_air', {
+            headers: { 'Authorization': `Bearer ${TMDB_TOKEN}` }
           })
         ]);
 
@@ -107,12 +129,34 @@ function Streaming() {
         setTopRatedShows(topShowsRes.data.results);
         setTopRatedMovies(topMoviesRes.data.results);
         setPopularShows(popularShowsRes.data.results);
+        setUpcomingMovies(upcomingRes.data.results);
+        setNowPlayingMovies(nowPlayingRes.data.results);
+        setAiringTodayShows(airingTodayRes.data.results);
+        setOnTheAirShows(onTheAirRes.data.results);
+
+        // Fetch anime content
+        const animeQuery = 'with_keywords=210024|222243'; // Keywords for anime content
+        const [trendingAnimeRes, popularAnimeRes] = await Promise.all([
+          axios.get(`https://api.themoviedb.org/3/discover/tv?${animeQuery}&sort_by=popularity.desc`, {
+            headers: { 'Authorization': `Bearer ${TMDB_TOKEN}` }
+          }),
+          axios.get(`https://api.themoviedb.org/3/discover/tv?${animeQuery}&sort_by=vote_average.desc`, {
+            headers: { 'Authorization': `Bearer ${TMDB_TOKEN}` }
+          })
+        ]);
+
+        setTrendingAnime(trendingAnimeRes.data.results);
+        setPopularAnime(popularAnimeRes.data.results);
       } catch (error) {
         console.error('Error fetching content:', error);
       }
     };
 
     fetchAllContent();
+
+    // Set up real-time updates every 5 minutes
+    const updateInterval = setInterval(fetchAllContent, 300000);
+    return () => clearInterval(updateInterval);
   }, []);
 
   useEffect(() => {
@@ -503,9 +547,15 @@ function Streaming() {
             <div className="space-y-12">
               <CategorySection title="Trending Now" items={trending} type="movie" />
               <CategorySection title="Popular Movies" items={popularMovies} type="movie" />
+              <CategorySection title="Now Playing in Theaters" items={nowPlayingMovies} type="movie" />
+              <CategorySection title="Upcoming Movies" items={upcomingMovies} type="movie" />
               <CategorySection title="Top Rated Movies" items={topRatedMovies} type="movie" />
               <CategorySection title="Popular TV Shows" items={popularShows} type="tv" />
               <CategorySection title="Top Rated TV Shows" items={topRatedShows} type="tv" />
+              <CategorySection title="TV Shows Airing Today" items={airingTodayShows} type="tv" />
+              <CategorySection title="Currently On Air" items={onTheAirShows} type="tv" />
+              <CategorySection title="Trending Anime" items={trendingAnime} type="tv" />
+              <CategorySection title="Popular Anime" items={popularAnime} type="tv" />
             </div>
           )}
         </motion.section>

@@ -59,7 +59,7 @@ function Navbar() {
             {/* Logo */}
             <Link to="/" className="flex items-center space-x-2">
               <img 
-                src="https://i.pinimg.com/1200x/1c/d4/31/1cd431f58c191c9eeb3bbc417ee1c53b.jpg"
+                src="https://i.pinimg.com/736x/8f/d4/0e/8fd40ebc6be2d34f2de430a70420c236.jpg"
                 alt="Logo"
                 className="w-8 h-8 rounded-full"
               />
