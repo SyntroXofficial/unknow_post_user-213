@@ -32,6 +32,18 @@ function Signup() {
     }
   };
 
+  const checkIPExists = async (ip) => {
+    try {
+      const usersRef = collection(db, 'users');
+      const q = query(usersRef, where('registrationIP', '==', ip));
+      const querySnapshot = await getDocs(q);
+      return !querySnapshot.empty;
+    } catch (error) {
+      console.error('IP check error:', error);
+      throw new Error('Failed to check IP. Please try again.');
+    }
+  };
+
   const handleSignup = async (e) => {
     e.preventDefault();
     setError('');
@@ -54,6 +66,17 @@ function Signup() {
         throw new Error('This email is already registered');
       }
 
+      // Get user's IP address
+      const ipResponse = await fetch('https://ipapi.co/json/');
+      const ipData = await ipResponse.json();
+      const userIP = ipData.ip;
+
+      // Check if IP already exists
+      const ipExists = await checkIPExists(userIP);
+      if (ipExists) {
+        throw new Error('An account already exists from this IP address');
+      }
+
       // Create Firebase auth user
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
 
@@ -64,7 +87,11 @@ function Signup() {
         createdAt: new Date().toISOString(),
         lastLogin: new Date().toISOString(),
         loginCount: 0,
-        banned: false
+        banned: false,
+        registrationIP: userIP,
+        registrationCountry: ipData.country_name,
+        registrationCity: ipData.city,
+        registrationISP: ipData.org
       };
 
       await setDoc(doc(db, 'users', userCredential.user.uid), userData);
@@ -96,7 +123,7 @@ function Signup() {
               Important Notice
             </h3>
             <p className="text-red-400 text-sm">
-              Make sure you're using either Gmail, Proton, or Outlook email.
+              Only one account per IP address is allowed. Make sure you're using either Gmail, Proton, or Outlook email.
               Providing incorrect information will result in an immediate permanent ban.
             </p>
           </div>
