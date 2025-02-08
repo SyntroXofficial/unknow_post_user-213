@@ -13,6 +13,30 @@ import {
   FaUserShield, FaHorse, FaFighterJet, FaShieldAlt
 } from 'react-icons/fa';
 
+const container = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.3
+    }
+  }
+};
+
+const item = {
+  hidden: { opacity: 0, y: 20 },
+  show: { 
+    opacity: 1, 
+    y: 0,
+    transition: {
+      type: "spring",
+      stiffness: 100,
+      damping: 10
+    }
+  }
+};
+
 // Memoized Content Card Component
 const ContentCard = memo(({ item, index, type = 'movie' }) => (
   <Link 
@@ -34,16 +58,6 @@ const ContentCard = memo(({ item, index, type = 'movie' }) => (
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
           <div className="absolute bottom-0 left-0 right-0 p-4 flex flex-col items-center justify-end h-full">
-            <div className="flex items-center space-x-2 mb-4">
-              <div className="flex items-center bg-black/60 backdrop-blur-sm rounded-full px-2 py-0.5">
-                <FaStar className="text-yellow-500 w-3 h-3 mr-1" />
-                <span className="text-white text-xs">{item.vote_average?.toFixed(1)}</span>
-              </div>
-              <div className="flex items-center bg-black/60 backdrop-blur-sm rounded-full px-2 py-0.5">
-                <FaRegCalendarAlt className="text-gray-400 w-3 h-3 mr-1" />
-                <span className="text-white text-xs">{(item.release_date || item.first_air_date)?.split('-')[0]}</span>
-              </div>
-            </div>
             <button className="w-full bg-white/90 hover:bg-white text-black px-4 py-2 rounded text-sm font-semibold flex items-center justify-center space-x-2 transition-colors">
               <FaPlayCircle className="w-4 h-4" />
               <span>Watch Now</span>
