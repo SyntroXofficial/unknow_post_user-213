@@ -1,70 +1,44 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import axios from 'axios';
 import { 
-  FaStar, FaCalendar, FaClock, FaGlobe, FaServer, FaPlay, 
-  FaInfoCircle, FaUser, FaFilm, FaLanguage, FaDollarSign,
-  FaTicketAlt, FaImdb, FaTheaterMasks, FaVideo, FaPhotoVideo,
-  FaClosedCaptioning, FaGlobeAmericas, FaAward, FaTrophy,
-  FaUserTie, FaMoneyBillWave, FaRegClock, FaRegCalendarAlt,
-  FaRegStar, FaRegBookmark, FaRegHeart, FaRegEye, FaRegCommentAlt,
-  FaRegFileAlt, FaRegImage, FaRegPlayCircle, FaRegTimesCircle,
+  FaStar, FaCalendar, FaClock, FaServer, FaPlay, 
+  FaUser, FaFilm, FaLanguage, FaDollarSign,
+  FaTicketAlt, FaImdb, FaTheaterMasks, FaVideo,
+  FaGlobeAmericas, FaAward, FaTrophy, FaUserTie,
+  FaMoneyBillWave, FaRegClock, FaRegCalendarAlt,
+  FaRegStar, FaRegBookmark, FaRegHeart, FaRegEye,
+  FaRegFileAlt, FaRegImage, FaRegPlayCircle,
   FaRegCheckCircle, FaRegBell, FaRegLightbulb
 } from 'react-icons/fa';
+import axios from 'axios';
 
 function Movie() {
   const { id } = useParams();
   const [movie, setMovie] = useState(null);
   const [credits, setCredits] = useState(null);
-  const [videos, setVideos] = useState(null);
-  const [reviews, setReviews] = useState(null);
-  const [similar, setSimilar] = useState(null);
-  const [keywords, setKeywords] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [awards, setAwards] = useState(null);
-  const [boxOffice, setBoxOffice] = useState(null);
   const [trivia, setTrivia] = useState(null);
+  const [ratings, setRatings] = useState(null);
   const TMDB_TOKEN = 'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI3MmJhMTBjNDI5OTE0MTU3MzgwOGQyNzEwNGVkMThmYSIsInN1YiI6IjY0ZjVhNTUwMTIxOTdlMDBmZWE5MzdmMSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.84b7vWpVEilAbly4RpS01E9tyirHdhSXjcpfmTczI3Q';
 
   useEffect(() => {
     const fetchMovieData = async () => {
       try {
-        const [
-          movieRes,
-          creditsRes,
-          videosRes,
-          reviewsRes,
-          similarRes,
-          keywordsRes
-        ] = await Promise.all([
+        const [movieRes, creditsRes] = await Promise.all([
           axios.get(`https://api.themoviedb.org/3/movie/${id}`, {
             headers: { 'Authorization': `Bearer ${TMDB_TOKEN}` }
           }),
           axios.get(`https://api.themoviedb.org/3/movie/${id}/credits`, {
-            headers: { 'Authorization': `Bearer ${TMDB_TOKEN}` }
-          }),
-          axios.get(`https://api.themoviedb.org/3/movie/${id}/videos`, {
-            headers: { 'Authorization': `Bearer ${TMDB_TOKEN}` }
-          }),
-          axios.get(`https://api.themoviedb.org/3/movie/${id}/reviews`, {
-            headers: { 'Authorization': `Bearer ${TMDB_TOKEN}` }
-          }),
-          axios.get(`https://api.themoviedb.org/3/movie/${id}/similar`, {
-            headers: { 'Authorization': `Bearer ${TMDB_TOKEN}` }
-          }),
-          axios.get(`https://api.themoviedb.org/3/movie/${id}/keywords`, {
             headers: { 'Authorization': `Bearer ${TMDB_TOKEN}` }
           })
         ]);
 
         setMovie(movieRes.data);
         setCredits(creditsRes.data);
-        setVideos(videosRes.data);
-        setReviews(reviewsRes.data);
-        setSimilar(similarRes.data);
-        setKeywords(keywordsRes.data);
 
-        // Simulate awards data
+        // Simulate awards data for highly rated movies
         if (movieRes.data.vote_average > 7.5) {
           setAwards([
             { name: "Academy Award", category: "Best Picture Nominee" },
@@ -72,17 +46,12 @@ function Movie() {
           ]);
         }
 
-        // Simulate box office data
-        setBoxOffice({
-          budget: movieRes.data.budget,
-          revenue: movieRes.data.revenue,
-          openingWeekend: Math.floor(movieRes.data.revenue * 0.3),
-          worldwide: movieRes.data.revenue,
-          domestic: Math.floor(movieRes.data.revenue * 0.4),
-          international: Math.floor(movieRes.data.revenue * 0.6)
+        setRatings({
+          average: movieRes.data.vote_average,
+          popularity: movieRes.data.popularity,
+          voteCount: movieRes.data.vote_count
         });
 
-        // Simulate trivia
         setTrivia([
           "The movie took over 6 months to film",
           "Over 1000 extras were used in crowd scenes",
@@ -90,8 +59,10 @@ function Movie() {
           "The film was shot in multiple countries"
         ]);
 
+        setLoading(false);
       } catch (error) {
         console.error('Error fetching movie data:', error);
+        setLoading(false);
       }
     };
 
@@ -122,10 +93,13 @@ function Movie() {
     window.open(streamingUrl, '_blank');
   };
 
-  if (!movie || !credits) {
+  if (loading || !movie || !credits) {
     return (
       <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
-        <div className="text-white text-2xl">Loading movie details...</div>
+        <div className="space-y-4 text-center">
+          <div className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="text-white text-lg">Loading movie details...</p>
+        </div>
       </div>
     );
   }
@@ -134,9 +108,6 @@ function Movie() {
   const writers = credits.crew.filter(person => 
     ["Screenplay", "Writer", "Story"].includes(person.job)
   );
-  const producers = credits.crew.filter(person => 
-    person.job === "Producer"
-  ).slice(0, 3);
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-US', {
@@ -151,14 +122,6 @@ function Movie() {
     const hours = Math.floor(minutes / 60);
     const remainingMinutes = minutes % 60;
     return `${hours}h ${remainingMinutes}m`;
-  };
-
-  const getProductionCountries = () => {
-    return movie.production_countries.map(country => country.name).join(', ');
-  };
-
-  const getSpokenLanguages = () => {
-    return movie.spoken_languages.map(lang => lang.english_name).join(', ');
   };
 
   return (
@@ -187,143 +150,84 @@ function Movie() {
           animate={{ x: 0, opacity: 1 }}
           transition={{ delay: 0.3, duration: 0.8 }}
         >
-          <div className="w-[600px] ml-16 space-y-6">
+          <div className="w-[800px] ml-16 space-y-8">
             <div className="space-y-4">
+              <h1 className="text-6xl font-bold text-white tracking-tight">{movie.title}</h1>
               {movie.tagline && (
-                <p className="text-gray-400 italic">"{movie.tagline}"</p>
-              )}
-              <h1 className="text-5xl font-bold text-white">{movie.title}</h1>
-              {movie.title !== movie.original_title && (
-                <p className="text-gray-400">Original Title: {movie.original_title}</p>
+                <p className="text-2xl text-gray-400 italic">"{movie.tagline}"</p>
               )}
             </div>
 
-            <div className="flex items-center space-x-6">
-              <div className="flex items-center">
-                <FaStar className="text-yellow-500 w-4 h-4 mr-2" />
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center bg-black/50 backdrop-blur-sm rounded-full px-4 py-2">
+                <FaStar className="text-yellow-500 w-5 h-5 mr-2" />
                 <span className="text-white font-bold">{movie.vote_average.toFixed(1)}/10</span>
               </div>
-              <span className="text-white/70">{movie.release_date?.split('-')[0]}</span>
-              <span className="px-2 py-1 border border-white/20 text-white/70 text-sm">
-                {movie.adult ? 'R' : 'PG-13'}
-              </span>
-              <span className="text-white/70">{formatRuntime(movie.runtime)}</span>
+              <div className="flex items-center bg-black/50 backdrop-blur-sm rounded-full px-4 py-2">
+                <FaRegCalendarAlt className="text-gray-400 w-5 h-5 mr-2" />
+                <span className="text-white">{movie.release_date}</span>
+              </div>
             </div>
-
-            <div className="flex flex-wrap gap-2">
-              {movie.genres.map(genre => (
-                <span 
-                  key={genre.id}
-                  className="px-3 py-1 bg-white/10 rounded-full text-white text-sm"
-                >
-                  {genre.name}
-                </span>
-              ))}
-            </div>
-
-            <p className="text-lg text-white/90">{movie.overview}</p>
 
             {/* Streaming Buttons */}
-            <div className="flex flex-col space-y-2">
+            <div className="flex flex-col gap-4 max-w-xl pt-4">
               <button
                 onClick={() => handlePlay('server1')}
-                className="flex items-center justify-center px-6 py-2.5 bg-white text-black rounded-lg hover:bg-gray-200 transition-all duration-300 text-base font-semibold group w-full"
+                className="w-full bg-purple-600 hover:bg-purple-700 text-white px-8 py-4 rounded-xl font-bold text-lg transition-all duration-300 flex items-center justify-center gap-3"
               >
-                <FaPlay className="mr-2 group-hover:translate-x-1 transition-transform duration-300" />
-                Watch Now in 4K
+                <FaPlay className="w-5 h-5" />
+                Watch in 4K Ultra HD
               </button>
-              <div className="grid grid-cols-4 gap-2">
-                <button
-                  onClick={() => handlePlay('server2')}
-                  className="flex items-center justify-center px-3 py-2 bg-white/10 backdrop-blur-sm text-white rounded-lg hover:bg-white/20 transition-all duration-300 text-sm font-semibold border border-white/20 group"
-                >
-                  <FaServer className="mr-2 group-hover:rotate-12 transition-transform duration-300" />
-                  Server 2
-                </button>
-                <button
-                  onClick={() => handlePlay('server3')}
-                  className="flex items-center justify-center px-3 py-2 bg-white/10 backdrop-blur-sm text-white rounded-lg hover:bg-white/20 transition-all duration-300 text-sm font-semibold border border-white/20 group"
-                >
-                  <FaServer className="mr-2 group-hover:rotate-12 transition-transform duration-300" />
-                  Server 3
-                </button>
-                <button
-                  onClick={() => handlePlay('server4')}
-                  className="flex items-center justify-center px-3 py-2 bg-white/10 backdrop-blur-sm text-white rounded-lg hover:bg-white/20 transition-all duration-300 text-sm font-semibold border border-white/20 group"
-                >
-                  <FaServer className="mr-2 group-hover:rotate-12 transition-transform duration-300" />
-                  Server 4
-                </button>
-                <button
-                  onClick={() => handlePlay('server5')}
-                  className="flex items-center justify-center px-3 py-2 bg-white/10 backdrop-blur-sm text-white rounded-lg hover:bg-white/20 transition-all duration-300 text-sm font-semibold border border-white/20 group"
-                >
-                  <FaServer className="mr-2 group-hover:rotate-12 transition-transform duration-300" />
-                  Server 5
-                </button>
+
+              <div className="grid grid-cols-4 gap-3">
+                {['server2', 'server3', 'server4', 'server5'].map((server, index) => (
+                  <button
+                    key={server}
+                    onClick={() => handlePlay(server)}
+                    className="flex flex-col items-center justify-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white p-4 rounded-xl transition-all duration-300"
+                  >
+                    <FaServer className="w-5 h-5" />
+                    <span className="text-sm font-medium">Server {index + 2}</span>
+                  </button>
+                ))}
               </div>
             </div>
           </div>
         </motion.div>
       </motion.div>
 
-      {/* Movie Details */}
-      <div className="px-16 py-12 bg-[#0a0a0a] space-y-12">
-        {/* Key Information */}
-        <motion.div 
-          className="grid grid-cols-2 gap-12"
-          initial={{ y: 50, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.5, duration: 0.8 }}
+      {/* Content Sections */}
+      <div className="px-16 py-12 space-y-8 max-w-7xl mx-auto">
+        {/* Cast & Crew */}
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10"
         >
-          <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-white">Movie Details</h2>
-            <div className="space-y-4 bg-white/5 rounded-xl p-6 border border-white/10">
-              <div className="flex items-center space-x-4">
-                <FaUser className="text-white w-6 h-6" />
-                <div>
-                  <p className="text-gray-400">Director</p>
-                  <p className="text-white">{director?.name || 'N/A'}</p>
-                </div>
+          <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
+            <FaUserTie className="text-purple-500" />
+            Cast & Crew
+          </h2>
+          
+          <div className="grid grid-cols-2 gap-8">
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <h3 className="text-gray-400 font-medium">Director</h3>
+                <p className="text-white text-lg">{director?.name || 'N/A'}</p>
               </div>
-              <div className="flex items-center space-x-4">
-                <FaTheaterMasks className="text-white w-6 h-6" />
-                <div>
-                  <p className="text-gray-400">Writers</p>
-                  <p className="text-white">{writers.map(w => w.name).join(', ') || 'N/A'}</p>
-                </div>
-              </div>
-              <div className="flex items-center space-x-4">
-                <FaVideo className="text-white w-6 h-6" />
-                <div>
-                  <p className="text-gray-400">Producers</p>
-                  <p className="text-white">{producers.map(p => p.name).join(', ') || 'N/A'}</p>
-                </div>
-              </div>
-              <div className="flex items-center space-x-4">
-                <FaDollarSign className="text-white w-6 h-6" />
-                <div>
-                  <p className="text-gray-400">Budget</p>
-                  <p className="text-white">{formatCurrency(movie.budget)}</p>
-                </div>
-              </div>
-              <div className="flex items-center space-x-4">
-                <FaTicketAlt className="text-white w-6 h-6" />
-                <div>
-                  <p className="text-gray-400">Revenue</p>
-                  <p className="text-white">{formatCurrency(movie.revenue)}</p>
-                </div>
+              
+              <div className="space-y-2">
+                <h3 className="text-gray-400 font-medium">Writers</h3>
+                <p className="text-white text-lg">{writers.map(w => w.name).join(', ') || 'N/A'}</p>
               </div>
             </div>
-          </div>
 
-          {/* Cast Information */}
-          <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-white">Cast</h2>
-            <div className="space-y-4 bg-white/5 rounded-xl p-6 border border-white/10">
+            <div className="space-y-4">
+              <h3 className="text-gray-400 font-medium mb-4">Main Cast</h3>
               <div className="grid grid-cols-2 gap-4">
-                {credits.cast.slice(0, 6).map(actor => (
-                  <div key={actor.id} className="flex items-center space-x-3">
+                {credits.cast.slice(0, 4).map(actor => (
+                  <div key={actor.id} className="flex items-center gap-3">
                     <img
                       src={actor.profile_path 
                         ? `https://image.tmdb.org/t/p/w185${actor.profile_path}`
@@ -341,195 +245,184 @@ function Movie() {
               </div>
             </div>
           </div>
-        </motion.div>
+        </motion.section>
 
-        {/* Box Office Information */}
-        {boxOffice && (
-          <motion.div 
-            className="bg-white/5 rounded-xl p-6 border border-white/10"
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.7, duration: 0.8 }}
-          >
-            <h2 className="text-2xl font-bold text-white mb-6 flex items-center">
-              <FaMoneyBillWave className="text-green-500 mr-2" />
-              Box Office Performance
-            </h2>
-            <div className="grid grid-cols-3 gap-6">
+        {/* Production Details */}
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10"
+        >
+          <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
+            <FaFilm className="text-purple-500" />
+            Production Details
+          </h2>
+
+          <div className="grid grid-cols-3 gap-8">
+            <div className="space-y-4">
               <div className="space-y-2">
-                <p className="text-gray-400">Opening Weekend</p>
-                <p className="text-white text-xl font-bold">
-                  {formatCurrency(boxOffice.openingWeekend)}
-                </p>
+                <h3 className="text-gray-400 font-medium">Budget</h3>
+                <p className="text-white text-lg">{formatCurrency(movie.budget)}</p>
               </div>
               <div className="space-y-2">
-                <p className="text-gray-400">Domestic Total</p>
-                <p className="text-white text-xl font-bold">
-                  {formatCurrency(boxOffice.domestic)}
-                </p>
-              </div>
-              <div className="space-y-2">
-                <p className="text-gray-400">International</p>
-                <p className="text-white text-xl font-bold">
-                  {formatCurrency(boxOffice.international)}
-                </p>
-              </div>
-              <div className="space-y-2">
-                <p className="text-gray-400">Worldwide Total</p>
-                <p className="text-white text-xl font-bold">
-                  {formatCurrency(boxOffice.worldwide)}
-                </p>
-              </div>
-              <div className="space-y-2">
-                <p className="text-gray-400">Budget</p>
-                <p className="text-white text-xl font-bold">
-                  {formatCurrency(boxOffice.budget)}
-                </p>
-              </div>
-              <div className="space-y-2">
-                <p className="text-gray-400">Profit</p>
-                <p className="text-white text-xl font-bold">
-                  {formatCurrency(boxOffice.worldwide - boxOffice.budget)}
-                </p>
+                <h3 className="text-gray-400 font-medium">Revenue</h3>
+                <p className="text-white text-lg">{formatCurrency(movie.revenue)}</p>
               </div>
             </div>
-          </motion.div>
-        )}
 
-        {/* Awards and Recognition */}
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <h3 className="text-gray-400 font-medium">Production Companies</h3>
+                <div className="space-y-2">
+                  {movie.production_companies.map(company => (
+                    <p key={company.id} className="text-white">{company.name}</p>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <h3 className="text-gray-400 font-medium">Production Countries</h3>
+                <div className="space-y-2">
+                  {movie.production_countries.map(country => (
+                    <p key={country.iso_3166_1} className="text-white">{country.name}</p>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </motion.section>
+
+        {/* Awards & Recognition */}
         {awards && (
-          <motion.div 
-            className="bg-white/5 rounded-xl p-6 border border-white/10"
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.9, duration: 0.8 }}
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10"
           >
-            <h2 className="text-2xl font-bold text-white mb-6 flex items-center">
-              <FaTrophy className="text-yellow-500 mr-2" />
-              Awards and Recognition
+            <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
+              <FaTrophy className="text-yellow-500" />
+              Awards & Recognition
             </h2>
+
             <div className="grid grid-cols-2 gap-6">
               {awards.map((award, index) => (
-                <div key={index} className="bg-black/30 rounded-lg p-4 border border-white/10">
-                  <div className="flex items-center space-x-3">
-                    <FaAward className="text-yellow-500 w-6 h-6" />
+                <div 
+                  key={index}
+                  className="bg-black/30 rounded-xl p-6 border border-white/10"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 bg-yellow-500/20 rounded-full">
+                      <FaAward className="w-6 h-6 text-yellow-500" />
+                    </div>
                     <div>
-                      <p className="text-white font-medium">{award.name}</p>
-                      <p className="text-gray-400 text-sm">{award.category}</p>
+                      <h3 className="text-white font-bold text-lg">{award.name}</h3>
+                      <p className="text-gray-400">{award.category}</p>
                     </div>
                   </div>
                 </div>
               ))}
             </div>
-          </motion.div>
+          </motion.section>
         )}
 
-        {/* Trivia Section */}
+        {/* Trivia */}
         {trivia && (
-          <motion.div 
-            className="bg-white/5 rounded-xl p-6 border border-white/10"
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 1.1, duration: 0.8 }}
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
+            className="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10"
           >
-            <h2 className="text-2xl font-bold text-white mb-6 flex items-center">
-              <FaRegLightbulb className="text-blue-500 mr-2" />
+            <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
+              <FaRegLightbulb className="text-blue-500" />
               Movie Trivia
             </h2>
-            <div className="grid gap-4">
+
+            <div className="grid grid-cols-2 gap-6">
               {trivia.map((fact, index) => (
-                <div key={index} className="bg-black/30 rounded-lg p-4 border border-white/10">
-                  <div className="flex items-start space-x-3">
-                    <FaRegBookmark className="text-blue-500 w-5 h-5 mt-1" />
+                <div 
+                  key={index}
+                  className="bg-black/30 rounded-xl p-6 border border-white/10"
+                >
+                  <div className="flex gap-4">
+                    <div className="p-3 bg-blue-500/20 rounded-full h-min">
+                      <FaRegBookmark className="w-5 h-5 text-blue-500" />
+                    </div>
                     <p className="text-white">{fact}</p>
                   </div>
                 </div>
               ))}
             </div>
-          </motion.div>
+          </motion.section>
         )}
 
-        {/* Additional Information */}
-        <motion.div 
-          className="bg-white/5 rounded-xl p-6 border border-white/10"
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 1.3, duration: 0.8 }}
-        >
-          <h2 className="text-2xl font-bold text-white mb-4">Additional Information</h2>
-          <div className="grid grid-cols-3 gap-6">
-            <div className="space-y-1">
-              <p className="text-gray-400">Status</p>
-              <p className="text-white">{movie.status}</p>
-            </div>
-            <div className="space-y-1">
-              <p className="text-gray-400">Release Date</p>
-              <p className="text-white">{movie.release_date}</p>
-            </div>
-            <div className="space-y-1">
-              <p className="text-gray-400">Runtime</p>
-              <p className="text-white">{formatRuntime(movie.runtime)}</p>
-            </div>
-            <div className="space-y-1">
-              <p className="text-gray-400">Original Language</p>
-              <p className="text-white">{movie.original_language.toUpperCase()}</p>
-            </div>
-            <div className="space-y-1">
-              <p className="text-gray-400">Production Countries</p>
-              <p className="text-white">{getProductionCountries()}</p>
-            </div>
-            <div className="space-y-1">
-              <p className="text-gray-400">Spoken Languages</p>
-              <p className="text-white">{getSpokenLanguages()}</p>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Keywords and Tags */}
-        {keywords && keywords.keywords.length > 0 && (
-          <motion.div 
-            className="bg-white/5 rounded-xl p-6 border border-white/10"
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 1.5, duration: 0.8 }}
+        {/* Ratings & Stats */}
+        {ratings && (
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.7 }}
+            className="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10"
           >
-            <h2 className="text-2xl font-bold text-white mb-4">Keywords</h2>
-            <div className="flex flex-wrap gap-2">
-              {keywords.keywords.map(keyword => (
-                <span 
-                  key={keyword.id}
-                  className="px-3 py-1 bg-white/10 rounded-full text-white text-sm"
-                >
-                  {keyword.name}
-                </span>
-              ))}
-            </div>
-          </motion.div>
-        )}
+            <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
+              <FaRegStar className="text-yellow-500" />
+              Ratings & Statistics
+            </h2>
 
-        {/* Similar Movies */}
-        {similar && similar.results.length > 0 && (
-          <motion.div 
-            className="bg-white/5 rounded-xl p-6 border border-white/10"
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 1.7, duration: 0.8 }}
-          >
-            <h2 className="text-2xl font-bold text-white mb-6">Similar Movies</h2>
-            <div className="grid grid-cols-6 gap-4">
-              {similar.results.slice(0, 6).map(movie => (
-                <div key={movie.id} className="space-y-2">
-                  <img
-                    src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
-                    alt={movie.title}
-                    className="w-full h-auto rounded-lg"
-                  />
-                  <p className="text-white font-medium text-sm">{movie.title}</p>
-                  <p className="text-gray-400 text-xs">{movie.release_date?.split('-')[0]}</p>
+            <div className="grid grid-cols-4 gap-6">
+              <div className="bg-black/30 rounded-xl p-6 border border-white/10">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-yellow-500/20 rounded-full">
+                    <FaStar className="w-6 h-6 text-yellow-500" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-white">{ratings.average.toFixed(1)}</p>
+                    <p className="text-gray-400">Average Rating</p>
+                  </div>
                 </div>
-              ))}
+              </div>
+
+              <div className="bg-black/30 rounded-xl p-6 border border-white/10">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-purple-500/20 rounded-full">
+                    <FaRegEye className="w-6 h-6 text-purple-500" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-white">{ratings.voteCount.toLocaleString()}</p>
+                    <p className="text-gray-400">Total Votes</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-black/30 rounded-xl p-6 border border-white/10">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-green-500/20 rounded-full">
+                    <FaRegHeart className="w-6 h-6 text-green-500" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-white">{ratings.popularity.toFixed(0)}</p>
+                    <p className="text-gray-400">Popularity Score</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-black/30 rounded-xl p-6 border border-white/10">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-blue-500/20 rounded-full">
+                    <FaImdb className="w-6 h-6 text-blue-500" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-white">{(ratings.average * 10).toFixed(0)}%</p>
+                    <p className="text-gray-400">Match Score</p>
+                  </div>
+                </div>
+              </div>
             </div>
-          </motion.div>
+          </motion.section>
         )}
       </div>
     </div>
