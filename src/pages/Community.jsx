@@ -6,7 +6,6 @@ import CreatePost from '../components/community/CreatePost';
 import PostFilters from '../components/community/PostFilters';
 import Post from '../components/community/Post';
 import ReportModal from '../components/community/ReportModal';
-import ReportsList from '../components/community/ReportsList';
 import Sidebar from '../components/community/Sidebar';
 import Pagination from '../components/community/Pagination';
 import { useCommunityData } from '../hooks/useCommunityData';
@@ -32,7 +31,6 @@ function Community() {
   const [selectedPostId, setSelectedPostId] = useState(null);
   const [reportReason, setReportReason] = useState('');
   const [reportDetails, setReportDetails] = useState('');
-  const [showReports, setShowReports] = useState(false);
   const [sortBy, setSortBy] = useState('hot');
   const [selectedTimeframe, setSelectedTimeframe] = useState('today');
   const [searchQuery, setSearchQuery] = useState('');
@@ -45,7 +43,6 @@ function Community() {
     messages,
     user,
     communityStats,
-    reports,
     handleVote,
     handleComment,
     handleReport,
@@ -54,8 +51,6 @@ function Community() {
     handleCommentVote,
     handleCommentDelete,
     handleReply,
-    handleMarkReportAsDone,
-    handleDeleteReport,
     handleEditMessage,
     handleEditComment,
     handleEditReply
@@ -337,16 +332,6 @@ function Community() {
                 ))}
               </div>
             </div>
-
-            {isAdmin && (
-              <ReportsList
-                showReports={true}
-                setShowReports={setShowReports}
-                reports={reports}
-                handleMarkReportAsDone={handleMarkReportAsDone}
-                handleDeleteReport={handleDeleteReport}
-              />
-            )}
           </div>
         </div>
       </div>

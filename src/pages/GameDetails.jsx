@@ -7,10 +7,11 @@ import {
   FaGamepad, FaMemory, FaMicrochip, FaHdd, FaDesktop,
   FaCalendarAlt, FaStar, FaTrophy, FaUsers, FaCrown,
   FaCode, FaServer, FaShieldAlt, FaExclamationTriangle,
-  FaCheckCircle, FaTimesCircle, FaQuestionCircle
+  FaCheckCircle, FaTimesCircle, FaQuestionCircle, FaFlag
 } from 'react-icons/fa';
 import { db } from '../firebase';
 import { doc, getDoc } from 'firebase/firestore';
+import ReportDetailsModal from '../components/ReportDetailsModal';
 
 function GameDetails() {
   const { id } = useParams();
@@ -20,6 +21,7 @@ function GameDetails() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('overview');
+  const [showReportModal, setShowReportModal] = useState(false);
 
   useEffect(() => {
     const fetchGame = async () => {
@@ -170,11 +172,18 @@ function GameDetails() {
                 </div>
               </div>
 
-              <div className="mt-4 pt-4 border-t border-white/10">
+              <div className="mt-4 flex items-center justify-between">
                 <div className="flex items-center space-x-2 text-yellow-500">
                   <FaExclamationTriangle className="w-4 h-4" />
-                  <p className="text-sm">Attention read the infos below or from important page or critical info</p>
+                  <p className="text-sm">Having issues? Report them to our staff</p>
                 </div>
+                <button 
+                  onClick={() => setShowReportModal(true)}
+                  className="flex items-center space-x-2 px-4 py-2 bg-red-500/10 text-red-500 rounded-lg hover:bg-red-500/20 transition-colors"
+                >
+                  <FaFlag className="w-4 h-4" />
+                  <span>Report Issue</span>
+                </button>
               </div>
             </div>
           </div>
@@ -450,6 +459,15 @@ function GameDetails() {
       >
         Copied to clipboard!
       </div>
+
+      {/* Report Modal */}
+      <ReportDetailsModal
+        show={showReportModal}
+        onClose={() => setShowReportModal(false)}
+        itemName={game?.game}
+        itemId={id}
+        type="game"
+      />
     </div>
   );
 }

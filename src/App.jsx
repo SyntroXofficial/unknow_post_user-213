@@ -19,13 +19,14 @@ import AdminGames from './pages/AdminGames';
 import AdminGenerator from './pages/AdminGenerator';
 import AdminUsers from './pages/AdminUsers';
 import AdminAnalytics from './pages/AdminAnalytics';
+import AdminReports from './pages/AdminReports';
 import Community from './pages/Community';
 import PageTransition from './components/PageTransition';
 import TransitionLayout from './components/TransitionLayout';
 import { auth, db } from './firebase';
 import { doc, updateDoc, serverTimestamp, increment, getDoc } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
-import { FaExclamationTriangle } from 'react-icons/fa';
+import { FaExclamationTriangle, FaYoutube } from 'react-icons/fa';
 
 function PrivateRoute({ children }) {
   const location = useLocation();
@@ -113,6 +114,26 @@ function CriticalInfoButton() {
     >
       <FaExclamationTriangle className="mr-2 group-hover:rotate-12 transition-transform duration-300" />
       <span className="font-semibold">CRITICAL INFO - MUST READ!</span>
+    </Link>
+  );
+}
+
+// YouTube Button Component
+function YouTubeButton() {
+  const location = useLocation();
+  const isYoutubePage = location.pathname === '/youtube';
+
+  if (isYoutubePage) return null;
+
+  return (
+    <Link
+      to="https://www.youtube.com/channel/UC9kPS24Rg7OmmM5u00huFBA"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="fixed bottom-24 right-8 z-50 flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg shadow-lg transition-all duration-300 group animate-pulse hover:animate-none"
+    >
+      <FaYoutube className="mr-2 group-hover:scale-110 transition-transform duration-300" />
+      <span className="font-semibold">YOUTUBE CHANNEL</span>
     </Link>
   );
 }
@@ -231,6 +252,7 @@ function App() {
         <main className="relative">
           <AnimatedRoutes />
           <CriticalInfoButton />
+          <YouTubeButton />
         </main>
         <Navbar isSidebarOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen} />
       </div>
@@ -360,6 +382,13 @@ function AnimatedRoutes() {
             <PageTransition>
               <AdminRoute>
                 <AdminAnalytics />
+              </AdminRoute>
+            </PageTransition>
+          } />
+          <Route path="/admin/reports" element={
+            <PageTransition>
+              <AdminRoute>
+                <AdminReports />
               </AdminRoute>
             </PageTransition>
           } />

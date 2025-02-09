@@ -6,10 +6,11 @@ import {
   FaDownload, FaCookie, FaDesktop, FaChrome, FaNetworkWired,
   FaHdd, FaShieldAlt, FaExclamationTriangle, FaCheckCircle,
   FaTimesCircle, FaQuestionCircle, FaStar, FaUsers, FaTrophy,
-  FaAward, FaRegLightbulb, FaRegStar, FaRegBookmark
+  FaAward, FaRegLightbulb, FaRegStar, FaRegBookmark, FaFlag
 } from 'react-icons/fa';
 import { db } from '../firebase';
 import { doc, getDoc } from 'firebase/firestore';
+import ReportDetailsModal from '../components/ReportDetailsModal';
 
 function GeneratorDetails() {
   const { id } = useParams();
@@ -19,6 +20,7 @@ function GeneratorDetails() {
   const [error, setError] = useState(null);
   const [ratings, setRatings] = useState(null);
   const [trivia, setTrivia] = useState(null);
+  const [showReportModal, setShowReportModal] = useState(false);
 
   useEffect(() => {
     const fetchService = async () => {
@@ -178,7 +180,7 @@ function GeneratorDetails() {
                     href={service.megaUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center justify-center px-6 py-2.5 bg-white text-black rounded-lg hover:bg-gray-200 transition-all duration-300 text-base font-semibold group w-full"
+                    className="flex items-center justify-center px-6 py-2.5 bg- center px-6 py-2.5 bg-white text-black rounded-lg hover:bg-gray-200 transition-all duration-300 text-base font-semibold group w-full"
                   >
                     <FaDownload className="mr-2 group-hover:translate-y-1 transition-transform duration-300" />
                     Download Cookie
@@ -192,6 +194,20 @@ function GeneratorDetails() {
                     Get Account
                   </button>
                 )}
+              </div>
+
+              <div className="mt-4 flex items-center justify-between">
+                <div className="flex items-center space-x-2 text-yellow-500">
+                  <FaExclamationTriangle className="w-4 h-4" />
+                  <p className="text-sm">Having issues? Report them to our staff</p>
+                </div>
+                <button 
+                  onClick={() => setShowReportModal(true)}
+                  className="flex items-center space-x-2 px-4 py-2 bg-red-500/10 text-red-500 rounded-lg hover:bg-red-500/20 transition-colors"
+                >
+                  <FaFlag className="w-4 h-4" />
+                  <span>Report Issue</span>
+                </button>
               </div>
             </div>
           </div>
@@ -425,6 +441,15 @@ function GeneratorDetails() {
       >
         Copied to clipboard!
       </div>
+
+      {/* Report Modal */}
+      <ReportDetailsModal
+        show={showReportModal}
+        onClose={() => setShowReportModal(false)}
+        itemName={service?.name}
+        itemId={id}
+        type="service"
+      />
     </div>
   );
 }

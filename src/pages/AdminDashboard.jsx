@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
   FaUserShield, FaGamepad, FaRandom, FaUsers,
-  FaChartBar, FaExclamationTriangle
+  FaChartBar, FaExclamationTriangle, FaFlag
 } from 'react-icons/fa';
 
 function AdminDashboard() {
@@ -87,6 +87,24 @@ function AdminDashboard() {
                 <div>
                   <h3 className="text-lg font-semibold text-white">Analytics</h3>
                   <p className="text-gray-400 text-sm">View usage statistics and metrics</p>
+                </div>
+              </div>
+            </motion.div>
+          </Link>
+
+          {/* Reports Management */}
+          <Link to="/admin/reports" className="group">
+            <motion.div
+              whileHover={{ scale: 1.02 }}
+              className="bg-gradient-to-br from-red-500/10 to-red-500/5 backdrop-blur-sm rounded-xl p-6 border border-white/10 hover:border-white/30 transition-all duration-300"
+            >
+              <div className="flex items-center space-x-4">
+                <div className="p-3 bg-red-500/20 rounded-lg group-hover:scale-110 transition-transform duration-300">
+                  <FaFlag className="w-6 h-6 text-red-500" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-white">Reports</h3>
+                  <p className="text-gray-400 text-sm">Manage user reports and issues</p>
                 </div>
               </div>
             </motion.div>
