@@ -14,8 +14,8 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      'react-icons/fa': 'react-icons/fa/index.js',
-      'react': 'react'
+      'react': 'react',
+      'react-dom': 'react-dom'
     }
   },
   optimizeDeps: {
@@ -28,14 +28,16 @@ export default defineConfig({
   },
   build: {
     commonjsOptions: {
-      include: [/react-icons/, /framer-motion/],
+      include: [/node_modules/],
       transformMixedEsModules: true
     },
     rollupOptions: {
       external: [],
       output: {
         manualChunks: {
-          'vendor': ['react', 'react-dom', 'framer-motion', 'react-icons'],
+          'vendor': ['react', 'react-dom'],
+          'framer-motion': ['framer-motion'],
+          'react-icons': ['react-icons/fa']
         }
       }
     }
