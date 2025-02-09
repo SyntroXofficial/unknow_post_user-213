@@ -15,6 +15,7 @@ import Important from './pages/Important';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import AdminDashboard from './pages/AdminDashboard';
+import AdminGames from './pages/AdminGames';
 import Community from './pages/Community';
 import PageTransition from './components/PageTransition';
 import TransitionLayout from './components/TransitionLayout';
@@ -328,6 +329,13 @@ function AnimatedRoutes() {
             <PageTransition>
               <AdminRoute>
                 <AdminDashboard />
+              </AdminRoute>
+            </PageTransition>
+          } />
+          <Route path="/admin/games" element={
+            <PageTransition>
+              <AdminRoute>
+                <AdminGames />
               </AdminRoute>
             </PageTransition>
           } />
