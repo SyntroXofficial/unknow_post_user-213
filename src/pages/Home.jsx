@@ -169,16 +169,6 @@ function Home() {
             transition={{ delay: 0.4, duration: 0.6 }}
             className="text-center mb-12"
           >
-            <div className="flex justify-center space-x-2 mb-6">
-              <span className="px-3 py-1 bg-white/10 backdrop-blur-sm rounded-full text-white/90 text-xs font-medium inline-flex items-center">
-                <FaBolt className="w-3 h-3 mr-1 text-yellow-500" />
-                TRENDING NOW
-              </span>
-              <span className="px-3 py-1 bg-purple-500/20 backdrop-blur-sm rounded-full text-purple-400 text-xs font-medium inline-flex items-center">
-                <FaCrown className="w-3 h-3 mr-1" />
-                PREMIUM ACCESS
-              </span>
-            </div>
             <h1 className="text-5xl font-bold mb-4">
               Your Gateway to <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-purple-500">
