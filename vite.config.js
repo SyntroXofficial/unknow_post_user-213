@@ -14,11 +14,12 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      'react-icons/fa': 'react-icons/fa/index.js'
+      'react-icons/fa': 'react-icons/fa/index.js',
+      'react': 'react'
     }
   },
   optimizeDeps: {
-    include: ['react-icons/fa'],
+    include: ['react-icons/fa', 'framer-motion', 'react', 'react-dom'],
     esbuildOptions: {
       loader: {
         '.js': 'jsx'
@@ -27,8 +28,16 @@ export default defineConfig({
   },
   build: {
     commonjsOptions: {
-      include: [/react-icons/],
+      include: [/react-icons/, /framer-motion/],
       transformMixedEsModules: true
+    },
+    rollupOptions: {
+      external: [],
+      output: {
+        manualChunks: {
+          'vendor': ['react', 'react-dom', 'framer-motion', 'react-icons'],
+        }
+      }
     }
   }
 })
