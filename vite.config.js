@@ -15,29 +15,29 @@ export default defineConfig({
   resolve: {
     alias: {
       'react': 'react',
-      'react-dom': 'react-dom'
+      'react-dom': 'react-dom',
+      'react-icons/fa': 'react-icons/fa'
     }
   },
   optimizeDeps: {
-    include: ['react-icons/fa', 'framer-motion', 'react', 'react-dom'],
+    include: ['react', 'react-dom', 'react-icons/fa', 'framer-motion'],
+    exclude: [],
     esbuildOptions: {
-      loader: {
-        '.js': 'jsx'
-      }
+      target: 'es2020'
     }
   },
   build: {
+    target: 'es2020',
     commonjsOptions: {
       include: [/node_modules/],
       transformMixedEsModules: true
     },
     rollupOptions: {
-      external: [],
       output: {
         manualChunks: {
-          'vendor': ['react', 'react-dom'],
-          'framer-motion': ['framer-motion'],
-          'react-icons': ['react-icons/fa']
+          'react-vendor': ['react', 'react-dom'],
+          'icons': ['react-icons/fa'],
+          'motion': ['framer-motion']
         }
       }
     }

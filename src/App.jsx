@@ -110,10 +110,10 @@ function CriticalInfoButton() {
   return (
     <Link
       to="/important"
-      className="fixed bottom-8 right-8 z-50 flex items-center px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg shadow-lg transition-all duration-300 group animate-pulse hover:animate-none"
+      className="fixed top-20 right-4 z-50 flex items-center px-3 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg shadow-lg transition-all duration-300 group text-sm"
     >
-      <FaExclamationTriangle className="mr-2 group-hover:rotate-12 transition-transform duration-300" />
-      <span className="font-semibold">CRITICAL INFO - MUST READ!</span>
+      <FaExclamationTriangle className="group-hover:rotate-12 transition-transform duration-300" />
+      <span className="ml-2">CRITICAL</span>
     </Link>
   );
 }
@@ -130,10 +130,10 @@ function YouTubeButton() {
       to="https://www.youtube.com/channel/UC9kPS24Rg7OmmM5u00huFBA"
       target="_blank"
       rel="noopener noreferrer"
-      className="fixed bottom-24 right-8 z-50 flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg shadow-lg transition-all duration-300 group animate-pulse hover:animate-none"
+      className="fixed top-32 right-4 z-50 flex items-center px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg shadow-lg transition-all duration-300 group text-sm"
     >
-      <FaYoutube className="mr-2 group-hover:scale-110 transition-transform duration-300" />
-      <span className="font-semibold">YOUTUBE CHANNEL</span>
+      <FaYoutube className="group-hover:scale-110 transition-transform duration-300" />
+      <span className="ml-2">YOUTUBE</span>
     </Link>
   );
 }
