@@ -16,6 +16,7 @@ import Login from './pages/Login';
 import Signup from './pages/Signup';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminGames from './pages/AdminGames';
+import AdminGenerator from './pages/AdminGenerator';
 import Community from './pages/Community';
 import PageTransition from './components/PageTransition';
 import TransitionLayout from './components/TransitionLayout';
@@ -336,6 +337,13 @@ function AnimatedRoutes() {
             <PageTransition>
               <AdminRoute>
                 <AdminGames />
+              </AdminRoute>
+            </PageTransition>
+          } />
+          <Route path="/admin/generator" element={
+            <PageTransition>
+              <AdminRoute>
+                <AdminGenerator />
               </AdminRoute>
             </PageTransition>
           } />
