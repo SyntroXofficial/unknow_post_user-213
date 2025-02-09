@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { 
   FaGamepad, FaPlus, FaEdit, FaTrash, FaArrowLeft,
   FaSave, FaTimes, FaImage, FaList, FaServer,
-  FaUserShield, FaSignInAlt, FaKey, FaCookie, FaDownload
+  FaUserShield, FaSignInAlt, FaKey, FaCookie
 } from 'react-icons/fa';
 import { db } from '../firebase';
 import { 
@@ -19,7 +19,6 @@ import {
   serverTimestamp,
   writeBatch
 } from 'firebase/firestore';
-import { accountLists } from '../data/generatorAccounts';
 
 function AdminGenerator() {
   const [services, setServices] = useState([]);
@@ -56,43 +55,6 @@ function AdminGenerator() {
   };
 
   const [newService, setNewService] = useState(defaultService);
-
-  const handleImportFromFile = async () => {
-    try {
-      const batch = writeBatch(db);
-      let importCount = 0;
-
-      for (const [key, service] of Object.entries(accountLists)) {
-        const serviceRef = doc(collection(db, 'generator_services'));
-        // Ensure features array exists when importing
-        const serviceData = {
-          ...service,
-          features: service.features || [
-            { label: 'Type', value: service.isCookie ? 'Cookie Auth' : 'Direct Login' },
-            { label: 'Duration', value: 'Unlimited' },
-            { label: 'Region', value: 'Global' },
-            { label: 'Quality', value: 'Premium' }
-          ],
-          requirements: service.requirements || {
-            device: 'Any modern device',
-            browser: 'Chrome, Firefox, or Edge',
-            connection: 'Stable internet connection',
-            storage: 'No additional storage required'
-          },
-          createdAt: serverTimestamp()
-        };
-        batch.set(serviceRef, serviceData);
-        importCount++;
-      }
-
-      await batch.commit();
-      alert(`Successfully imported ${importCount} services from generatorAccounts.js`);
-      
-    } catch (error) {
-      console.error('Error importing services:', error);
-      alert('Error importing services. Please check the console for details.');
-    }
-  };
 
   const handleAdminLogin = (e) => {
     e.preventDefault();
@@ -246,6 +208,17 @@ function AdminGenerator() {
     );
   }
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="space-y-4 text-center">
+          <div className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="text-white text-lg">Loading services...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-black pt-24 px-8 pb-16">
       {/* Header */}
@@ -260,13 +233,6 @@ function AdminGenerator() {
           <h1 className="text-2xl font-bold text-white">Generator Services Management</h1>
         </div>
         <div className="flex items-center space-x-4">
-          <button
-            onClick={handleImportFromFile}
-            className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors flex items-center space-x-2"
-          >
-            <FaDownload className="w-4 h-4" />
-            <span>Import from File</span>
-          </button>
           <button
             onClick={() => {
               setEditingService(null);
