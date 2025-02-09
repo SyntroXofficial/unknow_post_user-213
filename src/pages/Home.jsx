@@ -9,7 +9,6 @@ import {
 } from 'react-icons/fa';
 import { auth, db } from '../firebase';
 import { collection, query, where, getDocs, Timestamp, orderBy, limit } from 'firebase/firestore';
-import { allGames } from '../data/gameAccounts';
 
 const container = {
   hidden: { opacity: 0 },
@@ -40,7 +39,7 @@ function Home() {
   const [stats, setStats] = useState({
     totalUsers: 0,
     activeUsers: 0,
-    totalGames: allGames.length,
+    totalGames: 0,
     totalMovies: 1000,
     totalShows: 500,
     dailyLogins: 0,
@@ -91,7 +90,7 @@ function Home() {
         setStats({
           totalUsers,
           activeUsers: activeUsersSnapshot.size,
-          totalGames: allGames.length,
+          totalGames: 0,
           totalMovies: 1000,
           totalShows: 500,
           dailyLogins: dailyLoginsSnapshot.size,

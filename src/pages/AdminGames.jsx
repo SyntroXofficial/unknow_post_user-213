@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { 
   FaGamepad, FaPlus, FaEdit, FaTrash, FaArrowLeft,
   FaSave, FaTimes, FaImage, FaList, FaServer,
-  FaFileImport, FaSpinner
+  FaUserShield, FaSignInAlt
 } from 'react-icons/fa';
 import { db } from '../firebase';
 import { 
@@ -19,7 +19,6 @@ import {
   serverTimestamp,
   writeBatch
 } from 'firebase/firestore';
-import { allGames } from '../data/gameAccounts';
 
 function AdminGames() {
   const [games, setGames] = useState([]);
@@ -27,7 +26,10 @@ function AdminGames() {
   const [showGameForm, setShowGameForm] = useState(false);
   const [editingGame, setEditingGame] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [importing, setImporting] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [adminId, setAdminId] = useState('');
+  const [adminPassword, setAdminPassword] = useState('');
+  const [error, setError] = useState('');
   const [newGame, setNewGame] = useState({
     game: '',
     username: '',
@@ -49,7 +51,19 @@ function AdminGames() {
     }
   });
 
+  const handleAdminLogin = (e) => {
+    e.preventDefault();
+    if (adminId === '724819305684937' && adminPassword === 'tRXV[1P5=O:9') {
+      setIsAuthenticated(true);
+      setError('');
+    } else {
+      setError('Invalid credentials');
+    }
+  };
+
   useEffect(() => {
+    if (!isAuthenticated) return;
+
     const gamesQuery = query(collection(db, 'games'), orderBy('createdAt', 'desc'));
     const unsubscribe = onSnapshot(gamesQuery, (snapshot) => {
       const gamesData = snapshot.docs.map(doc => ({
@@ -61,54 +75,7 @@ function AdminGames() {
     });
 
     return () => unsubscribe();
-  }, []);
-
-  const handleImportGames = async () => {
-    if (importing) return;
-    
-    try {
-      setImporting(true);
-      const batch = writeBatch(db);
-      const gamesRef = collection(db, 'games');
-
-      // First, get existing games to avoid duplicates
-      const existingGames = new Set(games.map(g => g.game.toLowerCase()));
-
-      let importCount = 0;
-      for (const game of allGames) {
-        // Skip if game already exists
-        if (existingGames.has(game.game.toLowerCase())) {
-          continue;
-        }
-
-        const gameDoc = doc(gamesRef);
-        batch.set(gameDoc, {
-          ...game,
-          createdAt: serverTimestamp()
-        });
-        importCount++;
-
-        // Firestore batches are limited to 500 operations
-        if (importCount >= 500) {
-          await batch.commit();
-          const newBatch = writeBatch(db);
-          batch = newBatch;
-          importCount = 0;
-        }
-      }
-
-      if (importCount > 0) {
-        await batch.commit();
-      }
-
-      alert('Games imported successfully!');
-    } catch (error) {
-      console.error('Error importing games:', error);
-      alert('Error importing games. Please try again.');
-    } finally {
-      setImporting(false);
-    }
-  };
+  }, [isAuthenticated]);
 
   const handleAddGame = async () => {
     try {
@@ -178,6 +145,67 @@ function AdminGames() {
     game.username.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center px-4">
+        <div className="max-w-md w-full">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="bg-white/5 backdrop-blur-sm rounded-xl p-8 border border-white/10"
+          >
+            <div className="text-center mb-8">
+              <FaUserShield className="w-12 h-12 text-white mx-auto mb-4" />
+              <h2 className="text-3xl font-bold text-white">Admin Access</h2>
+              <p className="mt-2 text-gray-400">Enter your credentials to continue</p>
+            </div>
+
+            <form onSubmit={handleAdminLogin} className="space-y-6">
+              <div>
+                <label className="text-white text-sm font-medium block mb-2">Admin ID</label>
+                <input
+                  type="text"
+                  value={adminId}
+                  onChange={(e) => setAdminId(e.target.value)}
+                  className="w-full bg-black/50 text-white border border-white/20 rounded-lg px-4 py-2 focus:outline-none focus:border-white/40"
+                  placeholder="Enter admin ID"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="text-white text-sm font-medium block mb-2">Password</label>
+                <input
+                  type="password"
+                  value={adminPassword}
+                  onChange={(e) => setAdminPassword(e.target.value)}
+                  className="w-full bg-black/50 text-white border border-white/20 rounded-lg px-4 py-2 focus:outline-none focus:border-white/40"
+                  placeholder="Enter password"
+                  required
+                />
+              </div>
+
+              {error && (
+                <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4">
+                  <p className="text-red-500 text-sm">{error}</p>
+                </div>
+              )}
+
+              <button
+                type="submit"
+                className="w-full bg-white text-black rounded-lg py-3 font-semibold hover:bg-gray-200 transition-colors flex items-center justify-center"
+              >
+                <FaSignInAlt className="mr-2" />
+                Access Dashboard
+              </button>
+            </form>
+          </motion.div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-black pt-24 px-8 pb-16">
       {/* Header */}
@@ -192,20 +220,6 @@ function AdminGames() {
           <h1 className="text-2xl font-bold text-white">Games Management</h1>
         </div>
         <div className="flex items-center space-x-4">
-          <button
-            onClick={handleImportGames}
-            disabled={importing}
-            className={`px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors flex items-center space-x-2 ${
-              importing ? 'opacity-50 cursor-not-allowed' : ''
-            }`}
-          >
-            {importing ? (
-              <FaSpinner className="w-4 h-4 animate-spin" />
-            ) : (
-              <FaFileImport className="w-4 h-4" />
-            )}
-            <span>{importing ? 'Importing...' : 'Import All Games'}</span>
-          </button>
           <button
             onClick={() => {
               setEditingGame(null);

@@ -36,11 +36,11 @@ const item = {
 
 const GameCard = memo(({ game, index }) => {
   const navigate = useNavigate();
-  const gameUrl = game.game.toLowerCase().replace(/[^a-z0-9]+/g, '-');
   
   const handleClick = () => {
+    if (!game.id) return;
     window.scrollTo(0, 0);
-    navigate(`/game/${gameUrl}`);
+    navigate(`/game/${game.id}`);
   };
   
   return (
@@ -57,7 +57,7 @@ const GameCard = memo(({ game, index }) => {
             loading="lazy"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <div className="absolute bottom-0 left-0 right-0 p-6">
+            <div className="absolute bottom-0 left-0 right-0 p-4">
               <button className="w-full bg-white/90 hover:bg-white text-black px-3 py-2 rounded text-sm font-semibold flex items-center justify-center space-x-2 transition-colors">
                 <FaPlayCircle className="w-4 h-4" />
                 <span>Play Now</span>
@@ -119,10 +119,7 @@ const FeaturedSlide = memo(({ item, navigate }) => (
             </p>
             <div className="flex items-center space-x-3">
               <button
-                onClick={() => {
-                  const gameUrl = item.game.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-                  navigate(`/game/${gameUrl}`);
-                }}
+                onClick={() => navigate(`/game/${item.id}`)}
                 className="inline-flex items-center px-6 py-2 bg-white text-black rounded font-semibold hover:bg-gray-200 transition-colors space-x-2 text-sm"
               >
                 <FaPlay className="w-3 h-3" />
