@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import axios from 'axios';
 import { 
   FaStar, FaCalendar, FaClock, FaServer, FaPlay, 
   FaUser, FaFilm, FaLanguage, FaDollarSign,
@@ -223,7 +224,7 @@ function Anime() {
     <div className="min-h-screen bg-[#0a0a0a]">
       {/* Hero Section */}
       <motion.div 
-        className="relative h-[100vh]"
+        className="relative h-[75vh]"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.8 }}
@@ -237,15 +238,13 @@ function Anime() {
           <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0a] via-[#0a0a0a]/60 to-transparent" />
           <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent" />
         </div>
+      </motion.div>
 
-        {/* Anime Info */}
-        <motion.div 
-          className="absolute inset-0 flex items-end pb-32"
-          initial={{ x: -50, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          transition={{ delay: 0.3, duration: 0.8 }}
-        >
-          <div className="w-[800px] ml-16 space-y-8">
+      {/* Content Sections */}
+      <div className="px-16 py-12 space-y-8 max-w-7xl mx-auto">
+        {/* Anime Info Section */}
+        <div className="grid grid-cols-3 gap-8">
+          <div className="col-span-2 space-y-6">
             <div className="space-y-4">
               <h1 className="text-6xl font-bold text-white tracking-tight">
                 {anime.title.english || anime.title.romaji}
@@ -309,11 +308,46 @@ function Anime() {
               </div>
             </div>
           </div>
-        </motion.div>
-      </motion.div>
 
-      {/* Content Sections */}
-      <div className="px-16 py-12 space-y-8 max-w-7xl mx-auto">
+          {/* Anime Info Sidebar */}
+          <div className="space-y-6">
+            <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10">
+              <h3 className="text-xl font-bold text-white mb-4">Anime Info</h3>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-400">Format</span>
+                  <span className="text-white">{anime.format}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-400">Status</span>
+                  <span className="text-white">{anime.status}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-400">Episodes</span>
+                  <span className="text-white">{anime.episodes}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10">
+              <h3 className="text-xl font-bold text-white mb-4">Status</h3>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-400">Online Status</span>
+                  <span className="text-green-500 flex items-center">
+                    <FaCheckCircle className="w-4 h-4 mr-1" />
+                    Working
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-400">Last Verified</span>
+                  <span className="text-white">When posted by third-party app</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Cast & Staff */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}

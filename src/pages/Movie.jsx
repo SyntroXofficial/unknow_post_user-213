@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import axios from 'axios';
 import { 
   FaStar, FaCalendar, FaClock, FaServer, FaPlay, 
   FaUser, FaFilm, FaLanguage, FaDollarSign,
@@ -11,7 +12,6 @@ import {
   FaRegFileAlt, FaRegImage, FaRegPlayCircle,
   FaRegCheckCircle, FaRegBell, FaRegLightbulb
 } from 'react-icons/fa';
-import axios from 'axios';
 
 function Movie() {
   const { id } = useParams();
@@ -38,7 +38,7 @@ function Movie() {
         setMovie(movieRes.data);
         setCredits(creditsRes.data);
 
-        // Simulate awards data for highly rated movies
+        // Set awards for highly rated movies
         if (movieRes.data.vote_average > 7.5) {
           setAwards([
             { name: "Academy Award", category: "Best Picture Nominee" },
@@ -128,7 +128,7 @@ function Movie() {
     <div className="min-h-screen bg-[#0a0a0a]">
       {/* Hero Section */}
       <motion.div 
-        className="relative h-[100vh]"
+        className="relative h-[75vh]"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.8 }}
@@ -142,15 +142,13 @@ function Movie() {
           <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0a] via-[#0a0a0a]/60 to-transparent" />
           <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent" />
         </div>
+      </motion.div>
 
-        {/* Movie Info */}
-        <motion.div 
-          className="absolute inset-0 flex items-end pb-32"
-          initial={{ x: -50, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          transition={{ delay: 0.3, duration: 0.8 }}
-        >
-          <div className="w-[800px] ml-16 space-y-8">
+      {/* Content Sections */}
+      <div className="px-16 py-12 space-y-8 max-w-7xl mx-auto">
+        {/* Movie Info Section */}
+        <div className="grid grid-cols-3 gap-8">
+          <div className="col-span-2 space-y-6">
             <div className="space-y-4">
               <h1 className="text-6xl font-bold text-white tracking-tight">{movie.title}</h1>
               {movie.tagline && (
@@ -167,10 +165,14 @@ function Movie() {
                 <FaRegCalendarAlt className="text-gray-400 w-5 h-5 mr-2" />
                 <span className="text-white">{movie.release_date}</span>
               </div>
+              <div className="flex items-center bg-black/50 backdrop-blur-sm rounded-full px-4 py-2">
+                <FaRegClock className="text-gray-400 w-5 h-5 mr-2" />
+                <span className="text-white">{formatRuntime(movie.runtime)}</span>
+              </div>
             </div>
 
             {/* Streaming Buttons */}
-            <div className="flex flex-col gap-4 max-w-xl pt-4">
+            <div className="flex flex-col gap-4 max-w-xl">
               <button
                 onClick={() => handlePlay('server1')}
                 className="w-full bg-red-600 hover:bg-red-700 text-white px-8 py-4 rounded-xl font-bold text-lg transition-all duration-300 flex items-center justify-center gap-3"
@@ -193,11 +195,46 @@ function Movie() {
               </div>
             </div>
           </div>
-        </motion.div>
-      </motion.div>
 
-      {/* Content Sections */}
-      <div className="px-16 py-12 space-y-8 max-w-7xl mx-auto">
+          {/* Movie Info Sidebar */}
+          <div className="space-y-6">
+            <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10">
+              <h3 className="text-xl font-bold text-white mb-4">Movie Info</h3>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-400">Status</span>
+                  <span className="text-white">{movie.status}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-400">Budget</span>
+                  <span className="text-white">{formatCurrency(movie.budget)}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-400">Revenue</span>
+                  <span className="text-white">{formatCurrency(movie.revenue)}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10">
+              <h3 className="text-xl font-bold text-white mb-4">Status</h3>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-400">Online Status</span>
+                  <span className="text-green-500 flex items-center">
+                    <FaRegCheckCircle className="w-4 h-4 mr-1" />
+                    Working
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-400">Last Verified</span>
+                  <span className="text-white">When posted by third-party app </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Cast & Crew */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
@@ -247,7 +284,7 @@ function Movie() {
           </div>
         </motion.section>
 
-        {/* Production Details */}
+        {/* Movie Details */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -256,18 +293,18 @@ function Movie() {
         >
           <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
             <FaFilm className="text-purple-500" />
-            Production Details
+            Movie Details
           </h2>
 
           <div className="grid grid-cols-3 gap-8">
             <div className="space-y-4">
               <div className="space-y-2">
-                <h3 className="text-gray-400 font-medium">Budget</h3>
-                <p className="text-white text-lg">{formatCurrency(movie.budget)}</p>
+                <h3 className="text-gray-400 font-medium">Release Status</h3>
+                <p className="text-white text-lg">{movie.status}</p>
               </div>
               <div className="space-y-2">
-                <h3 className="text-gray-400 font-medium">Revenue</h3>
-                <p className="text-white text-lg">{formatCurrency(movie.revenue)}</p>
+                <h3 className="text-gray-400 font-medium">Runtime</h3>
+                <p className="text-white text-lg">{formatRuntime(movie.runtime)}</p>
               </div>
             </div>
 
