@@ -7,10 +7,6 @@ export default defineConfig({
     host: true,
     port: 5173,
     strictPort: true,
-    watch: {
-      usePolling: true,
-      interval: 100
-    }
   },
   preview: {
     port: 5173,
@@ -27,24 +23,14 @@ export default defineConfig({
     include: ['react', 'react-dom', 'react-icons/fa', 'framer-motion'],
     exclude: [],
     esbuildOptions: {
-      target: 'esnext'
+      target: 'es2020'
     }
   },
   build: {
-    target: 'esnext',
-    minify: 'terser',
-    terserOptions: {
-      compress: {
-        drop_console: true,
-        drop_debugger: true,
-        pure_funcs: ['console.log', 'console.info', 'console.debug', 'console.warn']
-      },
-      mangle: {
-        safari10: true
-      },
-      format: {
-        comments: false
-      }
+    target: 'es2020',
+    commonjsOptions: {
+      include: [/node_modules/],
+      transformMixedEsModules: true
     },
     rollupOptions: {
       output: {
@@ -52,19 +38,8 @@ export default defineConfig({
           'react-vendor': ['react', 'react-dom'],
           'icons': ['react-icons/fa'],
           'motion': ['framer-motion']
-        },
-        inlineDynamicImports: false,
-        sanitizeFileName: (name) => name.replace(/[<>:"/\\|?*]+/g, '-')
+        }
       }
-    },
-    sourcemap: false,
-    cssCodeSplit: true,
-    assetsInlineLimit: 4096,
-    chunkSizeWarningLimit: 1000,
-    reportCompressedSize: false
-  },
-  esbuild: {
-    legalComments: 'none',
-    target: 'esnext'
+    }
   }
 })
