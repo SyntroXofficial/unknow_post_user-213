@@ -8,24 +8,142 @@
       "src": "/favicon.svg",
       "headers": {
         "Cache-Control": "public, max-age=31536000, immutable",
-        "Content-Type": "image/svg+xml"
+        "Content-Type": "image/svg+xml",
+        "X-Content-Type-Options": "nosniff",
+        "Access-Control-Allow-Origin": "*"
       }
     },
     {
       "src": "/assets/(.*)",
       "headers": {
-        "Cache-Control": "public, max-age=31536000, immutable"
+        "Cache-Control": "public, max-age=31536000, immutable",
+        "X-Content-Type-Options": "nosniff",
+        "Access-Control-Allow-Origin": "*"
+      }
+    },
+    {
+      "src": "/(.*).js",
+      "headers": {
+        "Cache-Control": "public, max-age=31536000, immutable",
+        "Content-Type": "application/javascript; charset=utf-8",
+        "X-Content-Type-Options": "nosniff"
+      }
+    },
+    {
+      "src": "/(.*).css",
+      "headers": {
+        "Cache-Control": "public, max-age=31536000, immutable",
+        "Content-Type": "text/css; charset=utf-8",
+        "X-Content-Type-Options": "nosniff"
+      }
+    },
+    {
+      "src": "/manifest.json",
+      "headers": {
+        "Cache-Control": "public, max-age=0, must-revalidate",
+        "Content-Type": "application/json; charset=utf-8",
+        "X-Content-Type-Options": "nosniff"
       }
     },
     {
       "src": "/(.*)",
       "headers": {
+        "Access-Control-Allow-Credentials": "true",
         "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-        "Access-Control-Allow-Headers": "X-Requested-With, Content-Type, Authorization"
+        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD",
+        "Access-Control-Allow-Headers": "X-Requested-With, Content-Type, Authorization, Origin, Accept, X-CSRF-Token",
+        "Access-Control-Max-Age": "7200",
+        "X-Content-Type-Options": "nosniff",
+        "X-Frame-Options": "DENY",
+        "X-XSS-Protection": "1; mode=block",
+        "Referrer-Policy": "strict-origin-when-cross-origin",
+        "Permissions-Policy": "accelerometer=(), ambient-light-sensor=(), autoplay=(), battery=(), camera=(), cross-origin-isolated=(), display-capture=(), document-domain=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), geolocation=(), gyroscope=(), keyboard-map=(), magnetometer=(), microphone=(), midi=(), navigation-override=(), payment=(), picture-in-picture=(), publickey-credentials-get=(), screen-wake-lock=(), sync-xhr=(), usb=(), web-share=(), xr-spatial-tracking=(), clipboard-read=(), clipboard-write=(), gamepad=(), speaker-selection=(), conversion-measurement=(), focus-without-user-activation=(), hid=(), idle-detection=(), interest-cohort=(), serial=(), trust-token-redemption=(), window-placement=(), vertical-scroll=()",
+        "Content-Security-Policy": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.google-analytics.com https://ssl.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https: blob:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https: wss: data:; media-src 'self' https: data: blob:; object-src 'none'; frame-src 'self' https:; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; base-uri 'self'; frame-ancestors 'none'; upgrade-insecure-requests;",
+        "Strict-Transport-Security": "max-age=63072000; includeSubDomains; preload",
+        "Expect-CT": "max-age=86400, enforce",
+        "NEL": "{\"report_to\":\"default\",\"max_age\":31536000,\"include_subdomains\":true}",
+        "Report-To": "{\"group\":\"default\",\"max_age\":31536000,\"endpoints\":[{\"url\":\"https://your-reporting-endpoint.com/reports\"}],\"include_subdomains\":true}",
+        "Cross-Origin-Embedder-Policy": "require-corp",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Cross-Origin-Resource-Policy": "same-origin",
+        "Cache-Control": "public, max-age=0, must-revalidate",
+        "Feature-Policy": "microphone 'none'; geolocation 'none'; camera 'none'",
+        "Server": "Vercel",
+        "X-Powered-By": "Vercel",
+        "X-Vercel-Cache": "MISS",
+        "X-Vercel-ID": "${now.requestId}",
+        "X-DNS-Prefetch-Control": "on",
+        "X-Download-Options": "noopen",
+        "X-Permitted-Cross-Domain-Policies": "none",
+        "Clear-Site-Data": "\"cache\",\"cookies\",\"storage\"",
+        "Accept-Ranges": "none",
+        "Timing-Allow-Origin": "*"
       },
-      "dest": "/index.html"
+      "dest": "/index.html",
+      "continue": true
     }
   ],
-  "public": true
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "public": true,
+  "github": {
+    "silent": true,
+    "autoJobCancelation": true,
+    "enabled": true
+  },
+  "git": {
+    "deploymentEnabled": {
+      "main": true,
+      "development": false
+    }
+  },
+  "headers": [
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "query",
+          "key": "authorized"
+        }
+      ],
+      "headers": [
+        {
+          "key": "x-authorized",
+          "value": "true"
+        }
+      ]
+    }
+  ],
+  "rewrites": [
+    { "source": "/api/:path*", "destination": "/api/:path*" },
+    { "source": "/:path+", "destination": "/" }
+  ],
+  "redirects": [
+    {
+      "source": "/old-page",
+      "destination": "/new-page",
+      "permanent": true
+    }
+  ],
+  "regions": ["all"],
+  "functions": {
+    "api/**/*.js": {
+      "memory": 1024,
+      "maxDuration": 10
+    }
+  },
+  "build": {
+    "env": {
+      "NODE_ENV": "production"
+    }
+  },
+  "env": {
+    "PRODUCTION": "true"
+  },
+  "crons": [
+    {
+      "path": "/api/cron",
+      "schedule": "0 5 * * *"
+    }
+  ]
 }

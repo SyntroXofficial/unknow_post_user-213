@@ -1,3 +1,5 @@
+const defaultTheme = require('tailwindcss/defaultTheme')
+
 /** @type {import('tailwindcss').Config} */
 export default {
   content: [
@@ -8,22 +10,29 @@ export default {
     extend: {
       colors: {
         primary: {
-          500: '#ffffff',
-          600: '#e5e5e5',
+          50: '#f8fafc',
+          100: '#f1f5f9',
+          200: '#e2e8f0',
+          300: '#cbd5e1',
+          400: '#94a3b8',
+          500: '#64748b',
+          600: '#475569',
+          700: '#334155',
+          800: '#1e293b',
+          900: '#0f172a',
+          950: '#020617',
         }
       },
       screens: {
         'xs': '475px',
-        'sm': '640px',
-        'md': '768px',
-        'lg': '1024px',
-        'xl': '1280px',
-        '2xl': '1536px',
+        ...defaultTheme.screens,
       },
       animation: {
         'fade-in': 'fadeIn 0.5s ease-out',
         'fade-up': 'fadeUp 0.5s ease-out',
         'scale-in': 'scaleIn 0.3s ease-out',
+        'spin-slow': 'spin 3s linear infinite',
+        'bounce-slow': 'bounce 3s infinite',
       },
       keyframes: {
         fadeIn: {
@@ -39,11 +48,21 @@ export default {
           '100%': { opacity: '1', transform: 'scale(1)' },
         },
       },
+      fontFamily: {
+        sans: ['Inter var', ...defaultTheme.fontFamily.sans],
+      },
     },
   },
   plugins: [
     require('@tailwindcss/forms'),
     require('@tailwindcss/typography'),
     require('@tailwindcss/aspect-ratio'),
+    require('@tailwindcss/container-queries'),
   ],
+  future: {
+    hoverOnlyWhenSupported: true,
+  },
+  experimental: {
+    optimizeUniversalDefaults: true
+  }
 }

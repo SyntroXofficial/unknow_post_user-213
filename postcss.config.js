@@ -3,10 +3,15 @@ export default {
     'tailwindcss': {},
     'autoprefixer': {},
     'cssnano': process.env.NODE_ENV === 'production' ? {
-      preset: ['default', {
+      preset: ['advanced', {
         discardComments: {
           removeAll: true,
         },
+        reduceIdents: false,
+        zindex: false,
+        colormin: {
+          preserve: true
+        }
       }],
     } : false
   },

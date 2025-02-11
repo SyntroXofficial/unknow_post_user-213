@@ -1,7 +1,6 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
   server: {
@@ -28,16 +27,23 @@ export default defineConfig({
     include: ['react', 'react-dom', 'react-icons/fa', 'framer-motion'],
     exclude: [],
     esbuildOptions: {
-      target: 'es2020'
+      target: 'esnext'
     }
   },
   build: {
-    target: 'es2020',
+    target: 'esnext',
     minify: 'terser',
     terserOptions: {
       compress: {
         drop_console: true,
-        drop_debugger: true
+        drop_debugger: true,
+        pure_funcs: ['console.log', 'console.info', 'console.debug', 'console.warn']
+      },
+      mangle: {
+        safari10: true
+      },
+      format: {
+        comments: false
       }
     },
     rollupOptions: {
@@ -46,11 +52,19 @@ export default defineConfig({
           'react-vendor': ['react', 'react-dom'],
           'icons': ['react-icons/fa'],
           'motion': ['framer-motion']
-        }
+        },
+        inlineDynamicImports: false,
+        sanitizeFileName: (name) => name.replace(/[<>:"/\\|?*]+/g, '-')
       }
     },
     sourcemap: false,
     cssCodeSplit: true,
-    assetsInlineLimit: 4096
+    assetsInlineLimit: 4096,
+    chunkSizeWarningLimit: 1000,
+    reportCompressedSize: false
+  },
+  esbuild: {
+    legalComments: 'none',
+    target: 'esnext'
   }
 })
