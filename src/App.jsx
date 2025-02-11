@@ -126,7 +126,7 @@ function YouTubeButton() {
 
   return (
     <Link
-      to="https://www.youtube.com/channel/UC9kPS24Rg7OmmM5u00huFBA"
+      to="https://www.youtube.com/@olade_official"
       target="_blank"
       rel="noopener noreferrer"
       className="fixed top-32 right-4 z-50 flex items-center px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg shadow-lg transition-all duration-300 group text-sm"
