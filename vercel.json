@@ -75,9 +75,6 @@
       ]
     }
   ],
-  "env": {
-    "VITE_APP_ENV": "production"
-  },
   "github": {
     "silent": true,
     "autoJobCancelation": true
@@ -88,15 +85,7 @@
       "dev": false
     }
   },
-  "ignoreCommand": "git diff --quiet HEAD^ HEAD ./",
   "public": true,
   "cleanUrls": true,
-  "trailingSlash": false,
-  "regions": ["all"],
-  "functions": {
-    "api/*.js": {
-      "memory": 1024,
-      "maxDuration": 10
-    }
-  }
+  "trailingSlash": false
 }
