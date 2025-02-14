@@ -4,7 +4,8 @@ import { motion } from 'framer-motion';
 import { 
   FaHome, FaPlay, FaGamepad, FaRandom,
   FaUserShield, FaComments, FaSignInAlt, FaUser,
-  FaBars, FaTimes, FaChevronRight, FaExclamationTriangle
+  FaBars, FaTimes, FaChevronRight, FaExclamationTriangle,
+  FaYoutube, FaDiscord
 } from 'react-icons/fa';
 import { auth, db } from '../firebase';
 import { signOut } from 'firebase/auth';
@@ -81,9 +82,29 @@ function Navbar() {
       { path: '/streaming', icon: FaPlay, label: 'Streaming' },
       { path: '/games', icon: FaGamepad, label: 'Games' },
       { path: '/generator', icon: FaRandom, label: 'Generator' },
-      { path: '/important', icon: FaExclamationTriangle, label: 'Important', highlight: true },
     ] : []),
     ...(isAdmin ? [{ path: '/admin', icon: FaUserShield, label: 'Admin' }] : [])
+  ];
+
+  const socialLinks = [
+    { 
+      href: "https://discord.gg/cFdRcKwvgx",
+      icon: FaDiscord,
+      label: "Discord",
+      color: "hover:bg-[#7289DA]/20 text-[#7289DA]"
+    },
+    { 
+      href: "https://www.youtube.com/@olade_official",
+      icon: FaYoutube,
+      label: "YouTube",
+      color: "hover:bg-red-500/20 text-red-500"
+    },
+    { 
+      path: "/important",
+      icon: FaExclamationTriangle,
+      label: "Important",
+      color: "hover:bg-yellow-500/20 text-yellow-500"
+    }
   ];
 
   return (
@@ -106,6 +127,7 @@ function Navbar() {
 
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center space-x-1">
+              {/* Main Nav Items */}
               {navItems.map((item) => (
                 <Link
                   key={item.path}
@@ -113,8 +135,6 @@ function Navbar() {
                   className={`px-3 py-2 rounded-lg transition-all duration-300 ${
                     location.pathname === item.path
                       ? 'bg-white text-black'
-                      : item.highlight
-                      ? 'text-red-500 hover:bg-red-500/10'
                       : 'text-gray-300 hover:text-white hover:bg-white/10'
                   } flex items-center space-x-2`}
                 >
@@ -122,6 +142,33 @@ function Navbar() {
                   <span>{item.label}</span>
                 </Link>
               ))}
+
+              {/* Social/Important Links */}
+              <div className="border-l border-white/10 ml-2 pl-2 flex items-center space-x-1">
+                {socialLinks.map((link) => (
+                  link.path ? (
+                    <Link
+                      key={link.label}
+                      to={link.path}
+                      className={`px-3 py-2 rounded-lg transition-all duration-300 ${link.color} flex items-center space-x-2`}
+                    >
+                      <link.icon className="w-4 h-4" />
+                      <span>{link.label}</span>
+                    </Link>
+                  ) : (
+                    <a
+                      key={link.label}
+                      href={link.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`px-3 py-2 rounded-lg transition-all duration-300 ${link.color} flex items-center space-x-2`}
+                    >
+                      <link.icon className="w-4 h-4" />
+                      <span>{link.label}</span>
+                    </a>
+                  )
+                ))}
+              </div>
             </div>
 
             {/* Right Section */}
@@ -245,8 +292,6 @@ function Navbar() {
               className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-300 ${
                 location.pathname === item.path
                   ? 'bg-white text-black'
-                  : item.highlight
-                  ? 'text-red-500 hover:bg-red-500/10'
                   : 'text-gray-300 hover:text-white hover:bg-white/10'
               }`}
             >
@@ -255,6 +300,37 @@ function Navbar() {
               <FaChevronRight className="w-4 h-4 ml-auto" />
             </Link>
           ))}
+
+          {/* Mobile Social/Important Links */}
+          <div className="border-t border-white/10 pt-4 mt-4">
+            {socialLinks.map((link) => (
+              link.path ? (
+                <Link
+                  key={link.label}
+                  to={link.path}
+                  onClick={() => setIsOpen(false)}
+                  className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-300 ${link.color}`}
+                >
+                  <link.icon className="w-5 h-5" />
+                  <span>{link.label}</span>
+                  <FaChevronRight className="w-4 h-4 ml-auto" />
+                </Link>
+              ) : (
+                <a
+                  key={link.label}
+                  href={link.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => setIsOpen(false)}
+                  className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-300 ${link.color}`}
+                >
+                  <link.icon className="w-5 h-5" />
+                  <span>{link.label}</span>
+                  <FaChevronRight className="w-4 h-4 ml-auto" />
+                </a>
+              )
+            ))}
+          </div>
 
           {/* Mobile Close Button */}
           <button

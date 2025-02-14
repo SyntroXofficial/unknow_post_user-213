@@ -1,14 +1,12 @@
 export default {
   plugins: {
     'tailwindcss': {},
-    'autoprefixer': {},
-    'cssnano': {
-      preset: ['default', {
-        discardComments: {
-          removeAll: true,
-        },
-        normalizeWhitespace: false,
-      }],
+    'autoprefixer': {
+      flexbox: true,
+      grid: true
     },
-  },
+    'cssnano': {
+      preset: 'default'
+    }
+  }
 }

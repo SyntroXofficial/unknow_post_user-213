@@ -1,8 +1,30 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import { visualizer } from 'rollup-plugin-visualizer'
+import compression from 'vite-plugin-compression'
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    compression({
+      algorithm: 'gzip',
+      ext: '.gz',
+      threshold: 1024,
+      deleteOriginFile: false
+    }),
+    compression({
+      algorithm: 'brotliCompress',
+      ext: '.br',
+      threshold: 1024,
+      deleteOriginFile: false
+    }),
+    visualizer({
+      open: false,
+      gzipSize: true,
+      brotliSize: true,
+      template: 'treemap'
+    })
+  ],
   server: {
     host: true,
     port: 5173,
@@ -17,42 +39,38 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      'react': 'react',
-      'react-dom': 'react-dom',
-      'react-icons/fa': 'react-icons/fa'
-    }
-  },
-  optimizeDeps: {
-    include: ['react', 'react-dom', 'react-icons/fa', 'framer-motion'],
-    exclude: [],
-    esbuildOptions: {
-      target: 'esnext'
+      '@': '/src',
+      '@components': '/src/components',
+      '@pages': '/src/pages',
+      '@utils': '/src/utils'
     }
   },
   build: {
-    target: 'esnext',
+    outDir: 'dist',
+    assetsDir: 'assets',
+    sourcemap: false,
     minify: 'terser',
+    target: 'esnext',
+    cssCodeSplit: true,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom'],
+          'router': ['react-router-dom'],
+          'icons': ['react-icons/fa'],
+          'motion': ['framer-motion'],
+          'firebase': ['firebase/app', 'firebase/auth', 'firebase/firestore']
+        },
+        chunkFileNames: 'assets/js/[name]-[hash].js',
+        entryFileNames: 'assets/js/[name]-[hash].js',
+        assetFileNames: 'assets/[ext]/[name]-[hash].[ext]'
+      }
+    },
     terserOptions: {
       compress: {
         drop_console: true,
         drop_debugger: true
       }
-    },
-    commonjsOptions: {
-      include: [/node_modules/],
-      transformMixedEsModules: true
-    },
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          'react-vendor': ['react', 'react-dom'],
-          'icons': ['react-icons/fa'],
-          'motion': ['framer-motion']
-        }
-      }
-    },
-    sourcemap: false,
-    cssCodeSplit: true,
-    assetsInlineLimit: 4096
+    }
   }
 })

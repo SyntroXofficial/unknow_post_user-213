@@ -25,7 +25,6 @@ import TransitionLayout from './components/TransitionLayout';
 import { auth, db } from './firebase';
 import { doc, updateDoc, serverTimestamp, increment, getDoc } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
-import { FaExclamationTriangle, FaYoutube } from 'react-icons/fa';
 
 function PrivateRoute({ children }) {
   const location = useLocation();
@@ -97,44 +96,6 @@ function AdminRoute({ children }) {
   }
 
   return children;
-}
-
-// Critical Info Button Component
-function CriticalInfoButton() {
-  const location = useLocation();
-  const isImportantPage = location.pathname === '/important';
-
-  if (isImportantPage) return null;
-
-  return (
-    <Link
-      to="/important"
-      className="fixed top-20 right-4 z-50 flex items-center px-3 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg shadow-lg transition-all duration-300 group text-sm"
-    >
-      <FaExclamationTriangle className="group-hover:rotate-12 transition-transform duration-300" />
-      <span className="ml-2">CRITICAL</span>
-    </Link>
-  );
-}
-
-// YouTube Button Component
-function YouTubeButton() {
-  const location = useLocation();
-  const isYoutubePage = location.pathname === '/youtube';
-
-  if (isYoutubePage) return null;
-
-  return (
-    <Link
-      to="https://www.youtube.com/@olade_official"
-      target="_blank"
-      rel="noopener noreferrer"
-      className="fixed top-32 right-4 z-50 flex items-center px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg shadow-lg transition-all duration-300 group text-sm"
-    >
-      <FaYoutube className="group-hover:scale-110 transition-transform duration-300" />
-      <span className="ml-2">YOUTUBE</span>
-    </Link>
-  );
 }
 
 function App() {
@@ -250,8 +211,6 @@ function App() {
       <div className={`min-h-screen bg-black transition-all duration-300 ${isSidebarOpen ? 'pl-16' : ''}`}>
         <main className="relative">
           <AnimatedRoutes />
-          <CriticalInfoButton />
-          <YouTubeButton />
         </main>
         <Navbar isSidebarOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen} />
       </div>
