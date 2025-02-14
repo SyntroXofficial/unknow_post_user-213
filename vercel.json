@@ -59,12 +59,5 @@
   },
   "cleanUrls": true,
   "trailingSlash": false,
-  "public": true,
-  "regions": ["all"],
-  "functions": {
-    "api/*.js": {
-      "memory": 1024,
-      "maxDuration": 10
-    }
-  }
+  "public": true
 }
