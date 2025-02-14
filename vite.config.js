@@ -7,6 +7,9 @@ export default defineConfig({
     host: true,
     port: 5173,
     strictPort: true,
+    hmr: {
+      overlay: true
+    }
   },
   preview: {
     port: 5173,
@@ -23,11 +26,18 @@ export default defineConfig({
     include: ['react', 'react-dom', 'react-icons/fa', 'framer-motion'],
     exclude: [],
     esbuildOptions: {
-      target: 'es2020'
+      target: 'esnext'
     }
   },
   build: {
-    target: 'es2020',
+    target: 'esnext',
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true
+      }
+    },
     commonjsOptions: {
       include: [/node_modules/],
       transformMixedEsModules: true
@@ -40,6 +50,9 @@ export default defineConfig({
           'motion': ['framer-motion']
         }
       }
-    }
+    },
+    sourcemap: false,
+    cssCodeSplit: true,
+    assetsInlineLimit: 4096
   }
 })

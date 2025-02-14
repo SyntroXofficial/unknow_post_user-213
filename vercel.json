@@ -22,10 +22,16 @@
       "headers": {
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-        "Access-Control-Allow-Headers": "X-Requested-With, Content-Type, Authorization"
+        "Access-Control-Allow-Headers": "X-Requested-With, Content-Type, Authorization",
+        "Cache-Control": "public, max-age=0, must-revalidate"
       },
       "dest": "/index.html"
     }
   ],
-  "public": true
+  "public": true,
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "github": {
+    "silent": true
+  }
 }
