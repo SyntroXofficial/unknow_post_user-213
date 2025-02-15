@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="https://i.ibb.co/dJxpKfbN/Screenshot-1705.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <meta name="description" content="OLADE - Your premium streaming and gaming platform" />
     <meta name="theme-color" content="#000000" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -12,6 +12,15 @@
     <meta name="format-detection" content="telephone=no" />
     <meta name="msapplication-TileColor" content="#000000" />
     <meta name="msapplication-tap-highlight" content="no" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="application-name" content="OLADE" />
+    <meta name="apple-mobile-web-app-title" content="OLADE" />
+    
+    <!-- PWA Tags -->
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-status-bar" content="#000000" />
     
     <!-- Security Headers -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: 'unsafe-inline' 'unsafe-eval'; img-src 'self' https: data: blob:; media-src 'self' https: data: blob:; connect-src 'self' https: wss:; frame-src 'self' https:;" />
@@ -21,15 +30,29 @@
     <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin" />
     <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=()" />
     
-    <!-- Preload Critical Resources -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="preconnect" href="https://api.themoviedb.org" />
-    <link rel="preconnect" href="https://image.tmdb.org" />
+    <!-- Performance Optimizations -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin="anonymous" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+    <link rel="preconnect" href="https://api.themoviedb.org" crossorigin="anonymous" />
+    <link rel="preconnect" href="https://image.tmdb.org" crossorigin="anonymous" />
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
+    <link rel="dns-prefetch" href="https://api.themoviedb.org" />
+    <link rel="dns-prefetch" href="https://image.tmdb.org" />
     
     <!-- Preload Critical Fonts -->
-    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" as="style" />
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" as="style" crossorigin="anonymous" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" />
+    
+    <!-- SEO Tags -->
+    <meta name="robots" content="index, follow" />
+    <meta name="googlebot" content="index, follow" />
+    <meta property="og:title" content="OLADE - Premium Streaming & Gaming" />
+    <meta property="og:description" content="Your premium streaming and gaming platform" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://olade.vercel.app" />
+    <meta property="og:image" content="https://i.ibb.co/dJxpKfbN/Screenshot-1705.png" />
+    <meta name="twitter:card" content="summary_large_image" />
     
     <title>OLADE</title>
     
@@ -38,6 +61,16 @@
     
     <style>
       /* Critical CSS */
+      :root {
+        color-scheme: dark;
+      }
+      
+      html {
+        scroll-behavior: smooth;
+        text-size-adjust: 100%;
+        -webkit-text-size-adjust: 100%;
+      }
+      
       body {
         margin: 0;
         padding: 0;
@@ -47,6 +80,8 @@
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
         text-rendering: optimizeLegibility;
+        overflow-x: hidden;
+        overscroll-behavior-y: none;
       }
       
       /* Loading State */
@@ -75,6 +110,7 @@
       /* Disable tap highlight on mobile */
       * {
         -webkit-tap-highlight-color: transparent;
+        -webkit-touch-callout: none;
       }
       
       /* Improved scrollbar */
@@ -108,9 +144,40 @@
       @media screen and (min-width: 1025px) {
         html { font-size: 16px; }
       }
+      
+      /* High-DPI Screen Optimizations */
+      @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+        body {
+          -webkit-font-smoothing: subpixel-antialiased;
+        }
+      }
+      
+      /* Reduced Motion */
+      @media (prefers-reduced-motion: reduce) {
+        *, ::before, ::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+          scroll-behavior: auto !important;
+        }
+      }
+      
+      /* Print Styles */
+      @media print {
+        body {
+          background: #fff;
+          color: #000;
+        }
+      }
     </style>
   </head>
   <body>
     <div id="root"></div>
+    <noscript>
+      <div style="padding: 20px; text-align: center;">
+        <h1>JavaScript Required</h1>
+        <p>Please enable JavaScript to use OLADE.</p>
+      </div>
+    </noscript>
   </body>
 </html>
