@@ -5,19 +5,31 @@ import {
   FaArrowLeft, FaFlag, FaCheck, FaTimes, FaUser, 
   FaCalendar, FaExclamationTriangle, FaUserShield, FaSignInAlt,
   FaGamepad, FaRandom, FaComments, FaLink, FaDatabase,
-  FaInfoCircle, FaExclamationCircle, FaShieldAlt
+  FaInfoCircle, FaExclamationCircle, FaShieldAlt, FaBullhorn,
+  FaCheckCircle, FaTimesCircle, FaEdit, FaTrash, 
+  FaBell, FaExclamation, FaHeadset
 } from 'react-icons/fa';
 import { db } from '../firebase';
-import { collection, query, orderBy, onSnapshot, doc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, doc, updateDoc, deleteDoc, addDoc, serverTimestamp } from 'firebase/firestore';
 
 function AdminReports() {
   const [reports, setReports] = useState([]);
+  const [supportTickets, setSupportTickets] = useState([]);
+  const [announcements, setAnnouncements] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [adminId, setAdminId] = useState('');
   const [adminPassword, setAdminPassword] = useState('');
   const [error, setError] = useState('');
-  const [filter, setFilter] = useState('all'); // all, game, service, community
+  const [filter, setFilter] = useState('all');
+  const [showAnnouncementModal, setShowAnnouncementModal] = useState(false);
+  const [editingAnnouncement, setEditingAnnouncement] = useState(null);
+  const [newAnnouncement, setNewAnnouncement] = useState({
+    title: '',
+    content: '',
+    type: 'normal', // normal, important, urgent
+    active: true
+  });
 
   const handleAdminLogin = (e) => {
     e.preventDefault();
@@ -32,72 +44,116 @@ function AdminReports() {
   useEffect(() => {
     if (!isAuthenticated) return;
 
+    // Fetch reports
     const reportsQuery = query(collection(db, 'reports'), orderBy('timestamp', 'desc'));
-    const unsubscribe = onSnapshot(reportsQuery, (snapshot) => {
+    const unsubscribeReports = onSnapshot(reportsQuery, (snapshot) => {
       const reportsData = snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
       }));
       setReports(reportsData);
-      setLoading(false);
     });
 
-    return () => unsubscribe();
+    // Fetch support tickets
+    const ticketsQuery = query(collection(db, 'support_tickets'), orderBy('createdAt', 'desc'));
+    const unsubscribeTickets = onSnapshot(ticketsQuery, (snapshot) => {
+      const ticketsData = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      setSupportTickets(ticketsData);
+    });
+
+    // Fetch announcements
+    const announcementsQuery = query(collection(db, 'announcements'), orderBy('createdAt', 'desc'));
+    const unsubscribeAnnouncements = onSnapshot(announcementsQuery, (snapshot) => {
+      const announcementsData = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      setAnnouncements(announcementsData);
+    });
+
+    setLoading(false);
+
+    return () => {
+      unsubscribeReports();
+      unsubscribeTickets();
+      unsubscribeAnnouncements();
+    };
   }, [isAuthenticated]);
 
-  const handleMarkReportAsDone = async (reportId) => {
+  const handleMarkAsDone = async (itemId, collection) => {
     try {
-      const reportRef = doc(db, 'reports', reportId);
-      await updateDoc(reportRef, {
+      const itemRef = doc(db, collection, itemId);
+      await updateDoc(itemRef, {
         status: 'resolved',
         resolvedAt: new Date().toISOString()
       });
     } catch (error) {
-      console.error('Error marking report as done:', error);
+      console.error('Error marking as done:', error);
     }
   };
 
-  const handleDeleteReport = async (reportId) => {
+  const handleDeleteItem = async (itemId, collection) => {
     try {
-      await deleteDoc(doc(db, 'reports', reportId));
+      await deleteDoc(doc(db, collection, itemId));
     } catch (error) {
-      console.error('Error deleting report:', error);
+      console.error('Error deleting item:', error);
     }
   };
 
-  const getReportTypeIcon = (type) => {
+  const handleAddAnnouncement = async () => {
+    try {
+      const announcementData = {
+        ...newAnnouncement,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      };
+
+      if (editingAnnouncement) {
+        await updateDoc(doc(db, 'announcements', editingAnnouncement.id), {
+          ...announcementData,
+          updatedAt: serverTimestamp()
+        });
+      } else {
+        await addDoc(collection(db, 'announcements'), announcementData);
+      }
+
+      setShowAnnouncementModal(false);
+      setEditingAnnouncement(null);
+      setNewAnnouncement({
+        title: '',
+        content: '',
+        type: 'normal',
+        active: true
+      });
+    } catch (error) {
+      console.error('Error with announcement:', error);
+    }
+  };
+
+  const handleEditAnnouncement = (announcement) => {
+    setEditingAnnouncement(announcement);
+    setNewAnnouncement({
+      title: announcement.title,
+      content: announcement.content,
+      type: announcement.type,
+      active: announcement.active
+    });
+    setShowAnnouncementModal(true);
+  };
+
+  const getAnnouncementTypeStyle = (type) => {
     switch (type) {
-      case 'game':
-        return <FaGamepad className="text-blue-500" />;
-      case 'service':
-        return <FaRandom className="text-purple-500" />;
-      case 'post':
-      case 'comment':
-      case 'reply':
-        return <FaComments className="text-green-500" />;
+      case 'urgent':
+        return 'bg-red-500/20 text-red-500';
+      case 'important':
+        return 'bg-yellow-500/20 text-yellow-500';
       default:
-        return <FaFlag className="text-red-500" />;
+        return 'bg-blue-500/20 text-blue-500';
     }
   };
-
-  const getReportTypeBadge = (type) => {
-    const badges = {
-      game: 'bg-blue-500/20 text-blue-400',
-      service: 'bg-purple-500/20 text-purple-400',
-      post: 'bg-green-500/20 text-green-400',
-      comment: 'bg-green-500/20 text-green-400',
-      reply: 'bg-green-500/20 text-green-400'
-    };
-    return badges[type] || 'bg-red-500/20 text-red-400';
-  };
-
-  const filteredReports = reports.filter(report => {
-    if (filter === 'all') return true;
-    if (filter === 'game') return report.type === 'game';
-    if (filter === 'service') return report.type === 'service';
-    if (filter === 'community') return ['post', 'comment', 'reply'].includes(report.type);
-    return true;
-  });
 
   if (!isAuthenticated) {
     return (
@@ -185,165 +241,315 @@ function AdminReports() {
           <h1 className="text-2xl font-bold text-white">Reports Management</h1>
         </div>
 
-        {/* Filter Buttons */}
-        <div className="flex space-x-4">
-          <button
-            onClick={() => setFilter('all')}
-            className={`px-4 py-2 rounded-lg transition-colors ${
-              filter === 'all'
-                ? 'bg-white text-black'
-                : 'bg-white/10 text-white hover:bg-white/20'
-            }`}
-          >
-            All Reports
-          </button>
-          <button
-            onClick={() => setFilter('game')}
-            className={`px-4 py-2 rounded-lg transition-colors ${
-              filter === 'game'
-                ? 'bg-white text-black'
-                : 'bg-white/10 text-white hover:bg-white/20'
-            }`}
-          >
-            Game Reports
-          </button>
-          <button
-            onClick={() => setFilter('service')}
-            className={`px-4 py-2 rounded-lg transition-colors ${
-              filter === 'service'
-                ? 'bg-white text-black'
-                : 'bg-white/10 text-white hover:bg-white/20'
-            }`}
-          >
-            Service Reports
-          </button>
-          <button
-            onClick={() => setFilter('community')}
-            className={`px-4 py-2 rounded-lg transition-colors ${
-              filter === 'community'
-                ? 'bg-white text-black'
-                : 'bg-white/10 text-white hover:bg-white/20'
-            }`}
-          >
-            Community Reports
-          </button>
-        </div>
+        {/* Add Announcement Button */}
+        <button
+          onClick={() => {
+            setEditingAnnouncement(null);
+            setNewAnnouncement({
+              title: '',
+              content: '',
+              type: 'normal',
+              active: true
+            });
+            setShowAnnouncementModal(true);
+          }}
+          className="px-4 py-2 bg-white text-black rounded-lg hover:bg-gray-200 transition-colors flex items-center space-x-2"
+        >
+          <FaBullhorn className="w-4 h-4" />
+          <span>New Announcement</span>
+        </button>
       </div>
 
-      {/* Reports List */}
+      {/* Filter Buttons */}
+      <div className="flex space-x-4 mb-8">
+        <button
+          onClick={() => setFilter('all')}
+          className={`px-4 py-2 rounded-lg transition-colors ${
+            filter === 'all'
+              ? 'bg-white text-black'
+              : 'bg-white/10 text-white hover:bg-white/20'
+          }`}
+        >
+          All Items
+        </button>
+        <button
+          onClick={() => setFilter('reports')}
+          className={`px-4 py-2 rounded-lg transition-colors ${
+            filter === 'reports'
+              ? 'bg-white text-black'
+              : 'bg-white/10 text-white hover:bg-white/20'
+          }`}
+        >
+          Reports
+        </button>
+        <button
+          onClick={() => setFilter('tickets')}
+          className={`px-4 py-2 rounded-lg transition-colors ${
+            filter === 'tickets'
+              ? 'bg-white text-black'
+              : 'bg-white/10 text-white hover:bg-white/20'
+          }`}
+        >
+          Support Tickets
+        </button>
+        <button
+          onClick={() => setFilter('announcements')}
+          className={`px-4 py-2 rounded-lg transition-colors ${
+            filter === 'announcements'
+              ? 'bg-white text-black'
+              : 'bg-white/10 text-white hover:bg-white/20'
+          }`}
+        >
+          Announcements
+        </button>
+      </div>
+
+      {/* Content List */}
       <div className="space-y-4">
-        {filteredReports.length === 0 ? (
-          <div className="bg-white/5 backdrop-blur-sm rounded-xl p-8 border border-white/10 text-center">
-            <FaFlag className="w-12 h-12 text-gray-500 mx-auto mb-4" />
-            <p className="text-gray-400">No reports found</p>
-          </div>
-        ) : (
-          filteredReports.map(report => (
-            <div
-              key={report.id}
-              className="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10"
-            >
-              <div className="flex justify-between items-start">
-                <div className="space-y-4 flex-1">
-                  {/* Report Type Badge */}
-                  <div className="flex items-center space-x-2">
-                    {getReportTypeIcon(report.type)}
-                    <span className={`px-2 py-1 rounded-full text-sm ${getReportTypeBadge(report.type)}`}>
-                      {report.type.charAt(0).toUpperCase() + report.type.slice(1)} Report
-                    </span>
-                    <span className={`px-2 py-1 rounded-full text-sm ${
-                      report.status === 'resolved' 
-                        ? 'bg-green-500/20 text-green-400' 
-                        : 'bg-yellow-500/20 text-yellow-400'
-                    }`}>
-                      {report.status}
-                    </span>
-                  </div>
-
-                  {/* Reporter Info */}
-                  <div className="flex items-center space-x-3">
-                    <FaUser className="text-gray-400" />
-                    <div>
-                      <p className="text-white">Reporter: {report.reportedBy}</p>
-                      <p className="text-gray-400">Reported User: {report.reportedUserId}</p>
+        {/* Announcements Section */}
+        {(filter === 'all' || filter === 'announcements') && (
+          <div className="space-y-4">
+            <h2 className="text-xl font-bold text-white mb-4 flex items-center">
+              <FaBullhorn className="mr-2 text-yellow-500" />
+              Announcements
+            </h2>
+            {announcements.map(announcement => (
+              <div
+                key={announcement.id}
+                className="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10"
+              >
+                <div className="flex justify-between items-start">
+                  <div className="space-y-2">
+                    <div className="flex items-center space-x-3">
+                      <span className={`px-3 py-1 rounded-full text-sm ${getAnnouncementTypeStyle(announcement.type)}`}>
+                        {announcement.type.charAt(0).toUpperCase() + announcement.type.slice(1)}
+                      </span>
+                      {announcement.active && (
+                        <span className="px-3 py-1 bg-green-500/20 text-green-500 rounded-full text-sm">
+                          Active
+                        </span>
+                      )}
                     </div>
-                  </div>
-
-                  {/* Timestamp */}
-                  <div className="flex items-center space-x-3">
-                    <FaCalendar className="text-gray-400" />
-                    <p className="text-gray-400">
-                      {new Date(report.timestamp?.toDate()).toLocaleString()}
+                    <h3 className="text-xl font-bold text-white">{announcement.title}</h3>
+                    <p className="text-gray-300">{announcement.content}</p>
+                    <p className="text-gray-400 text-sm">
+                      Posted: {announcement.createdAt?.toDate().toLocaleString()}
                     </p>
                   </div>
-
-                  {/* Service/Game Details */}
-                  {(report.type === 'game' || report.type === 'service') && (
-                    <div className="bg-black/30 rounded-lg p-4 space-y-2">
-                      <div className="flex items-center space-x-2">
-                        <FaInfoCircle className="text-blue-400" />
-                        <p className="text-white">Name: {report.itemName}</p>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <FaDatabase className="text-purple-400" />
-                        <p className="text-white">ID: {report.itemId}</p>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <FaShieldAlt className="text-green-400" />
-                        <p className="text-white">Service: {report.serviceName}</p>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <FaExclamationCircle className="text-yellow-400" />
-                        <p className="text-white">Issue Type: {report.issueType}</p>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Community Content Details */}
-                  {['post', 'comment', 'reply'].includes(report.type) && (
-                    <div className="bg-black/30 rounded-lg p-4 space-y-2">
-                      <div className="flex items-center space-x-2">
-                        <FaLink className="text-blue-400" />
-                        <p className="text-white">Message ID: {report.messageId}</p>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <FaDatabase className="text-purple-400" />
-                        <p className="text-white">Content ID: {report.contentId}</p>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Report Details */}
-                  <div className="space-y-2">
-                    <p className="text-white">Reason: {report.reason}</p>
-                    <p className="text-white">Details: {report.details}</p>
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={() => handleEditAnnouncement(announcement)}
+                      className="p-2 text-blue-400 hover:bg-blue-500/20 rounded-lg transition-colors"
+                    >
+                      <FaEdit className="w-5 h-5" />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteItem(announcement.id, 'announcements')}
+                      className="p-2 text-red-400 hover:bg-red-500/20 rounded-lg transition-colors"
+                    >
+                      <FaTrash className="w-5 h-5" />
+                    </button>
                   </div>
                 </div>
+              </div>
+            ))}
+          </div>
+        )}
 
-                {/* Action Buttons */}
-                <div className="flex space-x-2 ml-4">
-                  {report.status === 'pending' && (
+        {/* Support Tickets Section */}
+        {(filter === 'all' || filter === 'tickets') && (
+          <div className="space-y-4">
+            <h2 className="text-xl font-bold text-white mb-4 flex items-center">
+              <FaHeadset className="mr-2 text-blue-500" />
+              Support Tickets
+            </h2>
+            {supportTickets.map(ticket => (
+              <div
+                key={ticket.id}
+                className="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10"
+              >
+                <div className="flex justify-between items-start">
+                  <div className="space-y-4">
+                    <div className="flex items-center space-x-3">
+                      <span className={`px-3 py-1 rounded-full text-sm ${
+                        ticket.status === 'resolved'
+                          ? 'bg-green-500/20 text-green-500'
+                          : 'bg-yellow-500/20 text-yellow-500'
+                      }`}>
+                        {ticket.status}
+                      </span>
+                      <span className="px-3 py-1 bg-blue-500/20 text-blue-500 rounded-full text-sm">
+                        {ticket.category}
+                      </span>
+                    </div>
+                    <div>
+                      <h3 className="text-white font-bold">{ticket.title}</h3>
+                      <p className="text-gray-300 mt-2">{ticket.description}</p>
+                    </div>
+                    <div className="flex items-center space-x-4 text-sm text-gray-400">
+                      <span>From: {ticket.userEmail}</span>
+                      <span>Created: {ticket.createdAt?.toDate().toLocaleString()}</span>
+                    </div>
+                  </div>
+                  <div className="flex space-x-2">
+                    {ticket.status !== 'resolved' && (
+                      <button
+                        onClick={() => handleMarkAsDone(ticket.id, 'support_tickets')}
+                        className="p-2 text-green-400 hover:bg-green-500/20 rounded-lg transition-colors"
+                      >
+                        <FaCheck className="w-5 h-5" />
+                      </button>
+                    )}
                     <button
-                      onClick={() => handleMarkReportAsDone(report.id)}
-                      className="p-2 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30 transition-colors"
-                      title="Mark as Resolved"
+                      onClick={() => handleDeleteItem(ticket.id, 'support_tickets')}
+                      className="p-2 text-red-400 hover:bg-red-500/20 rounded-lg transition-colors"
                     >
-                      <FaCheck className="w-4 h-4" />
+                      <FaTrash className="w-5 h-5" />
                     </button>
-                  )}
-                  <button
-                    onClick={() => handleDeleteReport(report.id)}
-                    className="p-2 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition-colors"
-                    title="Delete Report"
-                  >
-                    <FaTimes className="w-4 h-4" />
-                  </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))
+            ))}
+          </div>
+        )}
+
+        {/* Reports Section */}
+        {(filter === 'all' || filter === 'reports') && (
+          <div className="space-y-4">
+            <h2 className="text-xl font-bold text-white mb-4 flex items-center">
+              <FaFlag className="mr-2 text-red-500" />
+              Reports
+            </h2>
+            {reports.map(report => (
+              <div
+                key={report.id}
+                className="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10"
+              >
+                <div className="flex justify-between items-start">
+                  <div className="space-y-4">
+                    <div className="flex items-center space-x-3">
+                      <span className={`px-3 py-1 rounded-full text-sm ${
+                        report.status === 'resolved'
+                          ? 'bg-green-500/20 text-green-500'
+                          : 'bg-yellow-500/20 text-yellow-500'
+                      }`}>
+                        {report.status}
+                      </span>
+                      <span className="px-3 py-1 bg-purple-500/20 text-purple-400 rounded-full text-sm">
+                        {report.type}
+                      </span>
+                    </div>
+                    <div>
+                      <p className="text-white font-bold">Service: {report.serviceName}</p>
+                      <p className="text-gray-300 mt-2">Issue: {report.issueType}</p>
+                      <p className="text-gray-300">Details: {report.details}</p>
+                    </div>
+                    <div className="flex items-center space-x-4 text-sm text-gray-400">
+                      <span>From: {report.reportedBy}</span>
+                      <span>Created: {report.timestamp?.toDate().toLocaleString()}</span>
+                    </div>
+                  </div>
+                  <div className="flex space-x-2">
+                    {report.status !== 'resolved' && (
+                      <button
+                        onClick={() => handleMarkAsDone(report.id, 'reports')}
+                        className="p-2 text-green-400 hover:bg-green-500/20 rounded-lg transition-colors"
+                      >
+                        <FaCheck className="w-5 h-5" />
+                      </button>
+                    )}
+                    <button
+                      onClick={() => handleDeleteItem(report.id, 'reports')}
+                      className="p-2 text-red-400 hover:bg-red-500/20 rounded-lg transition-colors"
+                    >
+                      <FaTrash className="w-5 h-5" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         )}
       </div>
+
+      {/* Announcement Modal */}
+      {showAnnouncementModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-[#1A1A1B] p-8 rounded-xl w-full max-w-2xl">
+            <h3 className="text-2xl font-bold text-white mb-6">
+              {editingAnnouncement ? 'Edit Announcement' : 'New Announcement'}
+            </h3>
+            
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              handleAddAnnouncement();
+            }} className="space-y-6">
+              <div>
+                <label className="text-gray-400 text-sm block mb-2">Title</label>
+                <input
+                  type="text"
+                  value={newAnnouncement.title}
+                  onChange={(e) => setNewAnnouncement({...newAnnouncement, title: e.target.value})}
+                  className="w-full bg-black/50 text-white px-4 py-2 rounded-lg border border-white/20"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="text-gray-400 text-sm block mb-2">Content</label>
+                <textarea
+                  value={newAnnouncement.content}
+                  onChange={(e) => setNewAnnouncement({...newAnnouncement, content: e.target.value})}
+                  className="w-full bg-black/50 text-white px-4 py-2 rounded-lg border border-white/20 min-h-[100px]"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="text-gray-400 text-sm block mb-2">Type</label>
+                <select
+                  value={newAnnouncement.type}
+                  onChange={(e) => setNewAnnouncement({...newAnnouncement, type: e.target.value})}
+                  className="w-full bg-black/50 text-white px-4 py-2 rounded-lg border border-white/20"
+                >
+                  <option value="normal">Normal</option>
+                  <option value="important">Important</option>
+                  <option value="urgent">Urgent</option>
+                </select>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  checked={newAnnouncement.active}
+                  onChange={(e) => setNewAnnouncement({...newAnnouncement, active: e.target.checked})}
+                  className="rounded border-white/20"
+                />
+                <label className="text-white">Active</label>
+              </div>
+
+              <div className="flex justify-end space-x-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowAnnouncementModal(false);
+                    setEditingAnnouncement(null);
+                  }}
+                  className="px-4 py-2 text-gray-400 hover:text-white"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-white text-black rounded-lg hover:bg-gray-200"
+                >
+                  {editingAnnouncement ? 'Update' : 'Create'} Announcement
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

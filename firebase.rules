@@ -26,6 +26,12 @@ service cloud.firestore {
       allow write: if request.auth != null && request.auth.token.email == 'andres_rios_xyz@outlook.com';
     }
 
+    // Allow access to announcements collection
+    match /announcements/{announcementId} {
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.token.email == 'andres_rios_xyz@outlook.com';
+    }
+
     // Chat messages rules
     match /chat_messages/{messageId} {
       // Allow any authenticated user to read messages
@@ -71,6 +77,13 @@ service cloud.firestore {
 
     // Reports rules
     match /reports/{reportId} {
+      allow read: if request.auth != null && request.auth.token.email == 'andres_rios_xyz@outlook.com';
+      allow create: if request.auth != null;
+      allow update, delete: if request.auth != null && request.auth.token.email == 'andres_rios_xyz@outlook.com';
+    }
+
+    // Support tickets rules
+    match /support_tickets/{ticketId} {
       allow read: if request.auth != null && request.auth.token.email == 'andres_rios_xyz@outlook.com';
       allow create: if request.auth != null;
       allow update, delete: if request.auth != null && request.auth.token.email == 'andres_rios_xyz@outlook.com';

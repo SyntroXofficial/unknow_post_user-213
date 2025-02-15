@@ -12,6 +12,7 @@ import GameDetails from './pages/GameDetails';
 import Generator from './pages/Generator';
 import GeneratorDetails from './pages/GeneratorDetails';
 import Important from './pages/Important';
+import Support from './pages/Support';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import AdminDashboard from './pages/AdminDashboard';
@@ -278,6 +279,11 @@ function AnimatedRoutes() {
           <Route path="/important" element={
             <PageTransition>
               <Important />
+            </PageTransition>
+          } />
+          <Route path="/support" element={
+            <PageTransition>
+              <Support />
             </PageTransition>
           } />
           <Route path="/movie/:id" element={

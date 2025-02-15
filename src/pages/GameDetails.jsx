@@ -7,12 +7,11 @@ import {
   FaGamepad, FaMemory, FaMicrochip, FaHdd, FaDesktop,
   FaCalendarAlt, FaStar, FaTrophy, FaUsers, FaCrown,
   FaCode, FaServer, FaShieldAlt, FaExclamationTriangle,
-  FaCheckCircle, FaTimesCircle, FaQuestionCircle, FaFlag,
+  FaCheckCircle, FaTimesCircle, FaQuestionCircle,
   FaChevronDown, FaRegCalendarAlt
 } from 'react-icons/fa';
 import { db } from '../firebase';
 import { doc, getDoc } from 'firebase/firestore';
-import ReportDetailsModal from '../components/ReportDetailsModal';
 
 function GameDetails() {
   const { id } = useParams();
@@ -22,7 +21,6 @@ function GameDetails() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('overview');
-  const [showReportModal, setShowReportModal] = useState(false);
 
   useEffect(() => {
     const fetchGame = async () => {
@@ -87,26 +85,285 @@ function GameDetails() {
 
   if (!game) return null;
 
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'overview':
+        return (
+          <div className="grid grid-cols-3 gap-8">
+            <div className="col-span-2 space-y-6">
+              <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10">
+                <h3 className="text-xl font-bold text-white mb-4">Game Access - {game.game}</h3>
+                <div className="grid grid-cols-2 gap-4 mb-4">
+                  <div className="space-y-1">
+                    <label className="text-gray-400 text-sm">Username</label>
+                    <div className="flex items-center space-x-2">
+                      <code className="flex-1 bg-black/30 text-white px-3 py-1.5 rounded font-mono text-sm">
+                        {game.username}
+                      </code>
+                      <button
+                        onClick={() => copyToClipboard(game.username)}
+                        className="p-1.5 bg-white/10 rounded hover:bg-white/20 transition-colors"
+                      >
+                        <FaCopy className="w-3.5 h-3.5 text-white/70" />
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-gray-400 text-sm">Password</label>
+                    <div className="flex items-center space-x-2">
+                      <code className="flex-1 bg-black/30 text-white px-3 py-1.5 rounded font-mono text-sm">
+                        {game.password}
+                      </code>
+                      <button
+                        onClick={() => copyToClipboard(game.password)}
+                        className="p-1.5 bg-white/10 rounded hover:bg-white/20 transition-colors"
+                      >
+                        <FaCopy className="w-3.5 h-3.5 text-white/70" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Game Features */}
+              <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10">
+                <h3 className="text-xl font-bold text-white mb-4">Game Features</h3>
+                <div className="grid grid-cols-2 gap-6">
+                  {game.features.map((feature, index) => (
+                    <div key={index} className="flex items-center space-x-3">
+                      <div className="p-3 bg-red-500/20 rounded-lg">
+                        <FaGamepad className="w-5 h-5 text-red-500" />
+                      </div>
+                      <div>
+                        <p className="text-gray-400 text-sm">{feature.label}</p>
+                        <p className="text-white font-medium">{feature.value}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Game Description */}
+              <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10">
+                <h3 className="text-xl font-bold text-white mb-4">About This Game</h3>
+                <p className="text-gray-300 leading-relaxed">{game.description}</p>
+              </div>
+            </div>
+
+            <div className="space-y-6">
+              <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10">
+                <h3 className="text-xl font-bold text-white mb-4">Game Info</h3>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-400">Platform</span>
+                    <span className="text-white">Steam</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-400">Region</span>
+                    <span className="text-white">Global</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-400">Account Type</span>
+                    <span className="text-white">Full Access</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10">
+                <h3 className="text-xl font-bold text-white mb-4">Status</h3>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-400">Online Status</span>
+                    <span className="text-green-500 flex items-center">
+                      <FaCheckCircle className="w-4 h-4 mr-1" />
+                      Working
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-400">Last Verified</span>
+                    <span className="text-white">When Posted</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 'requirements':
+        return (
+          <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10">
+            <h3 className="text-xl font-bold text-white mb-6">System Requirements</h3>
+            <div className="grid grid-cols-2 gap-8">
+              {/* Minimum Requirements */}
+              <div className="space-y-4">
+                <h4 className="text-lg font-semibold text-white">Minimum Requirements</h4>
+                <div className="space-y-4">
+                  <div className="flex items-start space-x-3">
+                    <FaMicrochip className="w-5 h-5 text-red-500 mt-1" />
+                    <div>
+                      <p className="text-gray-400">CPU</p>
+                      <p className="text-white">{game.requirements.cpu}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start space-x-3">
+                    <FaDesktop className="w-5 h-5 text-red-500 mt-1" />
+                    <div>
+                      <p className="text-gray-400">GPU</p>
+                      <p className="text-white">{game.requirements.gpu}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start space-x-3">
+                    <FaMemory className="w-5 h-5 text-red-500 mt-1" />
+                    <div>
+                      <p className="text-gray-400">RAM</p>
+                      <p className="text-white">{game.requirements.ram}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start space-x-3">
+                    <FaHdd className="w-5 h-5 text-red-500 mt-1" />
+                    <div>
+                      <p className="text-gray-400">Storage</p>
+                      <p className="text-white">{game.requirements.storage}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Additional Requirements */}
+              <div className="space-y-4">
+                <h4 className="text-lg font-semibold text-white">Additional Requirements</h4>
+                <div className="space-y-4">
+                  <div className="flex items-start space-x-3">
+                    <FaGlobe className="w-5 h-5 text-red-500 mt-1" />
+                    <div>
+                      <p className="text-gray-400">Internet</p>
+                      <p className="text-white">Broadband Internet connection</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start space-x-3">
+                    <FaSteam className="w-5 h-5 text-red-500 mt-1" />
+                    <div>
+                      <p className="text-gray-400">Steam</p>
+                      <p className="text-white">Latest version required</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 'instructions':
+        return (
+          <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10">
+            <h3 className="text-xl font-bold text-white mb-6">Installation & Usage Instructions</h3>
+            <div className="space-y-6">
+              {/* Installation Steps */}
+              <div className="space-y-4">
+                <h4 className="text-lg font-semibold text-white flex items-center">
+                  <FaDownload className="w-5 h-5 mr-2 text-red-500" />
+                  Installation Steps
+                </h4>
+                <ol className="space-y-4 text-gray-300">
+                  <li className="flex items-start space-x-3">
+                    <span className="bg-red-500/20 text-red-500 px-2 py-0.5 rounded">1</span>
+                    <p>Open Steam and log out of any existing account</p>
+                  </li>
+                  <li className="flex items-start space-x-3">
+                    <span className="bg-red-500/20 text-red-500 px-2 py-0.5 rounded">2</span>
+                    <p>Log in using the provided username and password</p>
+                  </li>
+                  <li className="flex items-start space-x-3">
+                    <span className="bg-red-500/20 text-red-500 px-2 py-0.5 rounded">3</span>
+                    <p>Allow Steam to update if required</p>
+                  </li>
+                  <li className="flex items-start space-x-3">
+                    <span className="bg-red-500/20 text-red-500 px-2 py-0.5 rounded">4</span>
+                    <p>Install and play the game</p>
+                  </li>
+                </ol>
+              </div>
+
+              {/* Important Notes */}
+              <div className="space-y-4">
+                <h4 className="text-lg font-semibold text-white flex items-center">
+                  <FaExclamationTriangle className="w-5 h-5 mr-2 text-yellow-500" />
+                  Important Notes
+                </h4>
+                <ul className="space-y-2 text-gray-300">
+                  <li className="flex items-start space-x-3">
+                    <FaTimesCircle className="w-5 h-5 text-red-500 mt-1" />
+                    <p>Do not change the account password</p>
+                  </li>
+                  <li className="flex items-start space-x-3">
+                    <FaTimesCircle className="w-5 h-5 text-red-500 mt-1" />
+                    <p>Do not enable Steam Guard or 2FA</p>
+                  </li>
+                  <li className="flex items-start space-x-3">
+                    <FaTimesCircle className="w-5 h-5 text-red-500 mt-1" />
+                    <p>Do not add any payment methods</p>
+                  </li>
+                  <li className="flex items-start space-x-3">
+                    <FaCheckCircle className="w-5 h-5 text-green-500 mt-1" />
+                    <p>Use offline mode when possible</p>
+                  </li>
+                  <li className="flex items-start space-x-3">
+                    <FaCheckCircle className="w-5 h-5 text-green-500 mt-1" />
+                    <p>Log out when finished playing</p>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Troubleshooting */}
+              <div className="space-y-4">
+                <h4 className="text-lg font-semibold text-white flex items-center">
+                  <FaQuestionCircle className="w-5 h-5 mr-2 text-blue-500" />
+                  Troubleshooting
+                </h4>
+                <ul className="space-y-2 text-gray-300">
+                  <li className="flex items-start space-x-3">
+                    <FaInfoCircle className="w-5 h-5 text-blue-500 mt-1" />
+                    <p>If the game doesn't start, verify game files through Steam</p>
+                  </li>
+                  <li className="flex items-start space-x-3">
+                    <FaInfoCircle className="w-5 h-5 text-blue-500 mt-1" />
+                    <p>For login issues, try clearing Steam credentials and restarting</p>
+                  </li>
+                  <li className="flex items-start space-x-3">
+                    <FaInfoCircle className="w-5 h-5 text-blue-500 mt-1" />
+                    <p>If account is locked, try another account or wait for an update</p>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        );
+
+      default:
+        return null;
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#0a0a0a]">
-{/* Hero Section */}
-<motion.div 
-  className="relative h-[75vh]"
-  initial={{ opacity: 0 }}
-  animate={{ opacity: 1 }}
-  transition={{ duration: 0.8 }}
->
-  <div className="absolute inset-0">
-    <img
-      src={game.imageUrl}
-      alt={game.game}
-      className="w-full h-full object-cover"
-    />
-    <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0a] via-[#0a0a0a]/60 to-transparent" />
-    <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent" />
-  </div>
-</motion.div>
-
+      {/* Hero Section */}
+      <motion.div 
+        className="relative h-[75vh]"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.8 }}
+      >
+        <div className="absolute inset-0">
+          <img
+            src={game.imageUrl}
+            alt={game.game}
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0a] via-[#0a0a0a]/60 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent" />
+        </div>
+      </motion.div>
 
       {/* Content Sections */}
       <div className="px-16 py-12 space-y-8">
@@ -145,277 +402,7 @@ function GameDetails() {
         </div>
 
         {/* Tab Content */}
-        <div className="grid grid-cols-3 gap-8">
-          {activeTab === 'overview' && (
-            <>
-              {/* Game Access - Moved to top */}
-              <div className="col-span-2 space-y-6">
-                <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10">
-                  <h3 className="text-xl font-bold text-white mb-4">Game Access - {game.game}</h3>
-                  <div className="grid grid-cols-2 gap-4 mb-4">
-                    <div className="space-y-1">
-                      <label className="text-gray-400 text-sm">Username</label>
-                      <div className="flex items-center space-x-2">
-                        <code className="flex-1 bg-black/30 text-white px-3 py-1.5 rounded font-mono text-sm">
-                          {game.username}
-                        </code>
-                        <button
-                          onClick={() => copyToClipboard(game.username)}
-                          className="p-1.5 bg-white/10 rounded hover:bg-white/20 transition-colors"
-                        >
-                          <FaCopy className="w-3.5 h-3.5 text-white/70" />
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="space-y-1">
-                      <label className="text-gray-400 text-sm">Password</label>
-                      <div className="flex items-center space-x-2">
-                        <code className="flex-1 bg-black/30 text-white px-3 py-1.5 rounded font-mono text-sm">
-                          {game.password}
-                        </code>
-                        <button
-                          onClick={() => copyToClipboard(game.password)}
-                          className="p-1.5 bg-white/10 rounded hover:bg-white/20 transition-colors"
-                        >
-                          <FaCopy className="w-3.5 h-3.5 text-white/70" />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="mt-3 flex items-center justify-between">
-                    <div className="flex items-center space-x-2 text-yellow-500">
-                      <FaExclamationTriangle className="w-3.5 h-3.5" />
-                      <p className="text-sm">Having issues? Report them to our staff</p>
-                    </div>
-                    <button 
-                      onClick={() => setShowReportModal(true)}
-                      className="flex items-center space-x-2 px-3 py-1.5 bg-red-500/10 text-red-500 rounded-lg hover:bg-red-500/20 transition-colors text-sm"
-                    >
-                      <FaFlag className="w-3.5 h-3.5" />
-                      <span>Report Issue</span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Game Features */}
-                <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10">
-                  <h3 className="text-xl font-bold text-white mb-4">Game Features</h3>
-                  <div className="grid grid-cols-2 gap-6">
-                    {game.features.map((feature, index) => (
-                      <div key={index} className="flex items-center space-x-3">
-                        <div className="p-3 bg-red-500/20 rounded-lg">
-                          <FaGamepad className="w-5 h-5 text-red-500" />
-                        </div>
-                        <div>
-                          <p className="text-gray-400 text-sm">{feature.label}</p>
-                          <p className="text-white font-medium">{feature.value}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Game Description */}
-                <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10">
-                  <h3 className="text-xl font-bold text-white mb-4">About This Game</h3>
-                  <p className="text-gray-300 leading-relaxed">{game.description}</p>
-                </div>
-              </div>
-
-              {/* Rest of the overview content */}
-              <div className="space-y-6">
-                <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10">
-                  <h3 className="text-xl font-bold text-white mb-4">Game Info</h3>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-gray-400">Platform</span>
-                      <span className="text-white">Steam</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-gray-400">Region</span>
-                      <span className="text-white">Global</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-gray-400">Account Type</span>
-                      <span className="text-white">Full Access</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10">
-                  <h3 className="text-xl font-bold text-white mb-4">Status</h3>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-gray-400">Online Status</span>
-                      <span className="text-green-500 flex items-center">
-                        <FaCheckCircle className="w-4 h-4 mr-1" />
-                        Working
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-gray-400">Last Verified</span>
-                      <span className="text-white">When Posted</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </>
-          )}
-
-          {activeTab === 'requirements' && (
-            <div className="col-span-3">
-              <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10">
-                <h3 className="text-xl font-bold text-white mb-6">System Requirements</h3>
-                <div className="grid grid-cols-2 gap-8">
-                  {/* Minimum Requirements */}
-                  <div className="space-y-4">
-                    <h4 className="text-lg font-semibold text-white">Minimum Requirements</h4>
-                    <div className="space-y-4">
-                      <div className="flex items-start space-x-3">
-                        <FaMicrochip className="w-5 h-5 text-red-500 mt-1" />
-                        <div>
-                          <p className="text-gray-400">CPU</p>
-                          <p className="text-white">{game.requirements.cpu}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-start space-x-3">
-                        <FaDesktop className="w-5 h-5 text-red-500 mt-1" />
-                        <div>
-                          <p className="text-gray-400">GPU</p>
-                          <p className="text-white">{game.requirements.gpu}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-start space-x-3">
-                        <FaMemory className="w-5 h-5 text-red-500 mt-1" />
-                        <div>
-                          <p className="text-gray-400">RAM</p>
-                          <p className="text-white">{game.requirements.ram}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-start space-x-3">
-                        <FaHdd className="w-5 h-5 text-red-500 mt-1" />
-                        <div>
-                          <p className="text-gray-400">Storage</p>
-                          <p className="text-white">{game.requirements.storage}</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Additional Requirements */}
-                  <div className="space-y-4">
-                    <h4 className="text-lg font-semibold text-white">Additional Requirements</h4>
-                    <div className="space-y-4">
-                      <div className="flex items-start space-x-3">
-                        <FaGlobe className="w-5 h-5 text-red-500 mt-1" />
-                        <div>
-                          <p className="text-gray-400">Internet</p>
-                          <p className="text-white">Broadband Internet connection</p>
-                        </div>
-                      </div>
-                      <div className="flex items-start space-x-3">
-                        <FaSteam className="w-5 h-5 text-red-500 mt-1" />
-                        <div>
-                          <p className="text-gray-400">Steam</p>
-                          <p className="text-white">Latest version required</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'instructions' && (
-            <div className="col-span-3">
-              <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10">
-                <h3 className="text-xl font-bold text-white mb-6">Installation & Usage Instructions</h3>
-                <div className="space-y-6">
-                  {/* Installation Steps */}
-                  <div className="space-y-4">
-                    <h4 className="text-lg font-semibold text-white flex items-center">
-                      <FaDownload className="w-5 h-5 mr-2 text-red-500" />
-                      Installation Steps
-                    </h4>
-                    <ol className="space-y-4 text-gray-300">
-                      <li className="flex items-start space-x-3">
-                        <span className="bg-red-500/20 text-red-500 px-2 py-0.5 rounded">1</span>
-                        <p>Open Steam and log out of any existing account</p>
-                      </li>
-                      <li className="flex items-start space-x-3">
-                        <span className="bg-red-500/20 text-red-500 px-2 py-0.5 rounded">2</span>
-                        <p>Log in using the provided username and password</p>
-                      </li>
-                      <li className="flex items-start space-x-3">
-                        <span className="bg-red-500/20 text-red-500 px-2 py-0.5 rounded">3</span>
-                        <p>Allow Steam to update if required</p>
-                      </li>
-                      <li className="flex items-start space-x-3">
-                        <span className="bg-red-500/20 text-red-500 px-2 py-0.5 rounded">4</span>
-                        <p>Install and play the game</p>
-                      </li>
-                    </ol>
-                  </div>
-
-                  {/* Important Notes */}
-                  <div className="space-y-4">
-                    <h4 className="text-lg font-semibold text-white flex items-center">
-                      <FaExclamationTriangle className="w-5 h-5 mr-2 text-yellow-500" />
-                      Important Notes
-                    </h4>
-                    <ul className="space-y-2 text-gray-300">
-                      <li className="flex items-start space-x-3">
-                        <FaTimesCircle className="w-5 h-5 text-red-500 mt-1" />
-                        <p>Do not change the account password</p>
-                      </li>
-                      <li className="flex items-start space-x-3">
-                        <FaTimesCircle className="w-5 h-5 text-red-500 mt-1" />
-                        <p>Do not enable Steam Guard or 2FA</p>
-                      </li>
-                      <li className="flex items-start space-x-3">
-                        <FaTimesCircle className="w-5 h-5 text-red-500 mt-1" />
-                        <p>Do not add any payment methods</p>
-                      </li>
-                      <li className="flex items-start space-x-3">
-                        <FaCheckCircle className="w-5 h-5 text-green-500 mt-1" />
-                        <p>Use offline mode when possible</p>
-                      </li>
-                      <li className="flex items-start space-x-3">
-                        <FaCheckCircle className="w-5 h-5 text-green-500 mt-1" />
-                        <p>Log out when finished playing</p>
-                      </li>
-                    </ul>
-                  </div>
-
-                  {/* Troubleshooting */}
-                  <div className="space-y-4">
-                    <h4 className="text-lg font-semibold text-white flex items-center">
-                      <FaQuestionCircle className="w-5 h-5 mr-2 text-blue-500" />
-                      Troubleshooting
-                    </h4>
-                    <ul className="space-y-2 text-gray-300">
-                      <li className="flex items-start space-x-3">
-                        <FaInfoCircle className="w-5 h-5 text-blue-500 mt-1" />
-                        <p>If the game doesn't start, verify game files through Steam</p>
-                      </li>
-                      <li className="flex items-start space-x-3">
-                        <FaInfoCircle className="w-5 h-5 text-blue-500 mt-1" />
-                        <p>For login issues, try clearing Steam credentials and restarting</p>
-                      </li>
-                      <li className="flex items-start space-x-3">
-                        <FaInfoCircle className="w-5 h-5 text-blue-500 mt-1" />
-                        <p>If account is locked, try another account or wait for an update</p>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
+        {renderContent()}
       </div>
 
       {/* Copy Notification */}
@@ -426,15 +413,6 @@ function GameDetails() {
       >
         Copied to clipboard!
       </div>
-
-      {/* Report Modal */}
-      <ReportDetailsModal
-        show={showReportModal}
-        onClose={() => setShowReportModal(false)}
-        itemName={game?.game}
-        itemId={id}
-        type="game"
-      />
     </div>
   );
 }

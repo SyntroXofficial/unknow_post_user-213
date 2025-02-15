@@ -5,7 +5,7 @@ import {
   FaHome, FaPlay, FaGamepad, FaRandom,
   FaUserShield, FaComments, FaSignInAlt, FaUser,
   FaBars, FaTimes, FaChevronRight, FaExclamationTriangle,
-  FaYoutube, FaDiscord
+  FaYoutube, FaDiscord, FaHeadset
 } from 'react-icons/fa';
 import { auth, db } from '../firebase';
 import { signOut } from 'firebase/auth';
@@ -82,6 +82,7 @@ function Navbar() {
       { path: '/streaming', icon: FaPlay, label: 'Streaming' },
       { path: '/games', icon: FaGamepad, label: 'Games' },
       { path: '/generator', icon: FaRandom, label: 'Generator' },
+      { path: '/support', icon: FaHeadset, label: 'Support' },
     ] : []),
     ...(isAdmin ? [{ path: '/admin', icon: FaUserShield, label: 'Admin' }] : [])
   ];

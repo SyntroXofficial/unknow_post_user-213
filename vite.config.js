@@ -5,7 +5,13 @@ import compression from 'vite-plugin-compression'
 
 export default defineConfig({
   plugins: [
-    react(),
+    react({
+      babel: {
+        plugins: [
+          ['@babel/plugin-transform-react-jsx', { runtime: 'automatic' }]
+        ]
+      }
+    }),
     compression({
       algorithm: 'gzip',
       ext: '.gz',
@@ -52,6 +58,7 @@ export default defineConfig({
     minify: 'terser',
     target: 'esnext',
     cssCodeSplit: true,
+    chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
         manualChunks: {
@@ -72,5 +79,16 @@ export default defineConfig({
         drop_debugger: true
       }
     }
+  },
+  optimizeDeps: {
+    include: [
+      'react',
+      'react-dom',
+      'react-router-dom',
+      'framer-motion',
+      'firebase/app',
+      'firebase/auth',
+      'firebase/firestore'
+    ]
   }
 })
