@@ -163,24 +163,24 @@ function App() {
 
           // Get existing user data
           const userDoc = await getDoc(userRef);
-          const existingData = userDoc.data();
-
-          // Update user's last active timestamp and system information
-          await updateDoc(userRef, {
-            lastActive: serverTimestamp(),
-            lastLogin: serverTimestamp(),
-            lastBrowser: getBrowserInfo(browserInfo.userAgent),
-            lastOS: getOSInfo(browserInfo.userAgent),
-            lastDevice: getDeviceType(browserInfo.userAgent),
-            lastResolution: browserInfo.screenResolution,
-            lastLanguage: browserInfo.language,
-            lastTimeZone: ipData.timezone || 'Unknown',
-            lastCountry: ipData.country_name || 'Unknown',
-            lastCity: ipData.city || 'Unknown',
-            lastISP: ipData.org || 'Unknown',
-            lastIpAddress: ipData.ip || 'Unknown',
-            loginCount: increment(1)
-          });
+          if (userDoc.exists()) {
+            // Update user's last active timestamp and system information
+            await updateDoc(userRef, {
+              lastActive: serverTimestamp(),
+              lastLogin: serverTimestamp(),
+              lastBrowser: getBrowserInfo(browserInfo.userAgent),
+              lastOS: getOSInfo(browserInfo.userAgent),
+              lastDevice: getDeviceType(browserInfo.userAgent),
+              lastResolution: browserInfo.screenResolution,
+              lastLanguage: browserInfo.language,
+              lastTimeZone: ipData.timezone || 'Unknown',
+              lastCountry: ipData.country_name || 'Unknown',
+              lastCity: ipData.city || 'Unknown',
+              lastISP: ipData.org || 'Unknown',
+              lastIpAddress: ipData.ip || 'Unknown',
+              loginCount: increment(1)
+            });
+          }
 
           // Set up periodic updates while user is active
           const updateInterval = setInterval(async () => {
@@ -225,7 +225,7 @@ function AnimatedRoutes() {
   return (
     <AnimatePresence mode="wait">
       <TransitionLayout key={location.pathname}>
-        <Routes location={location} key={location.pathname}>
+        <Routes location={location}>
           <Route path="/" element={
             <PageTransition>
               <Home />

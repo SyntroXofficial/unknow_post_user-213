@@ -11,10 +11,9 @@ import { auth, db } from '../firebase';
 import { signOut } from 'firebase/auth';
 import { doc, updateDoc, getDoc } from 'firebase/firestore';
 
-function Navbar() {
+function Navbar({ isSidebarOpen, setIsSidebarOpen }) {
   const location = useLocation();
   const navigate = useNavigate();
-  const [isOpen, setIsOpen] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [profileUrl, setProfileUrl] = useState('');
@@ -82,8 +81,8 @@ function Navbar() {
       { path: '/streaming', icon: FaPlay, label: 'Streaming' },
       { path: '/games', icon: FaGamepad, label: 'Games' },
       { path: '/generator', icon: FaRandom, label: 'Generator' },
-      { path: '/support', icon: FaHeadset, label: 'Support' },
     ] : []),
+    { path: '/support', icon: FaHeadset, label: 'Support' }, // Moved outside user check
     ...(isAdmin ? [{ path: '/admin', icon: FaUserShield, label: 'Admin' }] : [])
   ];
 
@@ -119,7 +118,7 @@ function Navbar() {
             {/* Logo */}
             <Link to="/" className="flex items-center space-x-2">
               <img 
-                src="https://media.discordapp.net/attachments/1193190985614757969/1338521290499424308/Screenshot_1705.png?ex=67ab6298&is=67aa1118&hm=4016cd9a9b75badd9b65226cd2064a494302298ec1402dade04eadb053bb62bd&=&format=webp&quality=lossless&width=780&height=739"
+                src="https://i.ibb.co/8gdkvjLx/Screenshot-1705.png"
                 alt="Logo"
                 className="w-8 h-8 rounded-full"
               />
@@ -262,10 +261,10 @@ function Navbar() {
 
               {/* Mobile Menu Button */}
               <button
-                onClick={() => setIsOpen(!isOpen)}
+                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
                 className="md:hidden text-white hover:bg-white/10 p-2 rounded-lg transition-all duration-300"
               >
-                {isOpen ? (
+                {isSidebarOpen ? (
                   <FaTimes className="w-6 h-6" />
                 ) : (
                   <FaBars className="w-6 h-6" />
@@ -279,7 +278,7 @@ function Navbar() {
       {/* Mobile Menu */}
       <motion.div
         initial={{ x: '100%' }}
-        animate={{ x: isOpen ? 0 : '100%' }}
+        animate={{ x: isSidebarOpen ? 0 : '100%' }}
         transition={{ type: 'tween', duration: 0.3 }}
         className="fixed inset-y-0 right-0 w-64 bg-black/95 backdrop-blur-md z-40 md:hidden border-l border-white/10"
       >
@@ -289,7 +288,7 @@ function Navbar() {
             <Link
               key={item.path}
               to={item.path}
-              onClick={() => setIsOpen(false)}
+              onClick={() => setIsSidebarOpen(false)}
               className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-300 ${
                 location.pathname === item.path
                   ? 'bg-white text-black'
@@ -309,7 +308,7 @@ function Navbar() {
                 <Link
                   key={link.label}
                   to={link.path}
-                  onClick={() => setIsOpen(false)}
+                  onClick={() => setIsSidebarOpen(false)}
                   className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-300 ${link.color}`}
                 >
                   <link.icon className="w-5 h-5" />
@@ -322,7 +321,7 @@ function Navbar() {
                   href={link.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  onClick={() => setIsOpen(false)}
+                  onClick={() => setIsSidebarOpen(false)}
                   className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-300 ${link.color}`}
                 >
                   <link.icon className="w-5 h-5" />
@@ -335,7 +334,7 @@ function Navbar() {
 
           {/* Mobile Close Button */}
           <button
-            onClick={() => setIsOpen(false)}
+            onClick={() => setIsSidebarOpen(false)}
             className="absolute bottom-8 left-4 right-4 flex items-center justify-center space-x-2 bg-white text-black px-4 py-3 rounded-lg hover:bg-gray-200 transition-all duration-300"
           >
             <FaTimes className="w-4 h-4" />
@@ -345,12 +344,12 @@ function Navbar() {
       </motion.div>
 
       {/* Backdrop */}
-      {isOpen && (
+      {isSidebarOpen && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          onClick={() => setIsOpen(false)}
+          onClick={() => setIsSidebarOpen(false)}
           className="fixed inset-0 bg-black/50 backdrop-blur-sm z-30 md:hidden"
         />
       )}

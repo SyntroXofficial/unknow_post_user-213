@@ -145,7 +145,7 @@ function Home() {
         <div className="absolute inset-0">
           <div className="relative w-full h-full">
             <img 
-              src="https://media.discordapp.net/attachments/1193190985614757969/1338522256426537005/Screenshot_1289.png?ex=67ab637e&is=67aa11fe&hm=32cf92f0ec3b22242ff7a19fe2e0e3246cf6ec1e7fc8b0f8351f750c8bd95c31&=&format=webp&quality=lossless&width=2605&height=1327"
+              src="https://i.ibb.co/fGXYGbNx/Screenshot-1289.webp"
               alt="Background"
               className="w-full h-full object-cover"
             />

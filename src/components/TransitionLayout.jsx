@@ -1,7 +1,10 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useLocation } from 'react-router-dom';
 
 const TransitionLayout = ({ children }) => {
+  const location = useLocation();
+  
   return (
     <div className="relative">
       {children}
